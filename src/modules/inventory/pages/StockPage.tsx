@@ -34,8 +34,8 @@ export const StockPage = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-semibold text-slate-800">Existencias</h2>
-        <p className="text-slate-500">Consulta de inventario disponible por almacén</p>
+        <h2 className="text-[28px] font-bold tracking-tight text-[#1D1D1F]">Existencias</h2>
+        <p className="text-[15px] text-[#86868B]">Consulta de inventario disponible por almacén</p>
       </div>
 
       <Table 

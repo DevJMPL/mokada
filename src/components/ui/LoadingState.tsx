@@ -7,9 +7,9 @@ interface Props {
 
 export const LoadingState = ({ message = 'Cargando...', className = '' }: Props) => {
   return (
-    <div className={`flex flex-col items-center justify-center p-8 text-slate-500 min-h-[200px] ${className}`}>
-      <Loader2 className="w-8 h-8 animate-spin text-blue-500 mb-4" />
-      <p className="text-sm">{message}</p>
+    <div className={`flex flex-col items-center justify-center p-8 text-[#86868B] min-h-[200px] bg-white rounded-2xl border border-gray-100 shadow-sm ${className}`}>
+      <Loader2 className="w-6 h-6 animate-spin text-[#0066CC] mb-3" />
+      <p className="text-[13px]">{message}</p>
     </div>
   );
 };

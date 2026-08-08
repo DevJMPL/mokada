@@ -34,22 +34,22 @@ export function Table<T>({
   }
 
   return (
-    <div className="w-full overflow-x-auto border border-slate-200 rounded-lg bg-white shadow-sm">
-      <table className="w-full text-sm text-left">
-        <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-medium">
+    <div className="w-full overflow-x-auto border border-gray-200/60 rounded-2xl bg-white shadow-sm">
+      <table className="w-full text-[13px] text-left">
+        <thead className="bg-white border-b border-gray-200/60 text-[#86868B] font-semibold">
           <tr>
             {columns.map((col, idx) => (
-              <th key={idx} className={`px-4 py-3 whitespace-nowrap ${col.className || ''}`}>
+              <th key={idx} className={`px-5 py-3.5 whitespace-nowrap ${col.className || ''}`}>
                 {col.header}
               </th>
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-slate-200">
+        <tbody className="divide-y divide-gray-100">
           {data.map((row, rowIndex) => (
-            <tr key={rowIndex} className="hover:bg-slate-50 transition-colors">
+            <tr key={rowIndex} className="hover:bg-[#F5F5F7]/50 transition-colors">
               {columns.map((col, colIndex) => (
-                <td key={colIndex} className={`px-4 py-3 ${col.className || ''}`}>
+                <td key={colIndex} className={`px-5 py-3.5 ${col.className || ''}`}>
                   {col.cell ? col.cell(row) : col.accessorKey ? (row[col.accessorKey] as React.ReactNode) : null}
                 </td>
               ))}

@@ -1,4 +1,4 @@
-import { PackageOpen } from 'lucide-react';
+import { FolderSearch } from 'lucide-react';
 
 interface Props {
   title?: string;
@@ -14,13 +14,13 @@ export const EmptyState = ({
   action
 }: Props) => {
   return (
-    <div className="flex flex-col items-center justify-center p-12 text-center bg-white border border-slate-200 rounded-lg min-h-[300px]">
-      <div className="w-16 h-16 bg-slate-50 text-slate-400 rounded-full flex items-center justify-center mb-4">
-        {icon || <PackageOpen className="w-8 h-8" />}
+    <div className="flex flex-col items-center justify-center p-12 text-center bg-white rounded-2xl border border-gray-100 shadow-sm">
+      <div className="w-12 h-12 mb-4 rounded-full bg-gray-50 flex items-center justify-center">
+        {icon || <FolderSearch className="w-6 h-6 text-gray-400" />}
       </div>
-      <h3 className="text-lg font-medium text-slate-900 mb-1">{title}</h3>
-      <p className="text-sm text-slate-500 max-w-sm mb-6">{description}</p>
-      {action && <div>{action}</div>}
+      <h3 className="text-lg font-semibold text-[#1D1D1F] tracking-tight">{title}</h3>
+      <p className="mt-1 text-[13px] text-[#86868B] max-w-sm">{description}</p>
+      {action && <div className="mt-6">{action}</div>}
     </div>
   );
 };

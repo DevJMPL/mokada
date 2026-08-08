@@ -21,8 +21,8 @@ export const VehiclesPage = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-semibold text-slate-800">Vehículos</h2>
-        <p className="text-slate-500">Catálogo de marcas y modelos automotrices</p>
+        <h2 className="text-[28px] font-bold tracking-tight text-[#1D1D1F]">Vehículos</h2>
+        <p className="text-[15px] text-[#86868B]">Catálogo de marcas y modelos automotrices</p>
       </div>
 
       <Table 

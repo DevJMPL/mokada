@@ -23,8 +23,8 @@ export const PriceListsPage = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-semibold text-slate-800">Listas de Precios</h2>
-        <p className="text-slate-500">Configuración de niveles de precios y descuentos</p>
+        <h2 className="text-[28px] font-bold tracking-tight text-[#1D1D1F]">Listas de Precios</h2>
+        <p className="text-[15px] text-[#86868B]">Configuración de niveles de precios y descuentos</p>
       </div>
 
       <Table 

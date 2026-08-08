@@ -4,11 +4,11 @@ import { Header } from './Header';
 
 export const AppLayout = () => {
   return (
-    <div className="flex h-screen bg-slate-50 overflow-hidden text-slate-900 font-sans">
+    <div className="flex h-screen bg-[#F5F5F7] overflow-hidden text-[#1D1D1F] font-sans antialiased">
       <Sidebar />
       <div className="flex-1 flex flex-col h-screen overflow-hidden relative">
         <Header />
-        <main className="flex-1 overflow-auto bg-slate-50 p-6">
+        <main className="flex-1 overflow-auto p-6 md:p-8">
           <Outlet />
         </main>
       </div>

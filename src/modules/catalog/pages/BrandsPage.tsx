@@ -17,8 +17,8 @@ export const BrandsPage = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-semibold text-slate-800">Marcas</h2>
-        <p className="text-slate-500">Gestión de marcas de refacciones</p>
+        <h2 className="text-[28px] font-bold tracking-tight text-[#1D1D1F]">Marcas</h2>
+        <p className="text-[15px] text-[#86868B]">Gestión de marcas de refacciones</p>
       </div>
 
       <Table 

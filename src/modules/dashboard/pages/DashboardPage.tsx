@@ -21,8 +21,8 @@ export const DashboardPage = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-semibold text-slate-800">Dashboard</h2>
-        <p className="text-slate-500">Resumen general del sistema</p>
+        <h2 className="text-[28px] font-bold tracking-tight text-[#1D1D1F]">Dashboard</h2>
+        <p className="text-[15px] text-[#86868B]">Resumen general del sistema</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

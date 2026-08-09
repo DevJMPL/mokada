@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useForm, FormProvider } from 'react-hook-form';
 import { ArrowLeft, Save } from 'lucide-react';
-import { useProductFull, useSaveProductFull, useBrands, useCategories } from '../hooks/useCatalog';
+import { useProductFull, useSaveProductFull, useBrands, useCategories, useUploadProductImage } from '../hooks/useCatalog';
 import { useUnits, usePriceLists } from '../../configuration/hooks/useConfig';
 import { useWarehouses } from '../../inventory/hooks/useInventory';
 import { ProductGeneralTab } from '../components/ProductGeneralTab';
@@ -17,6 +17,9 @@ export const ProductFormPage = () => {
   const navigate = useNavigate();
   const isEditing = Boolean(id);
   const [activeTab, setActiveTab] = useState<'general' | 'prices' | 'inventory' | 'fitments'>('general');
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [currentImageUrl, setCurrentImageUrl] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   // Loaders for lookups
   const { data: brands } = useBrands();
@@ -28,6 +31,7 @@ export const ProductFormPage = () => {
   // Load product if editing
   const { data: fullProduct, isLoading: isLoadingProduct } = useProductFull(isEditing ? id! : null);
   const { mutateAsync: saveProduct, isPending: isSaving } = useSaveProductFull();
+  const { mutateAsync: uploadImage } = useUploadProductImage();
 
   const methods = useForm<{
     id: string | null;
@@ -77,6 +81,11 @@ export const ProductFormPage = () => {
         inventory: (fullProduct.inventory as any) || [],
         fitments: (fullProduct.fitments as any) || []
       });
+      if (p.image_url) {
+        import('../services/catalog.service').then(m => {
+          setCurrentImageUrl(m.catalogService.getProductImageUrl(p.image_url));
+        });
+      }
     } else if (!isEditing && priceLists && warehouses) {
       // Initialize arrays for new products based on available lists
       methods.reset({
@@ -98,6 +107,7 @@ export const ProductFormPage = () => {
 
   const onSubmit = async (data: any) => {
     try {
+      setIsUploading(true);
       const cleanData = {
         ...data,
         fitments: data.fitments.map((f: any) => ({
@@ -106,11 +116,20 @@ export const ProductFormPage = () => {
           year_to: f.year_to || null,
         }))
       };
-      await saveProduct(cleanData);
+      const productId = await saveProduct(cleanData);
+
+      if (imageFile && productId) {
+        const imagePath = await uploadImage({ productId, file: imageFile });
+        // Optionally update the product with the new image_url
+        await saveProduct({ ...cleanData, id: productId, image_url: imagePath });
+      }
+
       navigate('/catalog/products');
     } catch (error) {
       console.error('Error saving product', error);
       alert('Hubo un error al guardar el producto');
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -147,11 +166,11 @@ export const ProductFormPage = () => {
           
           <button 
             type="submit" 
-            disabled={isSaving}
+            disabled={isSaving || isUploading}
             className="flex items-center justify-center gap-2 bg-[#0066CC] hover:bg-[#005bb5] text-white px-5 py-2.5 rounded-xl text-[14px] font-medium transition-colors shadow-sm disabled:opacity-50"
           >
             <Save className="w-4 h-4" />
-            {isSaving ? 'Guardando...' : 'Guardar Producto'}
+            {(isSaving || isUploading) ? 'Guardando...' : 'Guardar Producto'}
           </button>
         </div>
 
@@ -180,6 +199,9 @@ export const ProductFormPage = () => {
               brands={brands || []} 
               categories={categories || []} 
               units={units || []} 
+              imageFile={imageFile}
+              setImageFile={setImageFile}
+              currentImageUrl={currentImageUrl}
             />
           )}
           {activeTab === 'prices' && (

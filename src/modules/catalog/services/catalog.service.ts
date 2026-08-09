@@ -1,4 +1,5 @@
 import { supabase } from '../../../lib/supabase/client';
+import { storageService } from '../../../lib/supabase/storage';
 
 export const catalogService = {
   async getProducts({ page = 1, pageSize = 25, search = '' }) {
@@ -83,7 +84,8 @@ export const catalogService = {
       p_status: payload.status || 'ACTIVE',
       p_prices: payload.prices || null,
       p_inventory: payload.inventory || null,
-      p_fitments: payload.fitments || null
+      p_fitments: payload.fitments || null,
+      p_image_url: payload.image_url || null
     });
     if (error) throw error;
     return data;
@@ -145,5 +147,20 @@ export const catalogService = {
     const { data, error } = await request.select().single();
     if (error) throw error;
     return data;
+  },
+
+  async uploadProductImage(productId: string, file: File) {
+    return storageService.uploadFile({
+      bucket: 'products',
+      file,
+      ownerId: productId,
+      folder: 'images',
+      upsert: true,
+    });
+  },
+
+  getProductImageUrl(path: string | null) {
+    if (!path) return null;
+    return storageService.getPublicUrl('products', path);
   }
 };

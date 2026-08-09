@@ -1,19 +1,35 @@
 import { useFormContext } from 'react-hook-form';
+import { ImageUpload } from '../../../components/ui/ImageUpload';
 
 interface Props {
   brands: any[];
   categories: any[];
   units: any[];
+  imageFile: File | null;
+  setImageFile: (file: File | null) => void;
+  currentImageUrl: string | null;
 }
 
-export const ProductGeneralTab = ({ brands, categories, units }: Props) => {
+export const ProductGeneralTab = ({ brands, categories, units, imageFile, setImageFile, currentImageUrl }: Props) => {
   const { register, formState: { errors } } = useFormContext();
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Columna de la Imagen */}
+        <div className="md:col-span-2 lg:col-span-1 lg:row-span-3">
+          <label className="block text-[13px] font-medium text-[#1D1D1F] mb-1.5">Fotografía del Producto</label>
+          <div className="aspect-square w-full max-w-[280px] mx-auto lg:mx-0">
+            <ImageUpload 
+              value={imageFile || currentImageUrl} 
+              onChange={setImageFile} 
+              onClear={() => setImageFile(null)}
+            />
+          </div>
+        </div>
+
         {/* Code */}
-        <div>
+        <div className="lg:col-span-1">
           <label className="block text-[13px] font-medium text-[#1D1D1F] mb-1.5">Código *</label>
           <input 
             type="text" 

@@ -9,6 +9,8 @@ import {
   ListTree,
   PackageSearch,
   Ruler,
+  BadgeDollarSign,
+  Truck
   Settings,
   ShieldCheck,
   ShoppingCart,
@@ -50,6 +52,7 @@ const navItems: NavSection[] = [
     items: [
       { path: '/inventory/stock', label: 'Existencias', icon: Boxes },
       { path: '/inventory/movements', label: 'Movimientos', icon: ArrowRightLeft },
+      { path: '/inventory/transfers', label: 'Traspasos', icon: Truck },
       { path: '/inventory/warehouses', label: 'Almacenes', icon: Building2 },
     ],
   },

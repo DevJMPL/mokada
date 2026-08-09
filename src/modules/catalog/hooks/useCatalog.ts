@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { catalogService } from '../services/catalog.service';
 import { catalogKeys } from '../../../utils/queryKeys';
 
@@ -27,5 +27,71 @@ export const useVehicles = () => {
   return useQuery({
     queryKey: catalogKeys.vehicles(),
     queryFn: catalogService.getVehicles,
+  });
+};
+
+export const useProductFull = (productId: string | null) => {
+  return useQuery({
+    queryKey: [...catalogKeys.products({}), 'full', productId],
+    queryFn: () => catalogService.getProductFull(productId!),
+    enabled: !!productId,
+  });
+};
+
+export const useSaveProductFull = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: catalogService.saveProductFull,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: catalogKeys.products({}) });
+    }
+  });
+};
+
+export const useSaveBrand = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: catalogService.saveBrand,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: catalogKeys.brands() });
+    }
+  });
+};
+
+export const useSaveCategory = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: catalogService.saveCategory,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: catalogKeys.categories() });
+    }
+  });
+};
+
+export const useVehicleMakes = () => {
+  return useQuery({
+    queryKey: [...catalogKeys.vehicles(), 'makes'],
+    queryFn: catalogService.getVehicleMakes,
+  });
+};
+
+export const useSaveVehicleMake = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: catalogService.saveVehicleMake,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [...catalogKeys.vehicles(), 'makes'] });
+    }
+  });
+};
+
+export const useSaveVehicleModel = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: catalogService.saveVehicleModel,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: catalogKeys.vehicles() });
+    }
   });
 };

@@ -25,3 +25,8 @@ export const configKeys = {
   priceLists: () => [...configKeys.all, 'priceLists'] as const,
   attributes: () => [...configKeys.all, 'attributes'] as const,
 };
+
+export const adminKeys = {
+  all: ['admin'] as const,
+  users: () => [...adminKeys.all, 'users'] as const,
+};

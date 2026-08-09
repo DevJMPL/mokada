@@ -1,31 +1,51 @@
 import { NavLink } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  PackageSearch, 
-  Tags, 
-  ListTree, 
-  CarFront,
-  Boxes,
+import {
   ArrowRightLeft,
+  BadgeDollarSign,
+  Boxes,
   Building2,
-  Users,
-  ShoppingCart,
-  Settings,
+  CarFront,
+  LayoutDashboard,
+  ListTree,
+  PackageSearch,
   Ruler,
   BadgeDollarSign,
-  Truck
+  Truck,
+  Settings,
+  ShieldCheck,
+  ShoppingCart,
+  Tags,
+  UserRound,
+  Users,
+  X,
+  type LucideIcon,
 } from 'lucide-react';
+import { useAuth } from '../../modules/auth/context/useAuth';
 
-const navItems = [
+interface NavItemConfig {
+  path: string;
+  label: string;
+  icon: LucideIcon;
+  disabled?: boolean;
+}
+
+interface NavSection {
+  label?: string;
+  items?: NavItemConfig[];
+  path?: string;
+  icon?: LucideIcon;
+}
+
+const navItems: NavSection[] = [
   { path: '/', label: 'Dashboard', icon: LayoutDashboard },
-  { 
-    label: 'Catálogo', 
+  {
+    label: 'Catalogo',
     items: [
       { path: '/catalog/products', label: 'Productos', icon: PackageSearch },
-      { path: '/catalog/categories', label: 'Categorías', icon: ListTree },
+      { path: '/catalog/categories', label: 'Categorias', icon: ListTree },
       { path: '/catalog/brands', label: 'Marcas', icon: Tags },
-      { path: '/catalog/vehicles', label: 'Vehículos', icon: CarFront },
-    ]
+      { path: '/catalog/vehicles', label: 'Vehiculos', icon: CarFront },
+    ],
   },
   {
     label: 'Inventario',
@@ -34,68 +54,113 @@ const navItems = [
       { path: '/inventory/movements', label: 'Movimientos', icon: ArrowRightLeft },
       { path: '/inventory/transfers', label: 'Traspasos', icon: Truck },
       { path: '/inventory/warehouses', label: 'Almacenes', icon: Building2 },
-    ]
+    ],
   },
   {
     label: 'Compras',
     items: [
       { path: '/purchases/suppliers', label: 'Proveedores', icon: Users, disabled: true },
-      { path: '/purchases/orders', label: 'Órdenes de Compra', icon: ShoppingCart, disabled: true },
-    ]
+      { path: '/purchases/orders', label: 'Ordenes de compra', icon: ShoppingCart, disabled: true },
+    ],
   },
   {
-    label: 'Configuración',
+    label: 'Configuracion',
     items: [
       { path: '/config/units', label: 'Unidades', icon: Ruler },
-      { path: '/config/price-lists', label: 'Listas de Precios', icon: BadgeDollarSign },
+      { path: '/config/price-lists', label: 'Listas de precios', icon: BadgeDollarSign },
       { path: '/config/attributes', label: 'Atributos', icon: Settings },
-    ]
-  }
+    ],
+  },
+  {
+    label: 'Cuenta',
+    items: [
+      { path: '/account/profile', label: 'Mi perfil', icon: UserRound },
+    ],
+  },
 ];
 
-export const Sidebar = () => {
+interface SidebarProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
+  const { isAdmin } = useAuth();
+  const sections = isAdmin
+    ? [
+        ...navItems,
+        {
+          label: 'Administracion',
+          items: [{ path: '/admin/users', label: 'Usuarios', icon: ShieldCheck }],
+        },
+      ]
+    : navItems;
+
   return (
-    <aside className="w-[260px] bg-[#F5F5F7] flex flex-col h-full border-r border-gray-200/50">
-      <div className="h-[3.25rem] flex items-center px-6">
-        <h1 className="text-lg font-semibold text-[#1D1D1F] tracking-tight flex items-center gap-2">
-          <Boxes className="w-[20px] h-[20px] text-[#0066CC]" />
-          Mokada
-        </h1>
-      </div>
-      
-      <div className="flex-1 overflow-y-auto py-2">
-        <nav className="space-y-4">
-          {navItems.map((section, idx) => (
-            <div key={idx} className="px-3">
-              {section.items ? (
-                <>
-                  <h3 className="px-3 py-1.5 text-[11px] font-semibold text-[#86868B] uppercase tracking-wider">
-                    {section.label}
-                  </h3>
-                  <div className="space-y-0.5">
-                    {section.items.map((item) => (
-                      <NavItem key={item.path} item={item} />
-                    ))}
-                  </div>
-                </>
-              ) : (
-                <NavItem item={section} />
-              )}
-            </div>
-          ))}
-        </nav>
-      </div>
-    </aside>
+    <>
+      {isOpen && (
+        <button
+          type="button"
+          aria-label="Cerrar menu"
+          className="fixed inset-0 z-30 bg-black/30 lg:hidden"
+          onClick={onClose}
+        />
+      )}
+
+      <aside
+        className={`fixed inset-y-0 left-0 z-40 flex h-full w-[260px] flex-col border-r border-gray-200/50 bg-[#F5F5F7] transition-transform duration-200 lg:static lg:translate-x-0 ${
+          isOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
+        <div className="flex h-[3.25rem] items-center justify-between px-6">
+          <h1 className="flex items-center gap-2 text-lg font-semibold tracking-tight text-[#1D1D1F]">
+            <Boxes className="h-5 w-5 text-[#0066CC]" />
+            Mokada
+          </h1>
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-[#86868B] transition-colors hover:bg-black/5 hover:text-[#1D1D1F] lg:hidden"
+            title="Cerrar menu"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto py-2">
+          <nav className="space-y-4">
+            {sections.map((section, idx) => (
+              <div key={`${section.label || section.path}-${idx}`} className="px-3">
+                {section.items ? (
+                  <>
+                    <h3 className="px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-[#86868B]">
+                      {section.label}
+                    </h3>
+                    <div className="space-y-0.5">
+                      {section.items.map((item) => (
+                        <NavItem key={item.path} item={item} onNavigate={onClose} />
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <NavItem item={section as NavItemConfig} onNavigate={onClose} />
+                )}
+              </div>
+            ))}
+          </nav>
+        </div>
+      </aside>
+    </>
   );
 };
 
-const NavItem = ({ item }: { item: any }) => {
+const NavItem = ({ item, onNavigate }: { item: NavItemConfig; onNavigate: () => void }) => {
   const Icon = item.icon;
-  
+
   if (item.disabled) {
     return (
-      <div className="flex items-center gap-2.5 px-3 py-1.5 text-[13px] text-gray-400 rounded-lg cursor-not-allowed">
-        <Icon className="w-[16px] h-[16px]" />
+      <div className="flex items-center gap-2.5 rounded-lg px-3 py-1.5 text-[13px] text-gray-400">
+        <Icon className="h-4 w-4" />
         {item.label}
       </div>
     );
@@ -104,15 +169,14 @@ const NavItem = ({ item }: { item: any }) => {
   return (
     <NavLink
       to={item.path}
+      onClick={onNavigate}
       className={({ isActive }) =>
-        `flex items-center gap-2.5 px-3 py-1.5 rounded-lg transition-colors text-[13px] ${
-          isActive 
-            ? 'bg-[#0066CC] text-white font-medium shadow-sm' 
-            : 'text-[#1D1D1F] hover:bg-black/5'
+        `flex items-center gap-2.5 rounded-lg px-3 py-1.5 text-[13px] transition-colors ${
+          isActive ? 'bg-[#0066CC] font-medium text-white shadow-sm' : 'text-[#1D1D1F] hover:bg-black/5'
         }`
       }
     >
-      <Icon className="w-[16px] h-[16px]" />
+      <Icon className="h-4 w-4" />
       {item.label}
     </NavLink>
   );

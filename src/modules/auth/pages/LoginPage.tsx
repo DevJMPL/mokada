@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent, type PointerEvent } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Lock, Mail } from 'lucide-react';
-import logoMokada from '../../../assets/login/logo-mokada.png';
+import logoMokada from '../../../assets/logo.svg';
 import productoAmortiguador from '../../../assets/login/producto-amortiguador.png';
 import productoBateria from '../../../assets/login/producto-bateria.png';
 import productoDiscoFreno from '../../../assets/login/producto-disco-freno.png';

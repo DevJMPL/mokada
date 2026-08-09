@@ -33,28 +33,6 @@ export const router = createBrowserRouter([
     element: <ProtectedRoute />,
     children: [
       {
-        index: true,
-        element: <DashboardPage />
-      },
-      {
-        path: 'catalog',
-        children: [
-          { path: 'products', element: <ProductsPage /> },
-          { path: 'products/new', element: <ProductFormPage /> },
-          { path: 'products/:id', element: <ProductFormPage /> },
-          { path: 'categories', element: <CategoriesPage /> },
-          { path: 'brands', element: <BrandsPage /> },
-          { path: 'vehicles', element: <VehiclesPage /> },
-        ]
-      },
-      {
-        path: 'inventory',
-        children: [
-          { path: 'stock', element: <StockPage /> },
-          { path: 'movements', element: <MovementsPage /> },
-          { path: 'warehouses', element: <WarehousesPage /> },
-          { path: 'transfers', element: <TransfersPage /> },
-          { path: 'transfers/new', element: <TransferFormPage /> },
         path: '/',
         element: <AppLayout />,
         children: [
@@ -73,6 +51,8 @@ export const router = createBrowserRouter([
             path: 'catalog',
             children: [
               { path: 'products', element: <ProductsPage /> },
+              { path: 'products/new', element: <ProductFormPage /> },
+              { path: 'products/:id', element: <ProductFormPage /> },
               { path: 'categories', element: <CategoriesPage /> },
               { path: 'brands', element: <BrandsPage /> },
               { path: 'vehicles', element: <VehiclesPage /> },
@@ -84,6 +64,8 @@ export const router = createBrowserRouter([
               { path: 'stock', element: <StockPage /> },
               { path: 'movements', element: <MovementsPage /> },
               { path: 'warehouses', element: <WarehousesPage /> },
+              { path: 'transfers', element: <TransfersPage /> },
+              { path: 'transfers/new', element: <TransferFormPage /> },
             ]
           },
           {

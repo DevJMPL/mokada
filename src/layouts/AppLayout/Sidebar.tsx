@@ -9,8 +9,7 @@ import {
   ListTree,
   PackageSearch,
   Ruler,
-  BadgeDollarSign,
-  Truck
+  Truck,
   Settings,
   ShieldCheck,
   ShoppingCart,

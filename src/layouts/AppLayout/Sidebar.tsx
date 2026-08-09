@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom';
+import logo from '../../assets/logo.svg';
 import {
   ArrowRightLeft,
   BadgeDollarSign,
@@ -105,10 +106,9 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
         }`}
       >
         <div className="flex h-[3.25rem] items-center justify-between px-6">
-          <h1 className="flex items-center gap-2 text-lg font-semibold tracking-tight text-[#1D1D1F]">
-            <Boxes className="h-5 w-5 text-[#0066CC]" />
-            Mokada
-          </h1>
+          <div className="flex items-center gap-2">
+            <img src={logo} alt="Mokada" className="h-6 w-auto" />
+          </div>
           <button
             type="button"
             onClick={onClose}

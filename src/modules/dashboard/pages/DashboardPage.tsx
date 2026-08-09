@@ -1,6 +1,8 @@
 import { useDashboardStats } from '../hooks/useDashboardStats';
 import { LoadingState } from '../../../components/ui/LoadingState';
 import { ErrorState } from '../../../components/ui/ErrorState';
+import { useAuth } from '../../auth/context/useAuth';
+import { Navigate } from 'react-router-dom';
 import { 
   BarChart, 
   Bar, 
@@ -17,7 +19,12 @@ import {
 import { Package, HeartPulse, Boxes } from 'lucide-react';
 
 export const DashboardPage = () => {
+  const { isAdmin } = useAuth();
   const { data: stats, isLoading, isError, refetch } = useDashboardStats();
+
+  if (!isAdmin) {
+    return <Navigate to="/my-route" replace />;
+  }
 
   if (isLoading) return <LoadingState message="Cargando resumen..." />;
   if (isError) return <ErrorState onRetry={() => refetch()} />;

@@ -30,3 +30,36 @@ export const adminKeys = {
   all: ['admin'] as const,
   users: () => [...adminKeys.all, 'users'] as const,
 };
+
+export const fleetKeys = {
+  all: ['fleet'] as const,
+  vehicles: () => [...fleetKeys.all, 'vehicles'] as const,
+  vehicle: (id: string) => [...fleetKeys.all, 'vehicle', id] as const,
+};
+
+export const routeKeys = {
+  all: ['routes'] as const,
+  routes: () => [...routeKeys.all, 'list'] as const,
+  route: (id: string) => [...routeKeys.all, 'detail', id] as const,
+  trips: (filters?: any) => [...routeKeys.all, 'trips', filters] as const,
+  trip: (id: string) => [...routeKeys.all, 'trip', id] as const,
+  myTrip: () => [...routeKeys.all, 'my-trip'] as const,
+};
+
+export const expenseKeys = {
+  all: ['expenses'] as const,
+  categories: () => [...expenseKeys.all, 'categories'] as const,
+  tripExpenses: (tripId: string) => [...expenseKeys.all, 'trip', tripId] as const,
+};
+
+export const settlementKeys = {
+  all: ['settlements'] as const,
+  list: (filters?: any) => [...settlementKeys.all, 'list', filters] as const,
+  detail: (id: string) => [...settlementKeys.all, 'detail', id] as const,
+  financialSummary: (filters?: any) => [...settlementKeys.all, 'financial', filters] as const,
+};
+
+export const routeOpsKeys = {
+  all: ['route-ops'] as const,
+  dashboard: () => [...routeOpsKeys.all, 'dashboard'] as const,
+};

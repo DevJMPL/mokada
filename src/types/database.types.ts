@@ -7,6 +7,11 @@ export type Json =
   | Json[]
 
 export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "14.15"
+  }
   graphql_public: {
     Tables: {
       [_ in never]: never
@@ -259,6 +264,236 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      client_branches: {
+        Row: {
+          address: string | null
+          city: string | null
+          client_id: string
+          code: string
+          created_at: string
+          id: string
+          is_active: boolean
+          latitude: number | null
+          longitude: number | null
+          name: string
+          postal_code: string | null
+          state: string | null
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          city?: string | null
+          client_id: string
+          code: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          latitude?: number | null
+          longitude?: number | null
+          name: string
+          postal_code?: string | null
+          state?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          city?: string | null
+          client_id?: string
+          code?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          latitude?: number | null
+          longitude?: number | null
+          name?: string
+          postal_code?: string | null
+          state?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_branches_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      clients: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      expense_attachments: {
+        Row: {
+          attachment_type: Database["public"]["Enums"]["expense_attachment_type"]
+          created_at: string
+          expense_id: string
+          file_name: string
+          file_size: number | null
+          id: string
+          mime_type: string | null
+          storage_path: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          attachment_type?: Database["public"]["Enums"]["expense_attachment_type"]
+          created_at?: string
+          expense_id: string
+          file_name: string
+          file_size?: number | null
+          id?: string
+          mime_type?: string | null
+          storage_path: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          attachment_type?: Database["public"]["Enums"]["expense_attachment_type"]
+          created_at?: string
+          expense_id?: string
+          file_name?: string
+          file_size?: number | null
+          id?: string
+          mime_type?: string | null
+          storage_path?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "expense_attachments_expense_id_fkey"
+            columns: ["expense_id"]
+            isOneToOne: false
+            referencedRelation: "travel_expenses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expense_attachments_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      expense_categories: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          requires_invoice: boolean
+          requires_receipt: boolean
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          requires_invoice?: boolean
+          requires_receipt?: boolean
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          requires_invoice?: boolean
+          requires_receipt?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      fleet_vehicles: {
+        Row: {
+          brand: string | null
+          color: string | null
+          created_at: string
+          engine: string | null
+          fuel_type: string | null
+          id: string
+          image_url: string | null
+          internal_code: string
+          mileage: number | null
+          model: string | null
+          notes: string | null
+          plate_number: string | null
+          status: Database["public"]["Enums"]["vehicle_status_type"]
+          transmission: string | null
+          updated_at: string
+          vehicle_type: string | null
+          vin: string | null
+          year: number | null
+        }
+        Insert: {
+          brand?: string | null
+          color?: string | null
+          created_at?: string
+          engine?: string | null
+          fuel_type?: string | null
+          id?: string
+          image_url?: string | null
+          internal_code: string
+          mileage?: number | null
+          model?: string | null
+          notes?: string | null
+          plate_number?: string | null
+          status?: Database["public"]["Enums"]["vehicle_status_type"]
+          transmission?: string | null
+          updated_at?: string
+          vehicle_type?: string | null
+          vin?: string | null
+          year?: number | null
+        }
+        Update: {
+          brand?: string | null
+          color?: string | null
+          created_at?: string
+          engine?: string | null
+          fuel_type?: string | null
+          id?: string
+          image_url?: string | null
+          internal_code?: string
+          mileage?: number | null
+          model?: string | null
+          notes?: string | null
+          plate_number?: string | null
+          status?: Database["public"]["Enums"]["vehicle_status_type"]
+          transmission?: string | null
+          updated_at?: string
+          vehicle_type?: string | null
+          vin?: string | null
+          year?: number | null
+        }
+        Relationships: []
       }
       inventory_movements: {
         Row: {
@@ -1225,6 +1460,348 @@ export type Database = {
           },
         ]
       }
+      route_states: {
+        Row: {
+          created_at: string
+          id: string
+          route_id: string
+          sequence: number
+          state_code: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          route_id: string
+          sequence: number
+          state_code: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          route_id?: string
+          sequence?: number
+          state_code?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "route_states_route_id_fkey"
+            columns: ["route_id"]
+            isOneToOne: false
+            referencedRelation: "routes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      route_stops: {
+        Row: {
+          branch_id: string
+          created_at: string
+          estimated_arrival_time: string | null
+          estimated_duration_minutes: number | null
+          id: string
+          notes: string | null
+          route_id: string
+          sequence: number
+          updated_at: string
+        }
+        Insert: {
+          branch_id: string
+          created_at?: string
+          estimated_arrival_time?: string | null
+          estimated_duration_minutes?: number | null
+          id?: string
+          notes?: string | null
+          route_id: string
+          sequence: number
+          updated_at?: string
+        }
+        Update: {
+          branch_id?: string
+          created_at?: string
+          estimated_arrival_time?: string | null
+          estimated_duration_minutes?: number | null
+          id?: string
+          notes?: string | null
+          route_id?: string
+          sequence?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "route_stops_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "client_branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "route_stops_route_id_fkey"
+            columns: ["route_id"]
+            isOneToOne: false
+            referencedRelation: "routes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      route_trip_settlements: {
+        Row: {
+          approved_expenses: number
+          balance: number
+          budget_amount: number
+          created_at: string
+          id: string
+          notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          route_trip_id: string
+          settled_at: string | null
+          settled_by: string | null
+          settlement_amount: number
+          settlement_type: Database["public"]["Enums"]["settlement_type_enum"]
+          status: Database["public"]["Enums"]["settlement_status_type"]
+          updated_at: string
+        }
+        Insert: {
+          approved_expenses: number
+          balance: number
+          budget_amount: number
+          created_at?: string
+          id?: string
+          notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          route_trip_id: string
+          settled_at?: string | null
+          settled_by?: string | null
+          settlement_amount: number
+          settlement_type: Database["public"]["Enums"]["settlement_type_enum"]
+          status?: Database["public"]["Enums"]["settlement_status_type"]
+          updated_at?: string
+        }
+        Update: {
+          approved_expenses?: number
+          balance?: number
+          budget_amount?: number
+          created_at?: string
+          id?: string
+          notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          route_trip_id?: string
+          settled_at?: string | null
+          settled_by?: string | null
+          settlement_amount?: number
+          settlement_type?: Database["public"]["Enums"]["settlement_type_enum"]
+          status?: Database["public"]["Enums"]["settlement_status_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "route_trip_settlements_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "route_trip_settlements_route_trip_id_fkey"
+            columns: ["route_trip_id"]
+            isOneToOne: true
+            referencedRelation: "route_trip_financial_summary"
+            referencedColumns: ["route_trip_id"]
+          },
+          {
+            foreignKeyName: "route_trip_settlements_route_trip_id_fkey"
+            columns: ["route_trip_id"]
+            isOneToOne: true
+            referencedRelation: "route_trips"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "route_trip_settlements_settled_by_fkey"
+            columns: ["settled_by"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      route_trips: {
+        Row: {
+          agent_id: string
+          budget_amount: number
+          completed_at: string | null
+          created_at: string
+          created_by: string | null
+          ending_mileage: number | null
+          id: string
+          notes: string | null
+          route_id: string
+          started_at: string | null
+          starting_mileage: number | null
+          status: Database["public"]["Enums"]["route_trip_status_type"]
+          updated_at: string
+          vehicle_id: string | null
+          week_end_date: string
+          week_start_date: string
+        }
+        Insert: {
+          agent_id: string
+          budget_amount?: number
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          ending_mileage?: number | null
+          id?: string
+          notes?: string | null
+          route_id: string
+          started_at?: string | null
+          starting_mileage?: number | null
+          status?: Database["public"]["Enums"]["route_trip_status_type"]
+          updated_at?: string
+          vehicle_id?: string | null
+          week_end_date: string
+          week_start_date: string
+        }
+        Update: {
+          agent_id?: string
+          budget_amount?: number
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          ending_mileage?: number | null
+          id?: string
+          notes?: string | null
+          route_id?: string
+          started_at?: string | null
+          starting_mileage?: number | null
+          status?: Database["public"]["Enums"]["route_trip_status_type"]
+          updated_at?: string
+          vehicle_id?: string | null
+          week_end_date?: string
+          week_start_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "route_trips_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "route_trips_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "route_trips_route_id_fkey"
+            columns: ["route_id"]
+            isOneToOne: false
+            referencedRelation: "routes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "route_trips_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "fleet_vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      routes: {
+        Row: {
+          code: string
+          created_at: string
+          default_weekly_budget: number
+          description: string | null
+          estimated_days: number | null
+          id: string
+          is_active: boolean
+          name: string
+          updated_at: string
+          working_days: string[] | null
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          default_weekly_budget?: number
+          description?: string | null
+          estimated_days?: number | null
+          id?: string
+          is_active?: boolean
+          name: string
+          updated_at?: string
+          working_days?: string[] | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          default_weekly_budget?: number
+          description?: string | null
+          estimated_days?: number | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          updated_at?: string
+          working_days?: string[] | null
+        }
+        Relationships: []
+      }
+      settlement_transactions: {
+        Row: {
+          amount: number
+          attachment_path: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          reference: string | null
+          settlement_id: string
+          transaction_date: string
+          transaction_type: Database["public"]["Enums"]["settlement_transaction_type"]
+        }
+        Insert: {
+          amount: number
+          attachment_path?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          reference?: string | null
+          settlement_id: string
+          transaction_date: string
+          transaction_type: Database["public"]["Enums"]["settlement_transaction_type"]
+        }
+        Update: {
+          amount?: number
+          attachment_path?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          reference?: string | null
+          settlement_id?: string
+          transaction_date?: string
+          transaction_type?: Database["public"]["Enums"]["settlement_transaction_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "settlement_transactions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "settlement_transactions_settlement_id_fkey"
+            columns: ["settlement_id"]
+            isOneToOne: false
+            referencedRelation: "route_trip_settlements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       suppliers: {
         Row: {
           created_at: string
@@ -1263,6 +1840,111 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      travel_expenses: {
+        Row: {
+          agent_id: string
+          amount: number
+          city: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          expense_category_id: string
+          expense_date: string
+          id: string
+          invoice_available: boolean
+          latitude: number | null
+          longitude: number | null
+          merchant_name: string | null
+          notes: string | null
+          payment_method: string | null
+          place_name: string | null
+          route_trip_id: string
+          state: string | null
+          status: Database["public"]["Enums"]["travel_expense_status_type"]
+          updated_at: string
+        }
+        Insert: {
+          agent_id: string
+          amount: number
+          city?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          expense_category_id: string
+          expense_date: string
+          id?: string
+          invoice_available?: boolean
+          latitude?: number | null
+          longitude?: number | null
+          merchant_name?: string | null
+          notes?: string | null
+          payment_method?: string | null
+          place_name?: string | null
+          route_trip_id: string
+          state?: string | null
+          status?: Database["public"]["Enums"]["travel_expense_status_type"]
+          updated_at?: string
+        }
+        Update: {
+          agent_id?: string
+          amount?: number
+          city?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          expense_category_id?: string
+          expense_date?: string
+          id?: string
+          invoice_available?: boolean
+          latitude?: number | null
+          longitude?: number | null
+          merchant_name?: string | null
+          notes?: string | null
+          payment_method?: string | null
+          place_name?: string | null
+          route_trip_id?: string
+          state?: string | null
+          status?: Database["public"]["Enums"]["travel_expense_status_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "travel_expenses_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "travel_expenses_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "travel_expenses_expense_category_id_fkey"
+            columns: ["expense_category_id"]
+            isOneToOne: false
+            referencedRelation: "expense_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "travel_expenses_route_trip_id_fkey"
+            columns: ["route_trip_id"]
+            isOneToOne: false
+            referencedRelation: "route_trip_financial_summary"
+            referencedColumns: ["route_trip_id"]
+          },
+          {
+            foreignKeyName: "travel_expenses_route_trip_id_fkey"
+            columns: ["route_trip_id"]
+            isOneToOne: false
+            referencedRelation: "route_trips"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       units_of_measure: {
         Row: {
@@ -1680,11 +2362,119 @@ export type Database = {
         }
         Relationships: []
       }
+      route_trip_financial_summary: {
+        Row: {
+          agent_id: string | null
+          approved_expenses: number | null
+          balance: number | null
+          budget_amount: number | null
+          pending_expenses: number | null
+          rejected_expenses: number | null
+          route_code: string | null
+          route_name: string | null
+          route_trip_id: string | null
+          route_trip_status:
+            | Database["public"]["Enums"]["route_trip_status_type"]
+            | null
+          settlement_type:
+            | Database["public"]["Enums"]["settlement_type_enum"]
+            | null
+          total_expenses: number | null
+          vehicle_id: string | null
+          week_end_date: string | null
+          week_start_date: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "route_trips_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "route_trips_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "fleet_vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
+      create_or_update_product_full:
+        | {
+            Args: {
+              p_barcode: string
+              p_brand_id: string
+              p_category_id: string
+              p_code: string
+              p_description: string
+              p_inventory: Json
+              p_name: string
+              p_prices: Json
+              p_product_id: string
+              p_status: string
+              p_unit_of_measure_id: string
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              p_barcode: string
+              p_brand_id: string
+              p_category_id: string
+              p_code: string
+              p_description: string
+              p_fitments?: Json
+              p_inventory: Json
+              p_name: string
+              p_prices: Json
+              p_product_id: string
+              p_status: string
+              p_unit_of_measure_id: string
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              p_barcode: string
+              p_brand_id: string
+              p_category_id: string
+              p_code: string
+              p_description: string
+              p_fitments?: Json
+              p_image_url?: string
+              p_inventory: Json
+              p_name: string
+              p_prices: Json
+              p_product_id: string
+              p_status: string
+              p_unit_of_measure_id: string
+            }
+            Returns: string
+          }
       current_user_is_active: { Args: never; Returns: boolean }
       current_user_is_admin: { Args: never; Returns: boolean }
       current_user_profile_id: { Args: never; Returns: string }
+      process_inventory_movement: {
+        Args: {
+          p_created_by?: string
+          p_movement_type: Database["public"]["Enums"]["inventory_movement_type"]
+          p_notes?: string
+          p_product_id: string
+          p_quantity: number
+          p_reference_id?: string
+          p_reference_type?: string
+          p_warehouse_id: string
+        }
+        Returns: string
+      }
+      process_inventory_transfer: {
+        Args: { p_created_by?: string; p_transfer_id: string }
+        Returns: boolean
+      }
       update_current_user_avatar: {
         Args: { next_avatar_path: string }
         Returns: {
@@ -1751,6 +2541,7 @@ export type Database = {
         | "COMPLETED"
         | "COMPLETED_WITH_ERRORS"
         | "FAILED"
+      expense_attachment_type: "RECEIPT" | "INVOICE" | "PHOTO" | "OTHER"
       inventory_movement_type:
         | "PURCHASE"
         | "SALE"
@@ -1769,7 +2560,33 @@ export type Database = {
         | "RECEIVED"
         | "CANCELLED"
       reservation_status: "ACTIVE" | "CONSUMED" | "RELEASED" | "EXPIRED"
+      route_trip_status_type:
+        | "PLANNED"
+        | "ASSIGNED"
+        | "IN_PROGRESS"
+        | "COMPLETED"
+        | "UNDER_REVIEW"
+        | "SETTLED"
+        | "CANCELLED"
+      settlement_status_type: "PENDING" | "APPROVED" | "SETTLED" | "CANCELLED"
+      settlement_transaction_type: "CASH_RETURN" | "REIMBURSEMENT"
+      settlement_type_enum:
+        | "BALANCED"
+        | "AGENT_RETURNS_CASH"
+        | "COMPANY_REIMBURSES"
+      travel_expense_status_type:
+        | "DRAFT"
+        | "SUBMITTED"
+        | "APPROVED"
+        | "REJECTED"
+        | "REQUIRES_INFORMATION"
       user_profile_type: "CUSTOMER" | "AGENT" | "ADMIN"
+      vehicle_status_type:
+        | "AVAILABLE"
+        | "ASSIGNED"
+        | "MAINTENANCE"
+        | "OUT_OF_SERVICE"
+        | "INACTIVE"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1909,6 +2726,7 @@ export const Constants = {
         "COMPLETED_WITH_ERRORS",
         "FAILED",
       ],
+      expense_attachment_type: ["RECEIPT", "INVOICE", "PHOTO", "OTHER"],
       inventory_movement_type: [
         "PURCHASE",
         "SALE",
@@ -1929,9 +2747,37 @@ export const Constants = {
         "CANCELLED",
       ],
       reservation_status: ["ACTIVE", "CONSUMED", "RELEASED", "EXPIRED"],
+      route_trip_status_type: [
+        "PLANNED",
+        "ASSIGNED",
+        "IN_PROGRESS",
+        "COMPLETED",
+        "UNDER_REVIEW",
+        "SETTLED",
+        "CANCELLED",
+      ],
+      settlement_status_type: ["PENDING", "APPROVED", "SETTLED", "CANCELLED"],
+      settlement_transaction_type: ["CASH_RETURN", "REIMBURSEMENT"],
+      settlement_type_enum: [
+        "BALANCED",
+        "AGENT_RETURNS_CASH",
+        "COMPANY_REIMBURSES",
+      ],
+      travel_expense_status_type: [
+        "DRAFT",
+        "SUBMITTED",
+        "APPROVED",
+        "REJECTED",
+        "REQUIRES_INFORMATION",
+      ],
       user_profile_type: ["CUSTOMER", "AGENT", "ADMIN"],
+      vehicle_status_type: [
+        "AVAILABLE",
+        "ASSIGNED",
+        "MAINTENANCE",
+        "OUT_OF_SERVICE",
+        "INACTIVE",
+      ],
     },
   },
 } as const
-
-

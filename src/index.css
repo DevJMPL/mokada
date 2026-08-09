@@ -13,3 +13,156 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+.login-showcase {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(238, 243, 249, 0.98)),
+    #f5f5f7;
+}
+
+.login-showcase-stage {
+  position: absolute;
+  inset: 0;
+  perspective: 1200px;
+}
+
+.login-product-layer,
+.login-logo-layer {
+  position: absolute;
+  inset: 0;
+  transition: transform 180ms ease-out;
+  will-change: transform;
+}
+
+.login-product {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: var(--product-width);
+  max-width: none;
+  object-fit: contain;
+  opacity: 0;
+  filter: drop-shadow(0 28px 36px rgba(28, 35, 45, 0.2));
+  transform-origin: center;
+  animation: loginProductConverge 1400ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation-delay: var(--delay);
+  will-change: transform, opacity, filter;
+}
+
+.login-product--brake {
+  --product-width: min(35vw, 310px);
+  --delay: 0ms;
+  --start-x: -34vw;
+  --start-y: -31vh;
+  --start-rotate: -22deg;
+  --start-scale: 0.72;
+  --center-x: -166px;
+  --center-y: -54px;
+  --center-rotate: -8deg;
+  --center-scale: 0.72;
+}
+
+.login-product--battery {
+  --product-width: min(38vw, 340px);
+  --delay: 180ms;
+  --start-x: 36vw;
+  --start-y: 26vh;
+  --start-rotate: 16deg;
+  --start-scale: 0.7;
+  --center-x: 116px;
+  --center-y: 134px;
+  --center-rotate: 3deg;
+  --center-scale: 0.6;
+}
+
+.login-product--headlight {
+  --product-width: min(42vw, 375px);
+  --delay: 360ms;
+  --start-x: 40vw;
+  --start-y: -24vh;
+  --start-rotate: -10deg;
+  --start-scale: 0.68;
+  --center-x: 178px;
+  --center-y: -92px;
+  --center-rotate: 7deg;
+  --center-scale: 0.58;
+}
+
+.login-product--shock {
+  --product-width: min(17vw, 150px);
+  --delay: 540ms;
+  --start-x: -29vw;
+  --start-y: 32vh;
+  --start-rotate: 28deg;
+  --start-scale: 0.76;
+  --center-x: -126px;
+  --center-y: 126px;
+  --center-rotate: 20deg;
+  --center-scale: 0.58;
+}
+
+.login-logo-layer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.login-logo-mark {
+  width: min(38vw, 315px);
+  max-width: 70%;
+  height: auto;
+  filter: drop-shadow(0 18px 24px rgba(28, 35, 45, 0.22));
+  opacity: 0;
+  transform: translateY(12px) scale(0.88);
+  animation: loginLogoReveal 900ms cubic-bezier(0.22, 1, 0.36, 1) 760ms forwards;
+  will-change: transform, opacity;
+}
+
+@keyframes loginProductConverge {
+  0% {
+    opacity: 0;
+    filter: blur(2px) drop-shadow(0 28px 36px rgba(28, 35, 45, 0.08));
+    transform: translate3d(calc(-50% + var(--start-x)), calc(-50% + var(--start-y)), -180px) rotate(var(--start-rotate)) scale(var(--start-scale));
+  }
+
+  18% {
+    opacity: 1;
+    filter: blur(0) drop-shadow(0 28px 36px rgba(28, 35, 45, 0.2));
+  }
+
+  100% {
+    opacity: 1;
+    filter: blur(0) drop-shadow(0 30px 38px rgba(28, 35, 45, 0.24));
+    transform: translate3d(calc(-50% + var(--center-x)), calc(-50% + var(--center-y)), 0) rotate(var(--center-rotate)) scale(var(--center-scale));
+  }
+}
+
+@keyframes loginLogoReveal {
+  0% {
+    opacity: 0;
+    transform: translateY(12px) scale(0.88);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .login-product,
+  .login-logo-mark {
+    animation: none;
+    opacity: 1;
+  }
+
+  .login-product {
+    transform: translate3d(calc(-50% + var(--center-x)), calc(-50% + var(--center-y)), 0) rotate(var(--center-rotate)) scale(var(--center-scale));
+  }
+
+  .login-logo-mark {
+    transform: none;
+  }
+}

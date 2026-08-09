@@ -25,6 +25,14 @@ import { AttributesPage } from '../../modules/configuration/pages/AttributesPage
 import { ConfigurationPage } from '../../modules/configuration/pages/ConfigurationPage';
 import { UsersPage } from '../../modules/admin/users/pages/UsersPage';
 
+import { FleetVehiclesPage } from '../../modules/fleet/pages/FleetVehiclesPage';
+import { RouteOpsDashboardPage } from '../../modules/route-operations/pages/RouteOpsDashboardPage';
+import { RoutesPage } from '../../modules/route-operations/pages/RoutesPage';
+import { RouteTripsPage } from '../../modules/route-operations/pages/RouteTripsPage';
+import { TripDetailPage } from '../../modules/route-operations/pages/TripDetailPage';
+import { MyRoutePage } from '../../modules/route-operations/pages/MyRoutePage';
+import { SettlementsPage } from '../../modules/route-operations/pages/SettlementsPage';
+
 export const router = createBrowserRouter([
   {
     path: '/login',
@@ -68,6 +76,26 @@ export const router = createBrowserRouter([
               { path: 'transfers', element: <TransfersPage /> },
               { path: 'transfers/new', element: <TransferFormPage /> },
             ]
+          },
+          {
+            path: 'fleet',
+            children: [
+              { path: 'vehicles', element: <FleetVehiclesPage /> },
+            ]
+          },
+          {
+            path: 'route-operations',
+            children: [
+              { path: 'dashboard', element: <RouteOpsDashboardPage /> },
+              { path: 'routes', element: <RoutesPage /> },
+              { path: 'trips', element: <RouteTripsPage /> },
+              { path: 'trips/:id', element: <TripDetailPage /> },
+              { path: 'settlements', element: <SettlementsPage /> },
+            ]
+          },
+          {
+            path: 'my-route',
+            element: <MyRoutePage />
           },
           {
             path: 'config',

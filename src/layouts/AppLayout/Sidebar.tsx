@@ -6,9 +6,12 @@ import {
   Boxes,
   Building2,
   CarFront,
+  ClipboardCheck,
   LayoutDashboard,
   ListTree,
+  MapPin,
   PackageSearch,
+  Route,
   Ruler,
   Truck,
   Settings,
@@ -36,41 +39,6 @@ interface NavSection {
   icon?: LucideIcon;
 }
 
-const navItems: NavSection[] = [
-  { path: '/', label: 'Dashboard', icon: LayoutDashboard },
-  {
-    label: 'Catalogo',
-    items: [
-      { path: '/catalog/products', label: 'Productos', icon: PackageSearch },
-      { path: '/catalog/categories', label: 'Categorias', icon: ListTree },
-      { path: '/catalog/brands', label: 'Marcas', icon: Tags },
-      { path: '/catalog/vehicles', label: 'Vehiculos', icon: CarFront },
-    ],
-  },
-  {
-    label: 'Inventario',
-    items: [
-      { path: '/inventory/stock', label: 'Existencias', icon: Boxes },
-      { path: '/inventory/movements', label: 'Movimientos', icon: ArrowRightLeft },
-      { path: '/inventory/transfers', label: 'Traspasos', icon: Truck },
-      { path: '/inventory/warehouses', label: 'Almacenes', icon: Building2 },
-    ],
-  },
-  {
-    label: 'Compras',
-    items: [
-      { path: '/purchases/suppliers', label: 'Proveedores', icon: Users, disabled: true },
-      { path: '/purchases/orders', label: 'Ordenes de compra', icon: ShoppingCart, disabled: true },
-    ],
-  },
-  {
-    label: 'Cuenta',
-    items: [
-      { path: '/account/profile', label: 'Mi perfil', icon: UserRound },
-    ],
-  },
-];
-
 interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
@@ -79,15 +47,90 @@ interface SidebarProps {
 export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
   const { isAdmin } = useAuth();
   
-  const sections = [
-    ...navItems.slice(0, 4),
-    {
-      path: '/config',
-      label: 'Configuración',
-      icon: Settings,
-    },
-    ...navItems.slice(4),
-  ];
+  // Conditionally build sections based on user role
+  const getNavSections = (): NavSection[] => {
+    const sections: NavSection[] = [];
+
+    // Admin-only Dashboard
+    if (isAdmin) {
+      sections.push({ path: '/', label: 'Dashboard', icon: LayoutDashboard });
+    }
+
+    // Catalog: Agent sees only Products. Admin sees all.
+    sections.push({
+      label: 'Catalogo',
+      items: [
+        { path: '/catalog/products', label: 'Productos', icon: PackageSearch },
+        ...(isAdmin
+          ? [
+              { path: '/catalog/categories', label: 'Categorias', icon: ListTree },
+              { path: '/catalog/brands', label: 'Marcas', icon: Tags },
+              { path: '/catalog/vehicles', label: 'Vehiculos', icon: CarFront },
+            ]
+          : []),
+      ],
+    });
+
+    // Admin-only sections
+    if (isAdmin) {
+      sections.push({
+        label: 'Inventario',
+        items: [
+          { path: '/inventory/stock', label: 'Existencias', icon: Boxes },
+          { path: '/inventory/movements', label: 'Movimientos', icon: ArrowRightLeft },
+          { path: '/inventory/transfers', label: 'Traspasos', icon: Truck },
+          { path: '/inventory/warehouses', label: 'Almacenes', icon: Building2 },
+        ],
+      });
+
+      sections.push({
+        label: 'Operación en Ruta',
+        items: [
+          { path: '/route-operations/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+          { path: '/fleet/vehicles', label: 'Flotilla', icon: Truck },
+          { path: '/route-operations/routes', label: 'Rutas', icon: Route },
+          { path: '/route-operations/trips', label: 'Viajes Semanales', icon: MapPin },
+          { path: '/route-operations/settlements', label: 'Conciliación', icon: ClipboardCheck },
+        ],
+      });
+      
+      sections.push({
+        label: 'Compras',
+        items: [
+          { path: '/purchases/suppliers', label: 'Proveedores', icon: Users, disabled: true },
+          { path: '/purchases/orders', label: 'Ordenes de compra', icon: ShoppingCart, disabled: true },
+        ],
+      });
+      
+      sections.push({
+        path: '/config',
+        label: 'Configuración',
+        icon: Settings,
+      });
+    }
+
+    // Agent-only sections
+    if (!isAdmin) {
+      sections.push({
+        label: 'Mi Ruta',
+        items: [
+          { path: '/my-route', label: 'Ruta Actual', icon: MapPin },
+        ],
+      });
+    }
+
+    // Common Account section
+    sections.push({
+      label: 'Cuenta',
+      items: [
+        { path: '/account/profile', label: 'Mi perfil', icon: UserRound },
+      ],
+    });
+
+    return sections;
+  };
+
+  const sections = getNavSections();
 
   return (
     <>

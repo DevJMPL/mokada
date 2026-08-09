@@ -26,10 +26,10 @@ VALUES
   (gen_random_uuid(), 'STUD_COUNT', 'STUD_COUNT', 'INTEGER', true),
   (gen_random_uuid(), 'TOOTH_COUNT', 'TOOTH_COUNT', 'INTEGER', true),
   (gen_random_uuid(), 'CABLE_COUNT', 'CABLE_COUNT', 'INTEGER', true),
-  (gen_random_uuid(), 'SIDE', 'SIDE', 'TEXT', true),
-  (gen_random_uuid(), 'POSITION', 'POSITION', 'TEXT', true),
-  (gen_random_uuid(), 'TYPE', 'TYPE', 'TEXT', true),
-  (gen_random_uuid(), 'DIAMETER', 'DIAMETER', 'NUMERIC', true)
+  (gen_random_uuid(), 'SIDE', 'SIDE', 'STRING', true),
+  (gen_random_uuid(), 'POSITION', 'POSITION', 'STRING', true),
+  (gen_random_uuid(), 'TYPE', 'TYPE', 'STRING', true),
+  (gen_random_uuid(), 'DIAMETER', 'DIAMETER', 'DECIMAL', true)
 ON CONFLICT (code) DO NOTHING;
 
 -- 4. Almacenes (Warehouse principal)

@@ -63,14 +63,6 @@ const navItems: NavSection[] = [
     ],
   },
   {
-    label: 'Configuracion',
-    items: [
-      { path: '/config/units', label: 'Unidades', icon: Ruler },
-      { path: '/config/price-lists', label: 'Listas de precios', icon: BadgeDollarSign },
-      { path: '/config/attributes', label: 'Atributos', icon: Settings },
-    ],
-  },
-  {
     label: 'Cuenta',
     items: [
       { path: '/account/profile', label: 'Mi perfil', icon: UserRound },
@@ -85,15 +77,16 @@ interface SidebarProps {
 
 export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
   const { isAdmin } = useAuth();
-  const sections = isAdmin
-    ? [
-        ...navItems,
-        {
-          label: 'Administracion',
-          items: [{ path: '/admin/users', label: 'Usuarios', icon: ShieldCheck }],
-        },
-      ]
-    : navItems;
+  
+  const sections = [
+    ...navItems.slice(0, 4),
+    {
+      path: '/config',
+      label: 'Configuración',
+      icon: Settings,
+    },
+    ...navItems.slice(4),
+  ];
 
   return (
     <>

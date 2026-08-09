@@ -22,6 +22,7 @@ import { TransferFormPage } from '../../modules/inventory/pages/TransferFormPage
 import { UnitsPage } from '../../modules/configuration/pages/UnitsPage';
 import { PriceListsPage } from '../../modules/configuration/pages/PriceListsPage';
 import { AttributesPage } from '../../modules/configuration/pages/AttributesPage';
+import { ConfigurationPage } from '../../modules/configuration/pages/ConfigurationPage';
 import { UsersPage } from '../../modules/admin/users/pages/UsersPage';
 
 export const router = createBrowserRouter([
@@ -71,6 +72,7 @@ export const router = createBrowserRouter([
           {
             path: 'config',
             children: [
+              { index: true, element: <ConfigurationPage /> },
               { path: 'units', element: <UnitsPage /> },
               { path: 'price-lists', element: <PriceListsPage /> },
               { path: 'attributes', element: <AttributesPage /> },

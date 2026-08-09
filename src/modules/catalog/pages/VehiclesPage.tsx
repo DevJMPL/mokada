@@ -1,28 +1,68 @@
 import { useVehicles } from '../hooks/useCatalog';
 import { Table, type Column } from '../../../components/ui/Table';
 import { StatusBadge } from '../../../components/ui/StatusBadge';
+import { VehicleFormModal } from '../components/VehicleFormModal';
+import { useState } from 'react';
+import { Plus, Edit2 } from 'lucide-react';
 
 export const VehiclesPage = () => {
   const { data, isLoading } = useVehicles();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedVehicle, setSelectedVehicle] = useState<any>(null);
+
+  const handleEdit = (vehicle: any) => {
+    setSelectedVehicle(vehicle);
+    setIsModalOpen(true);
+  };
+
+  const handleCreate = () => {
+    setSelectedVehicle(null);
+    setIsModalOpen(true);
+  };
 
   const columns: Column<any>[] = [
     { 
       header: 'Marca', 
-      cell: (item) => <span className="font-medium text-slate-900">{item.vehicle_makes?.name}</span>
+      accessorKey: 'vehicle_makes.name',
+      className: 'font-medium text-slate-900',
+      cell: (item) => item.vehicle_makes?.name 
     },
     { header: 'Modelo', accessorKey: 'name' },
-    { header: 'Generación', accessorKey: 'generation' },
+    { header: 'Generación/Años', accessorKey: 'generation', cell: (item) => item.generation || '-' },
     { 
       header: 'Estado', 
       cell: (item) => <StatusBadge status={item.is_active ? 'ACTIVE' : 'INACTIVE'} />
+    },
+    {
+      header: '',
+      cell: (item) => (
+        <div className="flex justify-end">
+          <button 
+            onClick={() => handleEdit(item)}
+            className="p-2 text-gray-400 hover:text-[#0066CC] hover:bg-[#0066CC]/10 rounded-lg transition-colors"
+          >
+            <Edit2 className="w-4 h-4" />
+          </button>
+        </div>
+      )
     }
   ];
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-[28px] font-bold tracking-tight text-[#1D1D1F]">Vehículos</h2>
-        <p className="text-[15px] text-[#86868B]">Catálogo de marcas y modelos automotrices</p>
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-[28px] font-bold tracking-tight text-[#1D1D1F]">Vehículos</h2>
+          <p className="text-[15px] text-[#86868B]">Catálogo de aplicaciones y compatibilidad</p>
+        </div>
+
+        <button
+          onClick={handleCreate}
+          className="flex items-center gap-2 px-4 py-2 bg-[#0066CC] text-white rounded-lg hover:bg-[#0055FF] transition-colors text-[14px] font-medium"
+        >
+          <Plus className="w-4 h-4" />
+          Nuevo Vehículo
+        </button>
       </div>
 
       <Table 
@@ -32,6 +72,12 @@ export const VehiclesPage = () => {
         isEmpty={!data?.length}
         emptyTitle="No hay vehículos"
         emptyMessage="Aún no se han registrado vehículos en el sistema."
+      />
+
+      <VehicleFormModal 
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        vehicle={selectedVehicle}
       />
     </div>
   );

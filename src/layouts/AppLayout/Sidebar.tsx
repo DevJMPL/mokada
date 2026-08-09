@@ -9,7 +9,6 @@ import {
   ListTree,
   PackageSearch,
   Ruler,
-  BadgeDollarSign,
   Truck,
   Settings,
   ShieldCheck,

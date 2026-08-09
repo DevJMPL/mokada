@@ -95,3 +95,15 @@ export const useSaveVehicleModel = () => {
     }
   });
 };
+
+export const useUploadProductImage = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ productId, file }: { productId: string; file: File }) =>
+      catalogService.uploadProductImage(productId, file),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: catalogKeys.products({}) });
+      queryClient.invalidateQueries({ queryKey: [...catalogKeys.products({}), 'full', variables.productId] });
+    }
+  });
+};

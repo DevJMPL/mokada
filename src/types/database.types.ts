@@ -1,4 +1,4 @@
-﻿export type Json =
+export type Json =
   | string
   | number
   | boolean
@@ -1039,6 +1039,7 @@ export type Database = {
           created_at: string
           description: string | null
           id: string
+          image_url: string | null
           is_active: boolean
           is_new: boolean
           name: string | null
@@ -1055,6 +1056,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          image_url?: string | null
           is_active?: boolean
           is_new?: boolean
           name?: string | null
@@ -1071,6 +1073,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          image_url?: string | null
           is_active?: boolean
           is_new?: boolean
           name?: string | null
@@ -1657,6 +1660,7 @@ export type Database = {
           code: string | null
           description: string | null
           id: string | null
+          image_url: string | null
           is_new: boolean | null
           name: string | null
           references: string[] | null

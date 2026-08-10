@@ -2,61 +2,71 @@ import { useRouteOpsDashboard } from '../hooks/useRouteOperations';
 import { LoadingState } from '../../../components/ui/LoadingState';
 import { formatCurrency } from '../../../utils/formatters';
 import { Link } from 'react-router-dom';
-import { Route, Truck, Users, DollarSign, AlertCircle, ClipboardCheck, TrendingUp, TrendingDown } from 'lucide-react';
+import { 
+  BarChart, 
+  Bar, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip as RechartsTooltip, 
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  Legend
+} from 'recharts';
+import { Route, Truck, Users, DollarSign, AlertCircle, ClipboardCheck, TrendingUp, TrendingDown, PieChart as PieChartIcon, BarChart2 } from 'lucide-react';
 
 export const RouteOpsDashboardPage = () => {
   const { data: stats, isLoading } = useRouteOpsDashboard();
 
   if (isLoading) return <LoadingState message="Cargando dashboard..." />;
 
-  const cards = [
-    {
-      label: 'Rutas activas',
-      value: stats?.activeTrips || 0,
-      icon: Route,
-      color: 'bg-blue-50 text-blue-600',
-      link: '/route-operations/trips',
-    },
-    {
-      label: 'Agentes en ruta',
-      value: stats?.agentsOnRoute || 0,
-      icon: Users,
-      color: 'bg-green-50 text-green-600',
-      link: '/route-operations/trips',
-    },
-    {
-      label: 'Pendientes de revisión',
-      value: stats?.pendingReview || 0,
-      icon: AlertCircle,
-      color: 'bg-amber-50 text-amber-600',
-      link: '/route-operations/trips',
-    },
-    {
-      label: 'Pendientes de liquidar',
-      value: stats?.pendingSettlements || 0,
-      icon: ClipboardCheck,
-      color: 'bg-purple-50 text-purple-600',
-      link: '/route-operations/settlements',
-    },
+  const budgetData = [
+    { name: 'Presupuesto', valor: stats?.totalBudget || 0 },
+    { name: 'Gastado', valor: stats?.totalExpenses || 0 },
+    { name: 'Pendientes', valor: stats?.pendingExpenses || 0 },
   ];
 
-  const budgetUsed = stats?.totalBudget ? ((stats.totalExpenses / stats.totalBudget) * 100).toFixed(0) : 0;
+  const tripsData = [
+    { name: 'Rutas Activas', value: stats?.activeTrips || 0, color: '#3b82f6' }, // Blue 500
+    { name: 'En Revisión', value: stats?.pendingReview || 0, color: '#f59e0b' }, // Amber 500
+    { name: 'Por Liquidar', value: stats?.pendingSettlements || 0, color: '#a855f7' }, // Purple 500
+  ];
+
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      const isCurrency = payload[0].payload.valor !== undefined;
+      return (
+        <div className="bg-white border border-gray-200/60 shadow-lg rounded-xl p-3 text-[13px]">
+          <p className="font-semibold text-[#1D1D1F] mb-1">{label || payload[0].name}</p>
+          <p className="text-[#0066CC] font-medium">
+            {isCurrency ? formatCurrency(payload[0].value) : `${payload[0].value} viajes`}
+          </p>
+        </div>
+      );
+    }
+    return null;
+  };
+
+  const cards = [
+    { label: 'Rutas activas', value: stats?.activeTrips || 0, icon: Route, color: 'bg-blue-50 text-blue-600', link: '/route-operations/trips' },
+    { label: 'Agentes en ruta', value: stats?.agentsOnRoute || 0, icon: Users, color: 'bg-green-50 text-green-600', link: '/route-operations/trips' },
+    { label: 'Pendientes de revisión', value: stats?.pendingReview || 0, icon: AlertCircle, color: 'bg-amber-50 text-amber-600', link: '/route-operations/trips' },
+    { label: 'Pendientes de liquidar', value: stats?.pendingSettlements || 0, icon: ClipboardCheck, color: 'bg-purple-50 text-purple-600', link: '/route-operations/settlements' },
+  ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-12">
       <div>
-        <h2 className="text-[28px] font-bold tracking-tight text-[#1D1D1F]">Operación en Ruta</h2>
+        <h2 className="text-[28px] font-bold tracking-tight text-[#1D1D1F]">Dashboard Rutas</h2>
         <p className="text-[15px] text-[#86868B]">Vista general de la operación semanal</p>
       </div>
 
       {/* Quick stat cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {cards.map((card) => (
-          <Link
-            key={card.label}
-            to={card.link}
-            className="group bg-white border border-gray-200/60 rounded-2xl p-5 hover:shadow-md hover:border-[#0066CC]/30 transition-all duration-200"
-          >
+          <Link key={card.label} to={card.link} className="group bg-white border border-gray-200/60 rounded-2xl p-5 hover:shadow-md hover:border-[#0066CC]/30 transition-all duration-200">
             <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-3 ${card.color}`}>
               <card.icon className="w-5 h-5" />
             </div>
@@ -66,38 +76,87 @@ export const RouteOpsDashboardPage = () => {
         ))}
       </div>
 
-      {/* Financial overview */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white border border-gray-200/60 rounded-2xl p-6">
-          <div className="flex items-center gap-2 text-[#86868B] mb-3">
-            <DollarSign className="w-4 h-4" />
-            <span className="text-[12px] font-medium uppercase tracking-wide">Presupuesto semanal</span>
+      {/* Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        {/* Gráfico 1: Estado de los viajes */}
+        <div className="bg-white border border-gray-200/60 rounded-[24px] p-6 shadow-sm flex flex-col">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2.5 bg-blue-50 rounded-xl">
+              <PieChartIcon className="w-5 h-5 text-blue-500" />
+            </div>
+            <div>
+              <h3 className="text-[16px] font-semibold text-[#1D1D1F]">Estado de los Viajes</h3>
+              <p className="text-[13px] text-[#86868B]">Distribución de viajes de la semana</p>
+            </div>
           </div>
-          <p className="text-[24px] font-bold text-[#1D1D1F]">{formatCurrency(stats?.totalBudget || 0)}</p>
-          <p className="text-[13px] text-[#86868B] mt-1">{budgetUsed}% utilizado</p>
-          <div className="w-full bg-gray-100 rounded-full h-2 mt-2">
-            <div
-              className={`h-2 rounded-full transition-all ${Number(budgetUsed) > 100 ? 'bg-red-500' : 'bg-[#0066CC]'}`}
-              style={{ width: `${Math.min(Number(budgetUsed), 100)}%` }}
-            />
+          
+          <div className="flex-1 min-h-[300px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={tripsData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={80}
+                  outerRadius={120}
+                  paddingAngle={5}
+                  dataKey="value"
+                  stroke="none"
+                >
+                  {tripsData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <RechartsTooltip content={<CustomTooltip />} />
+                <Legend 
+                  verticalAlign="bottom" 
+                  height={36}
+                  iconType="circle"
+                  formatter={(value) => <span className="text-[13px] text-[#1D1D1F] font-medium ml-1">{value}</span>}
+                />
+              </PieChart>
+            </ResponsiveContainer>
           </div>
         </div>
-        <div className="bg-white border border-gray-200/60 rounded-2xl p-6">
-          <div className="flex items-center gap-2 text-[#86868B] mb-3">
-            <TrendingDown className="w-4 h-4" />
-            <span className="text-[12px] font-medium uppercase tracking-wide">Gastos registrados</span>
+
+        {/* Gráfico 2: Presupuesto vs Gastos */}
+        <div className="bg-white border border-gray-200/60 rounded-[24px] p-6 shadow-sm flex flex-col">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2.5 bg-[#0066CC]/10 rounded-xl">
+              <BarChart2 className="w-5 h-5 text-[#0066CC]" />
+            </div>
+            <div>
+              <h3 className="text-[16px] font-semibold text-[#1D1D1F]">Resumen Financiero</h3>
+              <p className="text-[13px] text-[#86868B]">Presupuesto vs Gastos registrados</p>
+            </div>
           </div>
-          <p className="text-[24px] font-bold text-[#1D1D1F]">{formatCurrency(stats?.totalExpenses || 0)}</p>
-          <p className="text-[13px] text-amber-600 mt-1">Pendientes: {formatCurrency(stats?.pendingExpenses || 0)}</p>
-        </div>
-        <div className="bg-white border border-gray-200/60 rounded-2xl p-6">
-          <div className="flex items-center gap-2 text-[#86868B] mb-3">
-            <TrendingUp className="w-4 h-4" />
-            <span className="text-[12px] font-medium uppercase tracking-wide">Unidades asignadas</span>
+
+          <div className="flex-1 min-h-[300px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={budgetData} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+                <XAxis 
+                  dataKey="name" 
+                  axisLine={false} 
+                  tickLine={false} 
+                  tick={{ fontSize: 13, fill: '#86868B', fontWeight: 500 }}
+                  dy={10}
+                />
+                <YAxis 
+                  axisLine={false} 
+                  tickLine={false} 
+                  tick={{ fontSize: 13, fill: '#86868B' }}
+                  tickFormatter={(val) => `$${val}`}
+                  dx={-10}
+                />
+                <RechartsTooltip cursor={{ fill: '#F5F5F7' }} content={<CustomTooltip />} />
+                <Bar dataKey="valor" fill="#0066CC" radius={[6, 6, 6, 6]} barSize={40} animationDuration={1500} />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
-          <p className="text-[24px] font-bold text-[#1D1D1F]">{stats?.activeTrips || 0}</p>
-          <p className="text-[13px] text-[#86868B] mt-1">vehículos en operación</p>
         </div>
+
       </div>
 
       {/* Quick links */}

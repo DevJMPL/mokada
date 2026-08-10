@@ -53,7 +53,7 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
 
     // Admin-only Dashboard
     if (isAdmin) {
-      sections.push({ path: '/', label: 'Dashboard', icon: LayoutDashboard });
+      sections.push({ path: '/', label: 'Dashboard Principal', icon: LayoutDashboard });
     }
 
     // Catalog: Agent sees only Products. Admin sees all.
@@ -86,7 +86,7 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
       sections.push({
         label: 'Operación en Ruta',
         items: [
-          { path: '/route-operations/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+          { path: '/route-operations/dashboard', label: 'Dashboard Rutas', icon: LayoutDashboard },
           { path: '/fleet/vehicles', label: 'Flotilla', icon: Truck },
           { path: '/route-operations/routes', label: 'Rutas', icon: Route },
           { path: '/route-operations/trips', label: 'Viajes Semanales', icon: MapPin },

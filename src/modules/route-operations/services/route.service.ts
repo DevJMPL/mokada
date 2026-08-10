@@ -120,19 +120,29 @@ export const routeService = {
   },
 
   async getMyCurrentTrip(agentProfileId: string) {
-    const today = new Date().toISOString().split('T')[0];
-    const { data, error } = await supabase
+    const { data: active, error: activeErr } = await supabase
       .from('route_trips')
       .select('*, routes(code, name, description), vehicle:fleet_vehicles!route_trips_vehicle_id_fkey(internal_code, plate_number, brand, model)')
       .eq('agent_id', agentProfileId)
-      .lte('week_start_date', today)
-      .gte('week_end_date', today)
-      .in('status', ['ASSIGNED', 'IN_PROGRESS'])
+      .in('status', ['PLANNED', 'IN_PROGRESS'])
+      .order('week_start_date', { ascending: true })
+      .limit(1)
+      .maybeSingle();
+      
+    if (activeErr) throw activeErr;
+    if (active) return active;
+
+    const { data: past, error: pastErr } = await supabase
+      .from('route_trips')
+      .select('*, routes(code, name, description), vehicle:fleet_vehicles!route_trips_vehicle_id_fkey(internal_code, plate_number, brand, model)')
+      .eq('agent_id', agentProfileId)
+      .in('status', ['COMPLETED', 'UNDER_REVIEW', 'SETTLED'])
       .order('week_start_date', { ascending: false })
       .limit(1)
       .maybeSingle();
-    if (error) throw error;
-    return data;
+
+    if (pastErr) throw pastErr;
+    return past;
   },
 
   // Agents for assignment

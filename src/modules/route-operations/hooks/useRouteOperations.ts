@@ -80,6 +80,7 @@ export const useMyCurrentTrip = (agentProfileId: string | null) => {
     queryKey: routeKeys.myTrip(),
     queryFn: () => routeService.getMyCurrentTrip(agentProfileId!),
     enabled: !!agentProfileId,
+    refetchInterval: 10000,
   });
 };
 

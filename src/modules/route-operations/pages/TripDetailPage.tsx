@@ -1,27 +1,75 @@
+import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
+import { supabase } from '../../../lib/supabase/client';
+import { routeKeys, expenseKeys } from '../../../utils/queryKeys';
 import { useRouteTrip, useTripExpenses, useUpdateTripStatus, useUpdateExpenseStatus } from '../hooks/useRouteOperations';
+import { storageService } from '../../../lib/supabase/storage';
 import { StatusBadge } from '../../../components/ui/StatusBadge';
 import { LoadingState } from '../../../components/ui/LoadingState';
+import { Modal } from '../../../components/ui/Modal';
 import { formatCurrency } from '../../../utils/formatters';
 import { ArrowLeft, MapPin, DollarSign, Truck, User, CalendarDays, Paperclip } from 'lucide-react';
 
 export const TripDetailPage = () => {
   const { id } = useParams<{ id: string }>();
+  const queryClient = useQueryClient();
   const { data: trip, isLoading } = useRouteTrip(id || null);
   const { data: expenses } = useTripExpenses(id || null);
   const updateStatus = useUpdateTripStatus();
   const updateExpenseStatus = useUpdateExpenseStatus();
+  const [evidenceUrl, setEvidenceUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!id) return;
+
+    const expenseChannel = supabase
+      .channel(`trip-expenses-${id}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'travel_expenses', filter: `route_trip_id=eq.${id}` },
+        () => {
+          queryClient.invalidateQueries({ queryKey: expenseKeys.tripExpenses(id) });
+          queryClient.invalidateQueries({ queryKey: routeKeys.trip(id) });
+        }
+      )
+      .subscribe();
+
+    const tripChannel = supabase
+      .channel(`trip-updates-${id}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'route_trips', filter: `id=eq.${id}` },
+        () => {
+          queryClient.invalidateQueries({ queryKey: routeKeys.trip(id) });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(expenseChannel);
+      supabase.removeChannel(tripChannel);
+    };
+  }, [id, queryClient]);
 
   if (isLoading) return <LoadingState message="Cargando viaje..." />;
   if (!trip) return <div className="text-center py-12 text-[#86868B]">Viaje no encontrado</div>;
 
   const totalExpenses = expenses?.reduce((sum: number, e: any) => sum + Number(e.amount || 0), 0) || 0;
-  const approvedExpenses = expenses?.filter((e: any) => e.status === 'APPROVED').reduce((sum: number, e: any) => sum + Number(e.amount || 0), 0) || 0;
   const budget = Number(trip.budget_amount || 0);
-  const balance = budget - approvedExpenses;
+  const balance = budget - totalExpenses; // Updated in real time
 
   const startDate = new Date(trip.week_start_date + 'T12:00:00');
   const endDate = new Date(trip.week_end_date + 'T12:00:00');
+
+  const handleViewEvidence = async (path: string) => {
+    try {
+      const url = await storageService.createSignedUrl('expense-evidence', path);
+      setEvidenceUrl(url);
+    } catch (error) {
+      console.error('Error fetching evidence url:', error);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -140,9 +188,12 @@ export const TripDetailPage = () => {
                   <td className="px-5 py-3.5 text-center">{exp.invoice_available ? '✓' : '—'}</td>
                   <td className="px-5 py-3.5 text-center">
                     {exp.expense_attachments?.length > 0 && (
-                      <span className="inline-flex items-center gap-1 text-[#0066CC]">
+                      <button 
+                        onClick={() => handleViewEvidence(exp.expense_attachments[0].storage_path)}
+                        className="inline-flex items-center gap-1 text-[#0066CC] hover:underline"
+                      >
                         <Paperclip className="w-3.5 h-3.5" /> {exp.expense_attachments.length}
-                      </span>
+                      </button>
                     )}
                   </td>
                   <td className="px-5 py-3.5"><StatusBadge status={exp.status} /></td>
@@ -162,6 +213,18 @@ export const TripDetailPage = () => {
           <div className="px-6 py-8 text-center text-[#86868B]">No hay gastos registrados para este viaje.</div>
         )}
       </div>
+
+      <Modal isOpen={!!evidenceUrl} onClose={() => setEvidenceUrl(null)} title="Evidencia del gasto" maxWidth="max-w-3xl">
+        {evidenceUrl && (
+          <div className="flex justify-center bg-gray-50 rounded-lg p-2 min-h-[300px]">
+            {evidenceUrl.includes('.pdf') ? (
+               <iframe src={evidenceUrl} className="w-full h-[600px] rounded-lg" title="PDF Evidencia" />
+            ) : (
+               <img src={evidenceUrl} alt="Evidencia" className="max-h-[600px] object-contain rounded-lg shadow-sm" />
+            )}
+          </div>
+        )}
+      </Modal>
     </div>
   );
 };

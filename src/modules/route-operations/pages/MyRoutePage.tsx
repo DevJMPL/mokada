@@ -134,20 +134,20 @@ export const MyRoutePage = () => {
 
       {/* Actions */}
       <div className="flex gap-3">
-        {trip.status === 'ASSIGNED' && (
-          <button onClick={handleStartTrip} disabled={updateStatus.isPending} className="flex-1 rounded-xl bg-[#0066CC] py-3 text-[14px] font-semibold text-white hover:bg-[#0055AA] transition-colors">
+        {(trip.status === 'PLANNED' || trip.status === 'IN_PROGRESS') && (
+          <button onClick={() => setExpenseModal(true)} className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-[#0066CC] py-3 text-[14px] font-semibold text-white hover:bg-[#0055AA] transition-colors">
+            <Plus className="w-4 h-4" /> Registrar gasto
+          </button>
+        )}
+        {trip.status === 'PLANNED' && (
+          <button onClick={handleStartTrip} disabled={updateStatus.isPending} className="flex-1 rounded-xl border border-[#0066CC] text-[#0066CC] bg-white py-3 text-[14px] font-semibold hover:bg-gray-50 transition-colors">
             Iniciar Ruta
           </button>
         )}
         {trip.status === 'IN_PROGRESS' && (
-          <>
-            <button onClick={() => setExpenseModal(true)} className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-[#0066CC] py-3 text-[14px] font-semibold text-white hover:bg-[#0055AA] transition-colors">
-              <Plus className="w-4 h-4" /> Registrar gasto
-            </button>
-            <button onClick={handleCompleteTrip} disabled={updateStatus.isPending} className="rounded-xl border border-gray-200 bg-white px-6 py-3 text-[14px] font-semibold text-[#1D1D1F] hover:bg-gray-50 transition-colors">
-              Finalizar
-            </button>
-          </>
+          <button onClick={handleCompleteTrip} disabled={updateStatus.isPending} className="flex-1 rounded-xl border border-gray-200 bg-white py-3 text-[14px] font-semibold text-[#1D1D1F] hover:bg-gray-50 transition-colors">
+            Finalizar Ruta
+          </button>
         )}
       </div>
 

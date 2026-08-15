@@ -110,6 +110,7 @@ export const CustomerBranchFormModal = ({
   const latitude = normalizeCoordinate(form.latitude);
   const longitude = normalizeCoordinate(form.longitude);
   const hasLocation = latitude !== null && longitude !== null;
+  const hasPostalData = postalNeighborhoods.length > 0;
 
   const customerOptions = useMemo(
     () =>
@@ -201,6 +202,20 @@ export const CustomerBranchFormModal = ({
       ...current,
       customer_id: customerId,
       phone_primary: current.phone_primary.trim() || selectedCustomer?.phone || '',
+    }));
+  };
+
+  const handlePostalCodeChange = (value: string) => {
+    const postalCode = onlyDigits(value, 5);
+
+    setPostalNeighborhoods([]);
+    setPostalLookupError('');
+    setForm((current) => ({
+      ...current,
+      postal_code: postalCode,
+      neighborhood: postalCode === current.postal_code ? current.neighborhood : '',
+      municipality: postalCode === current.postal_code ? current.municipality : '',
+      state: postalCode === current.postal_code ? current.state : '',
     }));
   };
 
@@ -435,23 +450,24 @@ export const CustomerBranchFormModal = ({
           <TextInput label="Calle" value={form.street || ''} required={false} maxLength={120} onChange={(value) => setForm((current) => ({ ...current, street: value }))} />
           <TextInput label="Número exterior" value={form.exterior_number || ''} required={false} maxLength={20} onChange={(value) => setForm((current) => ({ ...current, exterior_number: value }))} />
           <TextInput label="Número interior" value={form.interior_number || ''} required={false} maxLength={20} onChange={(value) => setForm((current) => ({ ...current, interior_number: value }))} />
-          {postalNeighborhoods.length > 1 ? (
+          {hasPostalData ? (
             <SelectInput
               label="Colonia"
               value={form.neighborhood || ''}
               options={postalNeighborhoods}
+              disabled={postalNeighborhoods.length === 1}
               onChange={(value) => setForm((current) => ({ ...current, neighborhood: value }))}
             />
           ) : (
             <TextInput label="Colonia" value={form.neighborhood || ''} required={false} maxLength={90} onChange={(value) => setForm((current) => ({ ...current, neighborhood: value }))} />
           )}
           <div className="min-w-0">
-            <TextInput label="Código postal" value={form.postal_code || ''} inputMode="numeric" pattern="[0-9]{5}" maxLength={5} required={false} onChange={(value) => setForm((current) => ({ ...current, postal_code: onlyDigits(value, 5) }))} />
+            <TextInput label="Código postal" value={form.postal_code || ''} inputMode="numeric" pattern="[0-9]{5}" maxLength={5} required={false} onChange={handlePostalCodeChange} />
             {isPostalLookupLoading && <p className="mt-1 text-[12px] text-[#86868B]">Consultando código postal...</p>}
             {postalLookupError && <p className="mt-1 text-[12px] text-red-600">{postalLookupError}</p>}
           </div>
-          <TextInput label="Municipio o alcaldía" value={form.municipality || ''} required={false} maxLength={90} onChange={(value) => setForm((current) => ({ ...current, municipality: value }))} />
-          <TextInput label="Estado" value={form.state || ''} required={false} maxLength={90} onChange={(value) => setForm((current) => ({ ...current, state: value }))} />
+          <TextInput label="Municipio o alcaldía" value={form.municipality || ''} required={false} maxLength={90} disabled={hasPostalData} onChange={(value) => setForm((current) => ({ ...current, municipality: value }))} />
+          <TextInput label="Estado" value={form.state || ''} required={false} maxLength={90} disabled={hasPostalData} onChange={(value) => setForm((current) => ({ ...current, state: value }))} />
           <TextInput label="Latitud" type="number" value={String(form.latitude ?? '')} required={false} min="-90" max="90" step="any" onChange={(value) => setForm((current) => ({ ...current, latitude: value }))} />
           <TextInput label="Longitud" type="number" value={String(form.longitude ?? '')} required={false} min="-180" max="180" step="any" onChange={(value) => setForm((current) => ({ ...current, longitude: value }))} />
           <label className="block min-w-0 sm:col-span-2">
@@ -612,6 +628,7 @@ const TextInput = ({
   maxLength,
   pattern,
   inputMode,
+  disabled = false,
 }: {
   label: string;
   value: string;
@@ -625,6 +642,7 @@ const TextInput = ({
   maxLength?: number;
   pattern?: string;
   inputMode?: 'text' | 'numeric' | 'tel' | 'email' | 'decimal';
+  disabled?: boolean;
 }) => (
   <label className={`block min-w-0 ${className}`}>
     <span className="mb-1.5 block text-[13px] font-medium text-[#1D1D1F]">{label}</span>
@@ -638,8 +656,9 @@ const TextInput = ({
       maxLength={maxLength}
       pattern={pattern}
       inputMode={inputMode}
+      disabled={disabled}
       onChange={(event) => onChange(event.target.value)}
-      className="h-10 w-full min-w-0 rounded-lg border border-gray-300 px-3 text-sm outline-none focus:border-[#0066CC] focus:ring-2 focus:ring-[#0066CC]/15"
+      className="h-10 w-full min-w-0 rounded-lg border border-gray-300 px-3 text-sm outline-none focus:border-[#0066CC] focus:ring-2 focus:ring-[#0066CC]/15 disabled:bg-gray-50 disabled:text-[#86868B]"
     />
   </label>
 );
@@ -648,19 +667,22 @@ const SelectInput = ({
   label,
   value,
   options,
+  disabled = false,
   onChange,
 }: {
   label: string;
   value: string;
   options: string[];
+  disabled?: boolean;
   onChange: (value: string) => void;
 }) => (
   <label className="block min-w-0">
     <span className="mb-1.5 block text-[13px] font-medium text-[#1D1D1F]">{label}</span>
     <select
       value={value}
+      disabled={disabled}
       onChange={(event) => onChange(event.target.value)}
-      className="h-10 w-full min-w-0 rounded-lg border border-gray-300 bg-white px-3 text-sm outline-none focus:border-[#0066CC] focus:ring-2 focus:ring-[#0066CC]/15"
+      className="h-10 w-full min-w-0 rounded-lg border border-gray-300 bg-white px-3 text-sm outline-none focus:border-[#0066CC] focus:ring-2 focus:ring-[#0066CC]/15 disabled:bg-gray-50 disabled:text-[#86868B]"
     >
       {options.map((option) => (
         <option key={option} value={option}>

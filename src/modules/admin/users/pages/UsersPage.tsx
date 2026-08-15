@@ -12,6 +12,7 @@ import {
   ToggleRight,
   UserRound,
   X,
+  Check,
 } from 'lucide-react';
 import { EmptyState } from '../../../../components/ui/EmptyState';
 import { ErrorState } from '../../../../components/ui/ErrorState';
@@ -1045,9 +1046,7 @@ const agentFunctionOptions: AgentFunction[] = ['DRIVER', 'SALESPERSON', 'WAREHOU
 const AgentFunctionPicker = ({ values, onChange }: AgentFunctionPickerProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const pickerRef = useRef<HTMLDivElement>(null);
-  const selectedLabel = values.length
-    ? values.map((agentFunction) => agentFunctionLabels[agentFunction]).join(', ')
-    : 'Selecciona funciones';
+  const selectedFunctions = agentFunctionOptions.filter((agentFunction) => values.includes(agentFunction));
 
   useEffect(() => {
     if (!isOpen) return;
@@ -1076,32 +1075,51 @@ const AgentFunctionPicker = ({ values, onChange }: AgentFunctionPickerProps) => 
       <button
         type="button"
         onClick={() => setIsOpen((current) => !current)}
-        className="flex h-10 w-full min-w-0 items-center justify-between gap-2 rounded-lg border border-gray-300 bg-white px-3 text-left text-sm outline-none transition-colors hover:bg-gray-50 focus:border-[#0066CC] focus:ring-2 focus:ring-[#0066CC]/15 sm:h-11"
+        className={`flex h-10 w-full min-w-0 items-center justify-between gap-2 rounded-lg border bg-white px-3 text-left text-sm outline-none transition-colors hover:bg-gray-50 focus:border-[#0066CC] focus:ring-2 focus:ring-[#0066CC]/15 sm:h-11 ${
+          isOpen ? 'border-[#0066CC] ring-2 ring-[#0066CC]/15' : 'border-gray-300'
+        }`}
       >
-        <span className={`min-w-0 flex-1 truncate ${values.length ? 'text-[#1D1D1F]' : 'text-[#86868B]'}`}>
-          {selectedLabel}
+        <span className="flex min-w-0 flex-1 items-center gap-1.5 overflow-hidden">
+          {!selectedFunctions.length ? (
+            <span className="truncate text-[#86868B]">Selecciona funciones</span>
+          ) : (
+            <>
+              {selectedFunctions.slice(0, 2).map((agentFunction) => (
+                <span
+                  key={agentFunction}
+                  className="max-w-[105px] truncate rounded-md bg-[#0066CC]/10 px-2 py-0.5 text-[12px] font-medium text-[#0066CC]"
+                >
+                  {agentFunctionLabels[agentFunction]}
+                </span>
+              ))}
+              {selectedFunctions.length > 2 && (
+                <span className="rounded-md bg-gray-100 px-2 py-0.5 text-[12px] font-medium text-[#424245]">
+                  +{selectedFunctions.length - 2}
+                </span>
+              )}
+            </>
+          )}
         </span>
         <ChevronDown className={`h-4 w-4 shrink-0 text-[#86868B] transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
       {isOpen && (
-        <div className="absolute left-0 right-0 top-[calc(100%+0.35rem)] z-20 overflow-hidden rounded-lg border border-gray-200 bg-white p-1 shadow-lg">
+        <div className="absolute left-0 right-0 top-[calc(100%+0.35rem)] z-20 overflow-hidden rounded-lg border border-gray-200 bg-white p-1 shadow-xl">
           {agentFunctionOptions.map((agentFunction) => {
             const isChecked = values.includes(agentFunction);
 
             return (
-              <label
+              <button
                 key={agentFunction}
-                className="flex h-9 cursor-pointer items-center gap-2 rounded-md px-2 text-sm text-[#1D1D1F] transition-colors hover:bg-[#F5F5F7]"
+                type="button"
+                onClick={() => toggleFunction(agentFunction)}
+                className={`flex h-9 w-full items-center justify-between gap-2 rounded-md px-2 text-left text-sm transition-colors ${
+                  isChecked ? 'bg-[#0066CC]/10 text-[#0066CC]' : 'text-[#1D1D1F] hover:bg-[#F5F5F7]'
+                }`}
               >
-                <input
-                  type="checkbox"
-                  checked={isChecked}
-                  onChange={() => toggleFunction(agentFunction)}
-                  className="h-4 w-4 rounded border-gray-300 text-[#0066CC] focus:ring-[#0066CC]"
-                />
                 <span className="truncate">{agentFunctionLabels[agentFunction]}</span>
-              </label>
+                {isChecked && <Check className="h-4 w-4 shrink-0" />}
+              </button>
             );
           })}
         </div>

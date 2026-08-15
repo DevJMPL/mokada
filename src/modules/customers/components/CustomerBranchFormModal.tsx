@@ -504,6 +504,13 @@ export const CustomerBranchFormModal = ({
           <TextInput label="Calle" value={form.street || ''} required={false} maxLength={120} onChange={(value) => setForm((current) => ({ ...current, street: value }))} />
           <TextInput label="Número exterior" value={form.exterior_number || ''} required={false} maxLength={20} onChange={(value) => setForm((current) => ({ ...current, exterior_number: value }))} />
           <TextInput label="Número interior" value={form.interior_number || ''} required={false} maxLength={20} onChange={(value) => setForm((current) => ({ ...current, interior_number: value }))} />
+          <div className="min-w-0">
+            <TextInput label="Código postal" value={form.postal_code || ''} inputMode="numeric" pattern="[0-9]{5}" maxLength={5} required={false} onChange={handlePostalCodeChange} />
+            {isPostalLookupLoading && <p className="mt-1 text-[12px] text-[#86868B]">Consultando código postal...</p>}
+            {postalLookupError && <p className="mt-1 text-[12px] text-red-600">{postalLookupError}</p>}
+          </div>
+          <TextInput label="Estado" value={form.state || ''} required={false} maxLength={90} disabled={hasPostalData} onChange={(value) => setForm((current) => ({ ...current, state: value }))} />
+          <TextInput label="Municipio o alcaldía" value={form.municipality || ''} required={false} maxLength={90} disabled={hasPostalData} onChange={(value) => setForm((current) => ({ ...current, municipality: value }))} />
           {hasPostalData ? (
             <SelectInput
               label="Colonia"
@@ -515,13 +522,6 @@ export const CustomerBranchFormModal = ({
           ) : (
             <TextInput label="Colonia" value={form.neighborhood || ''} required={false} maxLength={90} onChange={(value) => setForm((current) => ({ ...current, neighborhood: value }))} />
           )}
-          <div className="min-w-0">
-            <TextInput label="Código postal" value={form.postal_code || ''} inputMode="numeric" pattern="[0-9]{5}" maxLength={5} required={false} onChange={handlePostalCodeChange} />
-            {isPostalLookupLoading && <p className="mt-1 text-[12px] text-[#86868B]">Consultando código postal...</p>}
-            {postalLookupError && <p className="mt-1 text-[12px] text-red-600">{postalLookupError}</p>}
-          </div>
-          <TextInput label="Municipio o alcaldía" value={form.municipality || ''} required={false} maxLength={90} disabled={hasPostalData} onChange={(value) => setForm((current) => ({ ...current, municipality: value }))} />
-          <TextInput label="Estado" value={form.state || ''} required={false} maxLength={90} disabled={hasPostalData} onChange={(value) => setForm((current) => ({ ...current, state: value }))} />
           {(hasZipCodeSuggestions || isZipCodeLookupLoading || zipCodeLookupError) && (
             <div className="min-w-0 sm:col-span-2">
               {hasZipCodeSuggestions && (
@@ -537,8 +537,8 @@ export const CustomerBranchFormModal = ({
               {zipCodeLookupError && <p className="mt-1 text-[12px] text-red-600">{zipCodeLookupError}</p>}
             </div>
           )}
-          <TextInput label="Latitud" type="number" value={String(form.latitude ?? '')} required={false} min="-90" max="90" step="any" onChange={(value) => setForm((current) => ({ ...current, latitude: value }))} />
-          <TextInput label="Longitud" type="number" value={String(form.longitude ?? '')} required={false} min="-180" max="180" step="any" onChange={(value) => setForm((current) => ({ ...current, longitude: value }))} />
+          <TextInput label="Latitud" type="number" value={String(form.latitude ?? '')} required={false} min="-90" max="90" step="any" readOnly onChange={() => undefined} />
+          <TextInput label="Longitud" type="number" value={String(form.longitude ?? '')} required={false} min="-180" max="180" step="any" readOnly onChange={() => undefined} />
           <label className="block min-w-0 sm:col-span-2">
             <span className="mb-1.5 block text-[13px] font-medium text-[#1D1D1F]">Referencias de ubicación</span>
             <textarea
@@ -698,6 +698,7 @@ const TextInput = ({
   pattern,
   inputMode,
   disabled = false,
+  readOnly = false,
 }: {
   label: string;
   value: string;
@@ -712,6 +713,7 @@ const TextInput = ({
   pattern?: string;
   inputMode?: 'text' | 'numeric' | 'tel' | 'email' | 'decimal';
   disabled?: boolean;
+  readOnly?: boolean;
 }) => (
   <label className={`block min-w-0 ${className}`}>
     <span className="mb-1.5 block text-[13px] font-medium text-[#1D1D1F]">{label}</span>
@@ -726,8 +728,9 @@ const TextInput = ({
       pattern={pattern}
       inputMode={inputMode}
       disabled={disabled}
+      readOnly={readOnly}
       onChange={(event) => onChange(event.target.value)}
-      className="h-10 w-full min-w-0 rounded-lg border border-gray-300 px-3 text-sm outline-none focus:border-[#0066CC] focus:ring-2 focus:ring-[#0066CC]/15 disabled:bg-gray-50 disabled:text-[#86868B]"
+      className="h-10 w-full min-w-0 rounded-lg border border-gray-300 px-3 text-sm outline-none focus:border-[#0066CC] focus:ring-2 focus:ring-[#0066CC]/15 disabled:bg-gray-50 disabled:text-[#86868B] read-only:bg-gray-50 read-only:text-[#86868B]"
     />
   </label>
 );

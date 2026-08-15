@@ -109,7 +109,7 @@ export const UsersPage = () => {
     });
   }, [searchTerm, statusFilter, typeFilter, users]);
 
-  const requiresDocument = form.user_type === 'ADMIN' || form.agent_functions.includes('SALESPERSON');
+  const requiresDocument = form.user_type === 'ADMIN' || form.user_type === 'AGENT';
 
   const saveMutation = useMutation({
     mutationFn: async () => {

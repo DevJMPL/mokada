@@ -12,7 +12,6 @@ import {
   PackageSearch,
   Route,
   Settings,
-  ShieldCheck,
   ShoppingCart,
   Tags,
   Truck,
@@ -44,8 +43,7 @@ interface SidebarProps {
 
 export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
   const { isAdmin, profile } = useAuth();
-  const isSalesperson = profile?.user_type === 'AGENT' && profile.agent_functions?.includes('SALESPERSON');
-  const canManageCustomers = isAdmin || isSalesperson;
+  const canManageCustomers = isAdmin || profile?.user_type === 'AGENT';
 
   const getNavSections = (): NavSection[] => {
     const sections: NavSection[] = [];
@@ -108,10 +106,6 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
         icon: Settings,
       });
 
-      sections.push({
-        label: 'Administracion',
-        items: [{ path: '/admin/users', label: 'Usuarios', icon: ShieldCheck }],
-      });
     }
 
     if (!isAdmin) {

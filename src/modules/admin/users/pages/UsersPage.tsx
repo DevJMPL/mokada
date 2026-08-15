@@ -1104,7 +1104,7 @@ const AgentFunctionPicker = ({ values, onChange }: AgentFunctionPickerProps) => 
       </button>
 
       {isOpen && (
-        <div className="absolute left-0 right-0 top-[calc(100%+0.35rem)] z-20 overflow-hidden rounded-lg border border-gray-200 bg-white p-1 shadow-xl">
+        <div className="mt-1 overflow-hidden rounded-lg border border-gray-200 bg-white p-1 shadow-sm">
           {agentFunctionOptions.map((agentFunction) => {
             const isChecked = values.includes(agentFunction);
 
@@ -1113,7 +1113,7 @@ const AgentFunctionPicker = ({ values, onChange }: AgentFunctionPickerProps) => 
                 key={agentFunction}
                 type="button"
                 onClick={() => toggleFunction(agentFunction)}
-                className={`flex h-9 w-full items-center justify-between gap-2 rounded-md px-2 text-left text-sm transition-colors ${
+                className={`flex h-8 w-full items-center justify-between gap-2 rounded-md px-2 text-left text-[13px] transition-colors ${
                   isChecked ? 'bg-[#0066CC]/10 text-[#0066CC]' : 'text-[#1D1D1F] hover:bg-[#F5F5F7]'
                 }`}
               >

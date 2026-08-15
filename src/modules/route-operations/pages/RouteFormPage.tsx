@@ -5,6 +5,7 @@ import { useCustomerBranchOptions } from '../../customers/hooks/useCustomers';
 import { useRoute, useSaveRoute } from '../hooks/useRouteOperations';
 import { LoadingState } from '../../../components/ui/LoadingState';
 import { AlertModal } from '../../../components/ui/AlertModal';
+import { Modal } from '../../../components/ui/Modal';
 import type { CustomerBranchOption } from '../../customers/services/customers.service';
 
 const DAYS = [
@@ -63,6 +64,7 @@ export const RouteFormPage = () => {
   const { data: branchOptions = [] } = useCustomerBranchOptions();
   const saveRoute = useSaveRoute();
   const [form, setForm] = useState(emptyForm);
+  const [selectedBranch, setSelectedBranch] = useState<CustomerBranchOption | null>(null);
   const [alertModal, setAlertModal] = useState<{ isOpen: boolean; title: string; message: string; type: 'error' | 'success' | 'info' }>({
     isOpen: false,
     title: '',
@@ -247,7 +249,7 @@ export const RouteFormPage = () => {
           ) : (
             <div className="grid gap-2">
               {assignedBranches.map((branch) => (
-                <RouteBranchCard key={branch.id} branch={branch} />
+                <RouteBranchCard key={branch.id} branch={branch} onDetails={() => setSelectedBranch(branch)} />
               ))}
             </div>
           )}
@@ -261,11 +263,17 @@ export const RouteFormPage = () => {
         message={alertModal.message}
         type={alertModal.type}
       />
+
+      {selectedBranch && (
+        <Modal isOpen onClose={() => setSelectedBranch(null)} title="Detalle de sucursal" size="lg">
+          <BranchDetails branch={selectedBranch} />
+        </Modal>
+      )}
     </div>
   );
 };
 
-const RouteBranchCard = ({ branch }: { branch: CustomerBranchOption }) => {
+const RouteBranchCard = ({ branch, onDetails }: { branch: CustomerBranchOption; onDetails: () => void }) => {
   const mapUrl = getBranchMapUrl(branch);
   const location = [branch.municipality, branch.state].filter(Boolean).join(', ') || 'Ubicación pendiente';
 
@@ -282,29 +290,85 @@ const RouteBranchCard = ({ branch }: { branch: CustomerBranchOption }) => {
         </p>
       </div>
       <div className="flex flex-wrap gap-2">
-        <Link
-          to={`/customers/${branch.customer_id}?tab=branches`}
-          className="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 text-[12px] font-medium text-[#424245] transition-colors hover:bg-gray-50"
+        <button
+          type="button"
+          onClick={onDetails}
+          title="Ver detalles"
+          aria-label="Ver detalles de sucursal"
+          className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 bg-white text-[#424245] transition-colors hover:bg-gray-50 hover:text-[#0066CC]"
         >
           <Eye className="h-3.5 w-3.5" />
-          Ver detalles
-        </Link>
+        </button>
         <a
           href={mapUrl || undefined}
           target="_blank"
           rel="noreferrer"
           aria-disabled={!mapUrl}
-          className={`inline-flex h-8 items-center justify-center gap-1.5 rounded-lg px-3 text-[12px] font-medium transition-colors ${
+          title="Abrir mapa"
+          aria-label="Abrir mapa de sucursal"
+          className={`inline-flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${
             mapUrl
               ? 'border border-gray-200 bg-white text-[#424245] hover:bg-gray-50'
               : 'pointer-events-none bg-gray-100 text-gray-400'
           }`}
         >
           <MapPin className="h-3.5 w-3.5" />
-          Abrir mapa
         </a>
       </div>
     </article>
+  );
+};
+
+const BranchDetails = ({ branch }: { branch: CustomerBranchOption }) => {
+  const mapUrl = getBranchMapUrl(branch);
+  const address = [
+    branch.street,
+    branch.exterior_number,
+    branch.interior_number ? `Int. ${branch.interior_number}` : null,
+    branch.neighborhood,
+    branch.postal_code ? `CP ${branch.postal_code}` : null,
+    branch.municipality,
+    branch.state,
+  ].filter(Boolean).join(', ');
+
+  const rows = [
+    { label: 'Cliente', value: branch.customers?.name || 'Sin cliente' },
+    { label: 'Encargado', value: branch.manager_name || 'Sin encargado' },
+    { label: 'Teléfono principal', value: branch.phone_primary || 'Sin teléfono' },
+    { label: 'Teléfono secundario', value: branch.phone_secondary || 'Sin teléfono secundario' },
+    { label: 'Dirección', value: address || 'Sin dirección capturada' },
+    { label: 'Referencias', value: branch.location_references || 'Sin referencias' },
+  ];
+
+  return (
+    <div className="space-y-4">
+      <div className="rounded-xl border border-gray-200 bg-[#F5F5F7] p-4">
+        <p className="text-[13px] font-medium text-[#86868B]">Sucursal</p>
+        <h3 className="mt-1 text-lg font-semibold text-[#1D1D1F]">{branch.name}</h3>
+      </div>
+      <div className="grid gap-3 sm:grid-cols-2">
+        {rows.map((row) => (
+          <div key={row.label} className="rounded-lg border border-gray-200 bg-white p-3">
+            <p className="text-[12px] font-medium text-[#86868B]">{row.label}</p>
+            <p className="mt-1 text-sm font-medium text-[#1D1D1F]">{row.value}</p>
+          </div>
+        ))}
+      </div>
+      <div className="flex justify-end">
+        <a
+          href={mapUrl || undefined}
+          target="_blank"
+          rel="noreferrer"
+          aria-disabled={!mapUrl}
+          className={`inline-flex h-10 items-center justify-center gap-2 rounded-xl px-4 text-sm font-semibold transition-colors ${
+            mapUrl ? 'bg-[#0066CC] text-white hover:bg-[#0057AD]' : 'pointer-events-none bg-gray-200 text-gray-400'
+          }`}
+        >
+          <MapPin className="h-4 w-4" />
+          Abrir mapa
+        </a>
+      </div>
+    </div>
   );
 };
 

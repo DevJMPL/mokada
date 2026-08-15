@@ -17,6 +17,7 @@ import {
   Save,
   ToggleLeft,
   ToggleRight,
+  UserRound,
 } from 'lucide-react';
 import { LoadingState } from '../../../components/ui/LoadingState';
 import { Modal } from '../../../components/ui/Modal';
@@ -333,6 +334,16 @@ export const CustomerFormPage = () => {
           onSubmit={handleSaveCustomer}
           className="rounded-2xl border border-gray-200/60 bg-white p-4 shadow-sm sm:p-6 md:p-8"
         >
+          <div className="mb-5 flex min-w-0 items-start gap-3">
+            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-2xl bg-[#EEF4FF] text-[#1E5EFF]">
+              <UserRound className="h-5 w-5" />
+            </div>
+            <div className="min-w-0">
+              <h2 className="text-base font-semibold text-[#1D1D1F]">Información general</h2>
+              <p className="mt-1 text-sm text-[#86868B]">Nombre, correo, teléfono y estado del cliente</p>
+            </div>
+          </div>
+
           <div className="grid gap-4 sm:grid-cols-2">
             <TextInput
               label="Nombre *"
@@ -375,7 +386,7 @@ export const CustomerFormPage = () => {
 
       {activeTab === 'fiscal' && customer && (
         <RelatedSection
-          title="Informacion fiscal"
+          title="Información fiscal"
           description="RFC, razón social y correo de facturación"
           icon={<ReceiptText className="h-5 w-5" />}
           actionLabel="Agregar fiscal"

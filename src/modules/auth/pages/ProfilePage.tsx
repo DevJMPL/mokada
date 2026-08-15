@@ -201,7 +201,7 @@ export const ProfilePage = () => {
           <div className="grid gap-4 md:grid-cols-2">
             <TextInput label="Nombre" value={firstName} onChange={setFirstName} autoComplete="given-name" />
             <TextInput label="Apellidos" value={lastName} onChange={setLastName} autoComplete="family-name" />
-            <TextInput label="Tel?fono" value={phone} onChange={setPhone} autoComplete="tel" required={false} />
+            <TextInput label="Teléfono" value={phone} onChange={setPhone} autoComplete="tel" required={false} />
             <label className="block">
               <span className="mb-1.5 block text-[13px] font-medium text-[#1D1D1F]">Correo</span>
               <input

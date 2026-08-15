@@ -635,20 +635,19 @@ const BranchCard = ({
                 </span>
               </p>
             )}
-            {mapUrl && (
-              <a
-                href={mapUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="mt-2 inline-flex items-center gap-1.5 text-[12px] font-medium text-[#0066CC] hover:underline"
-              >
-                <MapPin className="h-3.5 w-3.5" />
-                Ver mapa
-              </a>
-            )}
           </div>
         </div>
         <div className="flex justify-end gap-2">
+          <IconButton
+            title={mapUrl ? 'Ver mapa' : 'Sin coordenadas'}
+            disabled={!mapUrl}
+            onClick={() => {
+              if (!mapUrl) return;
+              window.open(mapUrl, '_blank', 'noopener,noreferrer');
+            }}
+          >
+            <MapPin className="h-4 w-4" />
+          </IconButton>
           <IconButton title="QR de sucursal" onClick={onShowQr}>
             <QrCode className="h-4 w-4" />
           </IconButton>

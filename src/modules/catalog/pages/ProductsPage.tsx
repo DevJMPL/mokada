@@ -4,10 +4,11 @@ import { useProducts } from '../hooks/useCatalog';
 import { catalogService } from '../services/catalog.service';
 import { StatusBadge } from '../../../components/ui/StatusBadge';
 import { Search, Plus, PackageSearch } from 'lucide-react';
-import { LoadingState } from '../../../components/ui/LoadingState';
+import { useAuth } from '../../auth/context/useAuth';
 
 export const ProductsPage = () => {
   const navigate = useNavigate();
+  const { isAdmin } = useAuth();
   const [search, setSearch] = useState('');
   const { data, isLoading } = useProducts({ page: 1, pageSize: 25, search });
 
@@ -32,23 +33,45 @@ export const ProductsPage = () => {
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
-          <button 
-            onClick={() => navigate('/catalog/products/new')}
-            className="flex items-center justify-center gap-2 bg-[#0066CC] hover:bg-[#005bb5] text-white px-4 py-2 rounded-xl text-[14px] font-medium transition-colors whitespace-nowrap shadow-sm"
-          >
-            <Plus className="w-4 h-4" />
-            Nuevo
-          </button>
+          {isAdmin && (
+            <button 
+              onClick={() => navigate('/catalog/products/new')}
+              className="flex items-center justify-center gap-2 bg-[#0066CC] hover:bg-[#005bb5] text-white px-4 py-2 rounded-xl text-[14px] font-medium transition-colors whitespace-nowrap shadow-sm"
+            >
+              <Plus className="w-4 h-4" />
+              Nuevo
+            </button>
+          )}
         </div>
       </div>
 
       {isLoading ? (
-        <LoadingState message="Cargando catálogo..." />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {[...Array(8)].map((_, i) => (
+            <div key={i} className="bg-white border border-gray-200/60 rounded-[24px] overflow-hidden shadow-sm flex flex-col h-[380px]">
+              <div className="relative aspect-square bg-gray-100 border-b border-gray-50 animate-pulse" />
+              <div className="p-5 flex-1 flex flex-col gap-3">
+                <div className="flex items-center justify-between">
+                  <div className="h-4 w-20 bg-gray-200 rounded animate-pulse" />
+                  <div className="h-5 w-16 bg-gray-200 rounded-full animate-pulse" />
+                </div>
+                <div className="h-5 w-full bg-gray-200 rounded animate-pulse" />
+                <div className="h-5 w-2/3 bg-gray-200 rounded animate-pulse mb-auto" />
+                <div className="flex flex-col gap-2 pt-3">
+                  <div className="h-3 w-1/2 bg-gray-200 rounded animate-pulse" />
+                  <div className="h-3 w-2/3 bg-gray-200 rounded animate-pulse" />
+                </div>
+                <div className="flex items-center justify-between border-t border-gray-100 pt-3 mt-1">
+                  <div className="h-3 w-20 bg-gray-200 rounded animate-pulse" />
+                  <div className="h-5 w-24 bg-gray-200 rounded animate-pulse" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       ) : products.length === 0 ? (
-        <div className="bg-white border border-gray-200/60 rounded-2xl p-12 text-center flex flex-col items-center">
-          <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4">
-            <PackageSearch className="w-8 h-8 text-gray-400" />
-          </div>
+        <div className="bg-white border border-gray-200/60 rounded-2xl p-12 text-center flex flex-col items-center shadow-sm">
+          <PackageSearch className="w-12 h-12 text-gray-300 mb-4 stroke-[1.5]" />
           <h3 className="text-[16px] font-semibold text-[#1D1D1F] mb-1">No hay productos</h3>
           <p className="text-[14px] text-[#86868B]">No se encontraron productos con los filtros actuales.</p>
         </div>
@@ -60,11 +83,11 @@ export const ProductsPage = () => {
             return (
               <div 
                 key={item.id}
-                onClick={() => navigate(`/catalog/products/${item.id}`)}
-                className="group bg-white border border-gray-200/60 rounded-[24px] overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col"
+                onClick={() => isAdmin ? navigate(`/catalog/products/${item.id}`) : undefined}
+                className={`group bg-white border border-gray-200/60 rounded-[24px] overflow-hidden shadow-sm flex flex-col ${isAdmin ? 'hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer' : ''}`}
               >
                 {/* Image Section */}
-                <div className="relative aspect-square bg-[#F5F5F7] p-6 flex items-center justify-center overflow-hidden">
+                <div className="relative aspect-square bg-white border-b border-gray-50 p-6 flex items-center justify-center overflow-hidden">
                   {item.is_new && (
                     <div className="absolute top-4 left-4 z-10">
                       <span className="text-[11px] bg-[#0066CC]/10 text-[#0066CC] font-semibold px-2.5 py-1 rounded-full uppercase backdrop-blur-md">
@@ -77,10 +100,10 @@ export const ProductsPage = () => {
                     <img 
                       src={imageUrl} 
                       alt={item.name} 
-                      className="w-full h-full object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-500"
+                      className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
                     />
                   ) : (
-                    <PackageSearch className="w-16 h-16 text-gray-300 group-hover:scale-110 transition-transform duration-500" />
+                    <PackageSearch className="w-20 h-20 text-gray-200 stroke-[1] group-hover:scale-105 transition-transform duration-500" />
                   )}
                 </div>
 
@@ -98,7 +121,7 @@ export const ProductsPage = () => {
                   </h3>
                   
                   <div className="mt-auto pt-3">
-                    <div className="flex flex-col gap-1 text-[13px] text-[#86868B]">
+                    <div className="flex flex-col gap-1 text-[13px] text-[#86868B] mb-3">
                       {item.brand && (
                         <span className="truncate">Marca: <span className="font-medium text-[#1D1D1F]">{item.brand}</span></span>
                       )}
@@ -106,6 +129,15 @@ export const ProductsPage = () => {
                         <span className="truncate">Categoría: <span className="font-medium text-[#1D1D1F]">{item.category}</span></span>
                       )}
                     </div>
+                    
+                    {item.public_price != null && (
+                      <div className="flex items-center justify-between border-t border-gray-100 pt-3">
+                        <span className="text-[12px] font-medium text-[#86868B]">Precio Público</span>
+                        <span className="text-[16px] font-bold text-[#1D1D1F]">
+                          {new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(item.public_price)}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

@@ -14,8 +14,8 @@ export const catalogKeys = {
 
 export const inventoryKeys = {
   all: ['inventory'] as const,
-  stock: (filters?: any) => [...inventoryKeys.all, 'stock', filters] as const,
-  movements: (filters?: any) => [...inventoryKeys.all, 'movements', filters] as const,
+  stock: (filters?: any) => filters ? [...inventoryKeys.all, 'stock', filters] as const : [...inventoryKeys.all, 'stock'] as const,
+  movements: (filters?: any) => filters ? [...inventoryKeys.all, 'movements', filters] as const : [...inventoryKeys.all, 'movements'] as const,
   warehouses: () => [...inventoryKeys.all, 'warehouses'] as const,
 };
 

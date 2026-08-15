@@ -18,6 +18,7 @@ import { MovementsPage } from '../../modules/inventory/pages/MovementsPage';
 import { WarehousesPage } from '../../modules/inventory/pages/WarehousesPage';
 import { TransfersPage } from '../../modules/inventory/pages/TransfersPage';
 import { TransferFormPage } from '../../modules/inventory/pages/TransferFormPage';
+import { TransferDetailPage } from '../../modules/inventory/pages/TransferDetailPage';
 import { CustomersPage } from '../../modules/customers/pages/CustomersPage';
 import { CustomerFormPage } from '../../modules/customers/pages/CustomerFormPage';
 
@@ -86,6 +87,8 @@ export const router = createBrowserRouter([
               { path: 'warehouses', element: <WarehousesPage /> },
               { path: 'transfers', element: <TransfersPage /> },
               { path: 'transfers/new', element: <TransferFormPage /> },
+              { path: 'transfers/:id', element: <TransferDetailPage /> },
+              { path: 'transfers/edit/:id', element: <TransferFormPage /> },
             ]
           },
           {

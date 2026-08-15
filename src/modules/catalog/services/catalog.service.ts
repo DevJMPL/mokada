@@ -15,6 +15,38 @@ export const catalogService = {
     const { data, count, error } = await query.range(from, to);
     if (error) throw error;
     
+    if (data && data.length > 0) {
+      const productIds = data.map((d: any) => d.id);
+      
+      const { data: prices } = await supabase.from('current_product_prices')
+        .select('product_id, amount, price_list_code, price_list_name')
+        .in('product_id', productIds);
+        
+      if (prices) {
+        const pricesByProduct = new Map();
+        prices.forEach((p: any) => {
+          if (!pricesByProduct.has(p.product_id)) {
+            pricesByProduct.set(p.product_id, []);
+          }
+          pricesByProduct.get(p.product_id).push(p);
+        });
+
+        data.forEach((d: any) => {
+          const productPrices = pricesByProduct.get(d.id) || [];
+          const publicPrice = productPrices.find((p: any) => 
+            p.price_list_code?.toUpperCase().includes('PUBLIC') || 
+            p.price_list_name?.toUpperCase().includes('PÚBLICO') ||
+            p.price_list_name?.toUpperCase().includes('PUBLICO') ||
+            p.price_list_name?.toUpperCase() === 'GENERAL'
+          );
+          
+          if (publicPrice) {
+            d.public_price = publicPrice.amount;
+          }
+        });
+      }
+    }
+
     return { data, count };
   },
 

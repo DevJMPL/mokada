@@ -50,6 +50,18 @@ export const MovementsPage = () => {
       cell: (item) => item.warehouses?.name 
     },
     { 
+      header: 'Realizado por', 
+      cell: (item) => (
+        item.user ? (
+          <span className="text-[13px] font-medium text-gray-900">
+            {item.user.first_name} {item.user.last_name}
+          </span>
+        ) : (
+          <span className="text-[13px] text-gray-500">-</span>
+        )
+      )
+    },
+    { 
       header: 'Costo Unit.', 
       cell: (item) => item.unit_cost ? formatCurrency(item.unit_cost) : '-',
       className: 'text-right text-slate-500'

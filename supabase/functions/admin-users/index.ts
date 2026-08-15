@@ -74,7 +74,6 @@ const normalizeProfile = (payload: ProfilePayload, requirePassword: boolean) => 
   const normalizedAgentFunctions = normalizeAgentFunctions(payload);
   const password = trimOrNull(payload.password);
 
-  if (!email) throw new Error('El correo es obligatorio.');
   if (!firstName) throw new Error('El nombre es obligatorio.');
   if (!lastName) throw new Error('Los apellidos son obligatorios.');
   if (!userTypes.has(userType)) throw new Error('El tipo de usuario no es valido.');

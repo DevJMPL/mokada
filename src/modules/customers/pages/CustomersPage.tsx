@@ -7,6 +7,7 @@ import { EmptyState } from '../../../components/ui/EmptyState';
 import { ErrorState } from '../../../components/ui/ErrorState';
 import { LoadingState } from '../../../components/ui/LoadingState';
 import { StatusBadge } from '../../../components/ui/StatusBadge';
+import { IconButton } from '../../../components/ui/IconButton';
 import { useCustomers, useSaveCustomer } from '../hooks/useCustomers';
 import type { CustomerSummary } from '../services/customers.service';
 
@@ -265,26 +266,4 @@ const CustomerActions = ({
       {customer.is_active ? <ToggleRight className="h-4 w-4" /> : <ToggleLeft className="h-4 w-4" />}
     </IconButton>
   </div>
-);
-
-const IconButton = ({
-  title,
-  onClick,
-  disabled,
-  children,
-}: {
-  title: string;
-  onClick: () => void;
-  disabled?: boolean;
-  children: React.ReactNode;
-}) => (
-  <button
-    type="button"
-    onClick={onClick}
-    disabled={disabled}
-    title={title}
-    className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 bg-white text-[#424245] transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:text-gray-300"
-  >
-    {children}
-  </button>
 );

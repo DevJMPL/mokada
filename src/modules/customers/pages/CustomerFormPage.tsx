@@ -23,6 +23,7 @@ import { Modal } from '../../../components/ui/Modal';
 import { StatusBadge } from '../../../components/ui/StatusBadge';
 import { AlertModal } from '../../../components/ui/AlertModal';
 import { ConfirmModal } from '../../../components/ui/ConfirmModal';
+import { IconButton } from '../../../components/ui/IconButton';
 import mokadaLogo from '../../../assets/logo.svg';
 import { createBrandedQrDataUrl } from '../../../utils/qr';
 import { CustomerBranchFormModal } from '../components/CustomerBranchFormModal';
@@ -1020,28 +1021,6 @@ const Alert = ({
 
 const FormError = ({ message }: { message: string }) => (
   <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-[13px] text-red-700">{message}</div>
-);
-
-const IconButton = ({
-  title,
-  onClick,
-  disabled,
-  children,
-}: {
-  title: string;
-  onClick: () => void;
-  disabled?: boolean;
-  children: ReactNode;
-}) => (
-  <button
-    type="button"
-    onClick={onClick}
-    disabled={disabled}
-    title={title}
-    className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 bg-white text-[#424245] transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:text-gray-300"
-  >
-    {children}
-  </button>
 );
 
 const SmallBadge = ({ label }: { label: string }) => (

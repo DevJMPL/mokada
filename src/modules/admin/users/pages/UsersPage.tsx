@@ -3,15 +3,16 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   FileBadge,
   FileText,
-  ImageIcon,
   Pencil,
   Plus,
   Search,
   ShieldCheck,
+  ChevronDown,
   ToggleLeft,
   ToggleRight,
   UserRound,
   X,
+  Check,
 } from 'lucide-react';
 import { EmptyState } from '../../../../components/ui/EmptyState';
 import { ErrorState } from '../../../../components/ui/ErrorState';
@@ -109,7 +110,7 @@ export const UsersPage = () => {
     });
   }, [searchTerm, statusFilter, typeFilter, users]);
 
-  const requiresDocument = form.user_type === 'ADMIN' || form.agent_functions.includes('SALESPERSON');
+  const requiresDocument = form.user_type === 'ADMIN' || form.user_type === 'AGENT';
 
   const saveMutation = useMutation({
     mutationFn: async () => {
@@ -433,7 +434,7 @@ export const UsersPage = () => {
           <option value="ALL">Todos los tipos</option>
           <option value="CUSTOMER">Clientes</option>
           <option value="AGENT">Agentes</option>
-          <option value="ADMIN">Admins</option>
+          <option value="ADMIN">Administradores</option>
         </select>
         <select
           value={statusFilter}
@@ -503,7 +504,6 @@ export const UsersPage = () => {
                       <MediaActions
                         user={user}
                         loadingPreviewPath={loadingPreviewPath}
-                        onAvatarPreview={() => openAvatarPreview(user)}
                         onDocumentPreview={() => openDocumentPreview(user)}
                       />
                     </td>
@@ -617,12 +617,11 @@ const UserTypeBadge = ({ userType }: { userType: UserType }) => {
 interface MediaActionsProps {
   user: ManagedUserProfile;
   loadingPreviewPath: string | null;
-  onAvatarPreview: () => void;
   onDocumentPreview: () => void;
 }
 
-const MediaActions = ({ user, loadingPreviewPath, onAvatarPreview, onDocumentPreview }: MediaActionsProps) => {
-  const hasFiles = Boolean(user.avatar_path || user.identity_document_path);
+const MediaActions = ({ user, loadingPreviewPath, onDocumentPreview }: MediaActionsProps) => {
+  const hasFiles = Boolean(user.identity_document_path);
 
   if (!hasFiles) {
     return <span className="text-[12px] text-[#86868B]">Sin archivos</span>;
@@ -630,13 +629,6 @@ const MediaActions = ({ user, loadingPreviewPath, onAvatarPreview, onDocumentPre
 
   return (
     <div className="flex flex-wrap gap-2">
-      {user.avatar_path && (
-        <MediaButton
-          label="Foto"
-          icon={<ImageIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
-          onClick={onAvatarPreview}
-        />
-      )}
       {user.identity_document_path && (
         <MediaButton
           label={loadingPreviewPath === user.identity_document_path ? 'Abriendo...' : 'Documento'}
@@ -746,7 +738,6 @@ const UserCard = ({
         <MediaActions
           user={user}
           loadingPreviewPath={loadingPreviewPath}
-          onAvatarPreview={onAvatarPreview}
           onDocumentPreview={onDocumentPreview}
         />
         <RowActions user={user} isPending={isTogglePending} onEdit={onEdit} onToggle={onToggle} />
@@ -932,9 +923,9 @@ const UserFormDialog = ({
         </div>
 
         <div className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
-          <div className="grid min-w-0 gap-4 px-3 py-4 sm:px-6 sm:py-5 lg:grid-cols-[200px_minmax(0,1fr)] xl:grid-cols-[220px_minmax(0,1fr)]">
-          <aside className="min-w-0 rounded-lg border border-gray-200 bg-[#F5F5F7] p-3 sm:p-4">
-            <div className="flex flex-col items-center text-center">
+          <div className="min-w-0 space-y-4 px-3 py-4 sm:px-6 sm:py-5">
+            <div className="rounded-lg border border-gray-200 bg-[#F5F5F7] p-4">
+              <div className="flex flex-col items-center text-center">
               <EditableUserAvatar
                 firstName={form.first_name}
                 lastName={form.last_name}
@@ -948,10 +939,10 @@ const UserFormDialog = ({
                 {form.first_name || form.last_name ? `${form.first_name} ${form.last_name}` : 'Usuario'}
               </p>
               <p className="mt-0.5 max-w-full truncate text-[12px] text-[#86868B]">{form.email || 'sin correo'}</p>
+              </div>
             </div>
-          </aside>
 
-          <div className="grid min-w-0 gap-3 sm:gap-4 md:grid-cols-2">
+            <div className="grid min-w-0 gap-3 sm:gap-4 md:grid-cols-2">
             <TextInput
               label="Correo"
               type="email"
@@ -959,7 +950,7 @@ const UserFormDialog = ({
               autoComplete="email"
               onChange={(value) => onChange((current) => ({ ...current, email: value }))}
             />
-            <TextInput
+              <TextInput
               label={isEditing ? 'Nueva contrasena' : 'Contrasena temporal'}
               type="password"
               value={form.password}
@@ -968,19 +959,19 @@ const UserFormDialog = ({
               required={!isEditing}
               onChange={(value) => onChange((current) => ({ ...current, password: value }))}
             />
-            <TextInput
+              <TextInput
               label="Nombre"
               value={form.first_name}
               autoComplete="given-name"
               onChange={(value) => onChange((current) => ({ ...current, first_name: value }))}
             />
-            <TextInput
+              <TextInput
               label="Apellidos"
               value={form.last_name}
               autoComplete="family-name"
               onChange={(value) => onChange((current) => ({ ...current, last_name: value }))}
             />
-            <TextInput
+              <TextInput
               label="Telefono"
               type="tel"
               value={form.phone}
@@ -988,7 +979,7 @@ const UserFormDialog = ({
               required={false}
               onChange={(value) => onChange((current) => ({ ...current, phone: value }))}
             />
-            <label className="block min-w-0">
+              <label className="block min-w-0">
               <span className="mb-1.5 block text-[13px] font-medium text-[#1D1D1F]">Tipo</span>
               {isEditing && form.user_type === 'CUSTOMER' ? (
                 <input
@@ -1003,28 +994,21 @@ const UserFormDialog = ({
                   className="h-10 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm outline-none focus:border-[#0066CC] focus:ring-2 focus:ring-[#0066CC]/15 sm:h-11"
                 >
                   <option value="AGENT">Agente</option>
-                  <option value="ADMIN">Admin</option>
+                  <option value="ADMIN">Administrador</option>
                 </select>
               )}
-            </label>
+              </label>
 
-            {form.user_type === 'AGENT' && (
+              {form.user_type === 'AGENT' && (
               <AgentFunctionPicker
                 values={form.agent_functions}
-                onToggle={(agentFunction) =>
-                  onChange((current) => {
-                    const hasFunction = current.agent_functions.includes(agentFunction);
-                    const nextFunctions = hasFunction
-                      ? current.agent_functions.filter((value) => value !== agentFunction)
-                      : [...current.agent_functions, agentFunction];
-
-                    return { ...current, agent_functions: nextFunctions };
-                  })
+                onChange={(nextFunctions) =>
+                  onChange((current) => ({ ...current, agent_functions: nextFunctions }))
                 }
               />
             )}
 
-            <div className="min-w-0 space-y-2">
+              <div className="min-w-0 space-y-2">
               <FileInput
                 label={`Documento oficial${requiresDocument ? ' *' : ''}`}
                 accept="image/png,image/jpeg,image/webp,application/pdf"
@@ -1044,7 +1028,7 @@ const UserFormDialog = ({
               )}
             </div>
 
-            <label className="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 md:col-span-2">
+              <label className="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 md:col-span-2">
               <input
                 type="checkbox"
                 checked={form.is_active}
@@ -1052,7 +1036,7 @@ const UserFormDialog = ({
                 className="h-4 w-4 rounded border-gray-300 text-[#0066CC] focus:ring-[#0066CC]"
               />
               <span className="text-sm font-medium text-[#1D1D1F]">Usuario activo</span>
-            </label>
+              </label>
           </div>
           </div>
 
@@ -1096,40 +1080,93 @@ interface TextInputProps {
 
 interface AgentFunctionPickerProps {
   values: AgentFunction[];
-  onToggle: (agentFunction: AgentFunction) => void;
+  onChange: (agentFunctions: AgentFunction[]) => void;
 }
 
 const agentFunctionOptions: AgentFunction[] = ['DRIVER', 'SALESPERSON', 'WAREHOUSE'];
 
-const AgentFunctionPicker = ({ values, onToggle }: AgentFunctionPickerProps) => {
-  return (
-    <fieldset className="block min-w-0">
-      <legend className="mb-1.5 block text-[13px] font-medium text-[#1D1D1F]">Funciones</legend>
-      <div className="grid min-w-0 gap-2 sm:grid-cols-3 md:grid-cols-1 xl:grid-cols-3">
-        {agentFunctionOptions.map((agentFunction) => {
-          const isChecked = values.includes(agentFunction);
+const AgentFunctionPicker = ({ values, onChange }: AgentFunctionPickerProps) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const pickerRef = useRef<HTMLDivElement>(null);
+  const selectedFunctions = agentFunctionOptions.filter((agentFunction) => values.includes(agentFunction));
 
-          return (
-            <label
-              key={agentFunction}
-              className={`flex h-10 min-w-0 cursor-pointer items-center justify-center rounded-lg border px-3 text-[12px] font-semibold transition-colors ${
-                isChecked
-                  ? 'border-[#0066CC] bg-[#0066CC] text-white'
-                  : 'border-gray-300 bg-white text-[#424245] hover:bg-gray-50'
-              }`}
-            >
-              <input
-                type="checkbox"
-                checked={isChecked}
-                onChange={() => onToggle(agentFunction)}
-                className="sr-only"
-              />
-              <span className="truncate">{agentFunctionLabels[agentFunction]}</span>
-            </label>
-          );
-        })}
-      </div>
-    </fieldset>
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handlePointerDown = (event: PointerEvent) => {
+      if (!pickerRef.current?.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('pointerdown', handlePointerDown);
+    return () => document.removeEventListener('pointerdown', handlePointerDown);
+  }, [isOpen]);
+
+  const toggleFunction = (agentFunction: AgentFunction) => {
+    const nextFunctions = values.includes(agentFunction)
+      ? values.filter((value) => value !== agentFunction)
+      : [...values, agentFunction];
+
+    onChange(nextFunctions);
+  };
+
+  return (
+    <div ref={pickerRef} className="relative block min-w-0">
+      <span className="mb-1.5 block text-[13px] font-medium text-[#1D1D1F]">Funciones</span>
+      <button
+        type="button"
+        onClick={() => setIsOpen((current) => !current)}
+        className={`flex h-10 w-full min-w-0 items-center justify-between gap-2 rounded-lg border bg-white px-3 text-left text-sm outline-none transition-colors hover:bg-gray-50 focus:border-[#0066CC] focus:ring-2 focus:ring-[#0066CC]/15 sm:h-11 ${
+          isOpen ? 'border-[#0066CC] ring-2 ring-[#0066CC]/15' : 'border-gray-300'
+        }`}
+      >
+        <span className="flex min-w-0 flex-1 items-center gap-1.5 overflow-hidden">
+          {!selectedFunctions.length ? (
+            <span className="truncate text-[#86868B]">Selecciona funciones</span>
+          ) : (
+            <>
+              {selectedFunctions.slice(0, 2).map((agentFunction) => (
+                <span
+                  key={agentFunction}
+                  className="max-w-[105px] truncate rounded-md bg-[#0066CC]/10 px-2 py-0.5 text-[12px] font-medium text-[#0066CC]"
+                >
+                  {agentFunctionLabels[agentFunction]}
+                </span>
+              ))}
+              {selectedFunctions.length > 2 && (
+                <span className="rounded-md bg-gray-100 px-2 py-0.5 text-[12px] font-medium text-[#424245]">
+                  +{selectedFunctions.length - 2}
+                </span>
+              )}
+            </>
+          )}
+        </span>
+        <ChevronDown className={`h-4 w-4 shrink-0 text-[#86868B] transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+
+      {isOpen && (
+        <div className="mt-1 overflow-hidden rounded-lg border border-gray-200 bg-white p-1 shadow-sm">
+          {agentFunctionOptions.map((agentFunction) => {
+            const isChecked = values.includes(agentFunction);
+
+            return (
+              <button
+                key={agentFunction}
+                type="button"
+                onClick={() => toggleFunction(agentFunction)}
+                className={`flex h-8 w-full items-center justify-between gap-2 rounded-md px-2 text-left text-[13px] transition-colors ${
+                  isChecked ? 'bg-[#0066CC]/10 text-[#0066CC]' : 'text-[#1D1D1F] hover:bg-[#F5F5F7]'
+                }`}
+              >
+                <span className="truncate">{agentFunctionLabels[agentFunction]}</span>
+                {isChecked && <Check className="h-4 w-4 shrink-0" />}
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
   );
 };
 

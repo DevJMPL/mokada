@@ -24,6 +24,21 @@ interface Props {
 }
 
 const onlyDigits = (value: string, maxLength: number) => value.replace(/\D/g, '').slice(0, maxLength);
+const SEPOMEX_API_URL = 'https://sepomex.kurenn.dev/api/v1/zip_codes';
+
+interface SepomexZipCode {
+  d_codigo?: string;
+  d_asenta?: string;
+  d_mnpio?: string;
+  d_estado?: string;
+  d_ciudad?: string;
+}
+
+interface SepomexResponse {
+  zip_codes?: SepomexZipCode[];
+  error?: string;
+  message?: string;
+}
 
 const normalizeCoordinate = (value?: string | number | null) => {
   if (value === null || value === undefined || value === '') return null;
@@ -90,9 +105,17 @@ export const CustomerBranchFormModal = ({
   const [imagePreviewUrl, setImagePreviewUrl] = useState('');
   const [isImageUploading, setIsImageUploading] = useState(false);
   const [isLocating, setIsLocating] = useState(false);
+  const [isPostalLookupLoading, setIsPostalLookupLoading] = useState(false);
+  const [postalLookupError, setPostalLookupError] = useState('');
+  const [postalNeighborhoods, setPostalNeighborhoods] = useState<string[]>([]);
+  const [isZipCodeLookupLoading, setIsZipCodeLookupLoading] = useState(false);
+  const [zipCodeLookupError, setZipCodeLookupError] = useState('');
+  const [zipCodeOptions, setZipCodeOptions] = useState<string[]>([]);
   const latitude = normalizeCoordinate(form.latitude);
   const longitude = normalizeCoordinate(form.longitude);
   const hasLocation = latitude !== null && longitude !== null;
+  const hasPostalData = postalNeighborhoods.length > 0;
+  const hasZipCodeSuggestions = zipCodeOptions.length > 0 && onlyDigits(form.postal_code || '', 5).length < 5;
 
   const customerOptions = useMemo(
     () =>
@@ -121,6 +144,109 @@ export const CustomerBranchFormModal = ({
     setForm((current) => ({ ...current, phone_primary: fixedCustomer.phone }));
   }, [branch, fixedCustomer, form.phone_primary]);
 
+  useEffect(() => {
+    const postalCode = onlyDigits(form.postal_code || '', 5);
+
+    if (postalCode.length !== 5) {
+      setPostalNeighborhoods([]);
+      setPostalLookupError('');
+      setIsPostalLookupLoading(false);
+      return;
+    }
+
+    const abortController = new AbortController();
+
+    const lookupPostalCode = async () => {
+      setIsPostalLookupLoading(true);
+      setPostalLookupError('');
+
+      try {
+        const params = new URLSearchParams({ zip_code: postalCode, per_page: '200' });
+        const response = await fetch(`${SEPOMEX_API_URL}?${params.toString()}`, { signal: abortController.signal });
+        const data = (await response.json()) as SepomexResponse;
+        const zipCodes = data.zip_codes || [];
+
+        if (!response.ok || !zipCodes.length) {
+          throw new Error(data.message || 'No se encontró información para este código postal.');
+        }
+
+        const firstZipCode = zipCodes[0];
+        const neighborhoods = Array.from(
+          new Set(zipCodes.map((zipCode) => zipCode.d_asenta).filter((neighborhood): neighborhood is string => Boolean(neighborhood))),
+        );
+        setPostalNeighborhoods(neighborhoods);
+
+        setForm((current) => ({
+          ...current,
+          neighborhood:
+            current.neighborhood && (!neighborhoods.length || neighborhoods.includes(current.neighborhood))
+              ? current.neighborhood
+              : neighborhoods[0] || current.neighborhood,
+          municipality: firstZipCode?.d_mnpio || current.municipality,
+          state: firstZipCode?.d_estado || current.state,
+        }));
+      } catch (error) {
+        if (error instanceof DOMException && error.name === 'AbortError') return;
+        const message = error instanceof Error ? error.message : 'No se pudo consultar el código postal.';
+        setPostalNeighborhoods([]);
+        setPostalLookupError(message);
+      } finally {
+        if (!abortController.signal.aborted) setIsPostalLookupLoading(false);
+      }
+    };
+
+    lookupPostalCode();
+
+    return () => abortController.abort();
+  }, [form.postal_code]);
+
+  useEffect(() => {
+    const postalCode = onlyDigits(form.postal_code || '', 5);
+    const municipality = (form.municipality || '').trim();
+    const state = (form.state || '').trim();
+
+    if (postalCode.length === 5 || municipality.length < 3 || state.length < 3 || hasPostalData) {
+      setZipCodeOptions([]);
+      setZipCodeLookupError('');
+      setIsZipCodeLookupLoading(false);
+      return;
+    }
+
+    const abortController = new AbortController();
+    const lookupDelay = window.setTimeout(async () => {
+      setIsZipCodeLookupLoading(true);
+      setZipCodeLookupError('');
+
+      try {
+        const params = new URLSearchParams({ state, city: municipality, per_page: '200' });
+        const response = await fetch(`${SEPOMEX_API_URL}?${params.toString()}`, { signal: abortController.signal });
+        const data = (await response.json()) as SepomexResponse;
+        const zipCodes = data.zip_codes || [];
+
+        if (!response.ok || !zipCodes.length) {
+          throw new Error(data.message || 'No se encontraron códigos postales para ese municipio y estado.');
+        }
+
+        const suggestions = Array.from(
+          new Set(zipCodes.map((zipCode) => zipCode.d_codigo).filter((zipCode): zipCode is string => Boolean(zipCode))),
+        );
+        setZipCodeOptions(suggestions);
+      } catch (error) {
+        if (error instanceof DOMException && error.name === 'AbortError') return;
+        const message = error instanceof Error ? error.message : 'No se pudieron consultar códigos postales.';
+        setZipCodeOptions([]);
+        setZipCodeLookupError(message);
+      } finally {
+        if (!abortController.signal.aborted) setIsZipCodeLookupLoading(false);
+      }
+    }, 350);
+
+    return () => {
+      window.clearTimeout(lookupDelay);
+      abortController.abort();
+    };
+  }, [form.municipality, form.postal_code, form.state, hasPostalData]);
+
   const handleCustomerChange = (customerId: string) => {
     const selectedCustomer = customers.find((customer) => customer.id === customerId);
 
@@ -128,6 +254,22 @@ export const CustomerBranchFormModal = ({
       ...current,
       customer_id: customerId,
       phone_primary: current.phone_primary.trim() || selectedCustomer?.phone || '',
+    }));
+  };
+
+  const handlePostalCodeChange = (value: string) => {
+    const postalCode = onlyDigits(value, 5);
+
+    setPostalNeighborhoods([]);
+    setPostalLookupError('');
+    setZipCodeOptions([]);
+    setZipCodeLookupError('');
+    setForm((current) => ({
+      ...current,
+      postal_code: postalCode,
+      neighborhood: postalCode === current.postal_code ? current.neighborhood : '',
+      municipality: postalCode === current.postal_code ? current.municipality : '',
+      state: postalCode === current.postal_code ? current.state : '',
     }));
   };
 
@@ -358,17 +500,46 @@ export const CustomerBranchFormModal = ({
           </div>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-2">
           <TextInput label="Calle" value={form.street || ''} required={false} maxLength={120} onChange={(value) => setForm((current) => ({ ...current, street: value }))} />
           <TextInput label="Número exterior" value={form.exterior_number || ''} required={false} maxLength={20} onChange={(value) => setForm((current) => ({ ...current, exterior_number: value }))} />
           <TextInput label="Número interior" value={form.interior_number || ''} required={false} maxLength={20} onChange={(value) => setForm((current) => ({ ...current, interior_number: value }))} />
-          <TextInput label="Colonia" value={form.neighborhood || ''} required={false} maxLength={90} onChange={(value) => setForm((current) => ({ ...current, neighborhood: value }))} />
-          <TextInput label="Código postal" value={form.postal_code || ''} inputMode="numeric" pattern="[0-9]{5}" maxLength={5} required={false} onChange={(value) => setForm((current) => ({ ...current, postal_code: onlyDigits(value, 5) }))} />
-          <TextInput label="Municipio o alcaldía" value={form.municipality || ''} required={false} maxLength={90} onChange={(value) => setForm((current) => ({ ...current, municipality: value }))} />
-          <TextInput label="Estado" value={form.state || ''} required={false} maxLength={90} onChange={(value) => setForm((current) => ({ ...current, state: value }))} />
-          <TextInput label="Latitud" type="number" value={String(form.latitude ?? '')} required={false} min="-90" max="90" step="any" onChange={(value) => setForm((current) => ({ ...current, latitude: value }))} />
-          <TextInput label="Longitud" type="number" value={String(form.longitude ?? '')} required={false} min="-180" max="180" step="any" onChange={(value) => setForm((current) => ({ ...current, longitude: value }))} />
-          <label className="block min-w-0 sm:col-span-2 lg:col-span-3">
+          <div className="min-w-0">
+            <TextInput label="Código postal" value={form.postal_code || ''} inputMode="numeric" pattern="[0-9]{5}" maxLength={5} required={false} onChange={handlePostalCodeChange} />
+            {isPostalLookupLoading && <p className="mt-1 text-[12px] text-[#86868B]">Consultando código postal...</p>}
+            {postalLookupError && <p className="mt-1 text-[12px] text-red-600">{postalLookupError}</p>}
+          </div>
+          <TextInput label="Estado" value={form.state || ''} required={false} maxLength={90} disabled={hasPostalData} onChange={(value) => setForm((current) => ({ ...current, state: value }))} />
+          <TextInput label="Municipio o alcaldía" value={form.municipality || ''} required={false} maxLength={90} disabled={hasPostalData} onChange={(value) => setForm((current) => ({ ...current, municipality: value }))} />
+          {hasPostalData ? (
+            <SelectInput
+              label="Colonia"
+              value={form.neighborhood || ''}
+              options={postalNeighborhoods}
+              disabled={postalNeighborhoods.length === 1}
+              onChange={(value) => setForm((current) => ({ ...current, neighborhood: value }))}
+            />
+          ) : (
+            <TextInput label="Colonia" value={form.neighborhood || ''} required={false} maxLength={90} onChange={(value) => setForm((current) => ({ ...current, neighborhood: value }))} />
+          )}
+          {(hasZipCodeSuggestions || isZipCodeLookupLoading || zipCodeLookupError) && (
+            <div className="min-w-0 sm:col-span-2">
+              {hasZipCodeSuggestions && (
+                <SelectInput
+                  label="Código postal sugerido"
+                  value=""
+                  options={zipCodeOptions}
+                  placeholder="Selecciona un código postal"
+                  onChange={handlePostalCodeChange}
+                />
+              )}
+              {isZipCodeLookupLoading && <p className="mt-1 text-[12px] text-[#86868B]">Buscando códigos postales...</p>}
+              {zipCodeLookupError && <p className="mt-1 text-[12px] text-red-600">{zipCodeLookupError}</p>}
+            </div>
+          )}
+          <TextInput label="Latitud" type="number" value={String(form.latitude ?? '')} required={false} min="-90" max="90" step="any" readOnly onChange={() => undefined} />
+          <TextInput label="Longitud" type="number" value={String(form.longitude ?? '')} required={false} min="-180" max="180" step="any" readOnly onChange={() => undefined} />
+          <label className="block min-w-0 sm:col-span-2">
             <span className="mb-1.5 block text-[13px] font-medium text-[#1D1D1F]">Referencias de ubicación</span>
             <textarea
               value={form.location_references || ''}
@@ -526,6 +697,8 @@ const TextInput = ({
   maxLength,
   pattern,
   inputMode,
+  disabled = false,
+  readOnly = false,
 }: {
   label: string;
   value: string;
@@ -539,6 +712,8 @@ const TextInput = ({
   maxLength?: number;
   pattern?: string;
   inputMode?: 'text' | 'numeric' | 'tel' | 'email' | 'decimal';
+  disabled?: boolean;
+  readOnly?: boolean;
 }) => (
   <label className={`block min-w-0 ${className}`}>
     <span className="mb-1.5 block text-[13px] font-medium text-[#1D1D1F]">{label}</span>
@@ -552,9 +727,48 @@ const TextInput = ({
       maxLength={maxLength}
       pattern={pattern}
       inputMode={inputMode}
+      disabled={disabled}
+      readOnly={readOnly}
       onChange={(event) => onChange(event.target.value)}
-      className="h-10 w-full min-w-0 rounded-lg border border-gray-300 px-3 text-sm outline-none focus:border-[#0066CC] focus:ring-2 focus:ring-[#0066CC]/15"
+      className="h-10 w-full min-w-0 rounded-lg border border-gray-300 px-3 text-sm outline-none focus:border-[#0066CC] focus:ring-2 focus:ring-[#0066CC]/15 disabled:bg-gray-50 disabled:text-[#86868B] read-only:bg-gray-50 read-only:text-[#86868B]"
     />
+  </label>
+);
+
+const SelectInput = ({
+  label,
+  value,
+  options,
+  placeholder,
+  disabled = false,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  options: string[];
+  placeholder?: string;
+  disabled?: boolean;
+  onChange: (value: string) => void;
+}) => (
+  <label className="block min-w-0">
+    <span className="mb-1.5 block text-[13px] font-medium text-[#1D1D1F]">{label}</span>
+    <select
+      value={value}
+      disabled={disabled}
+      onChange={(event) => onChange(event.target.value)}
+      className="h-10 w-full min-w-0 rounded-lg border border-gray-300 bg-white px-3 text-sm outline-none focus:border-[#0066CC] focus:ring-2 focus:ring-[#0066CC]/15 disabled:bg-gray-50 disabled:text-[#86868B]"
+    >
+      {placeholder && (
+        <option value="" disabled>
+          {placeholder}
+        </option>
+      )}
+      {options.map((option) => (
+        <option key={option} value={option}>
+          {option}
+        </option>
+      ))}
+    </select>
   </label>
 );
 

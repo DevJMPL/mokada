@@ -6,13 +6,13 @@ import {
   Building2,
   CarFront,
   ClipboardCheck,
+  Handshake,
   LayoutDashboard,
   ListTree,
   MapPin,
   PackageSearch,
   Route,
   Settings,
-  ShieldCheck,
   ShoppingCart,
   Tags,
   Truck,
@@ -44,8 +44,7 @@ interface SidebarProps {
 
 export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
   const { isAdmin, profile } = useAuth();
-  const isSalesperson = profile?.user_type === 'AGENT' && profile.agent_functions?.includes('SALESPERSON');
-  const canManageCustomers = isAdmin || isSalesperson;
+  const canManageCustomers = isAdmin || profile?.user_type === 'AGENT';
 
   const getNavSections = (): NavSection[] => {
     const sections: NavSection[] = [];
@@ -68,8 +67,11 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
       ],
     });
 
-    if (canManageCustomers) {
-      sections.push({ path: '/customers', label: 'Clientes', icon: Users });
+  if (canManageCustomers) {
+      sections.push({
+        label: 'Comercial',
+        items: [{ path: '/customers', label: 'Clientes', icon: Handshake }],
+      });
     }
 
     if (isAdmin) {
@@ -108,10 +110,6 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
         icon: Settings,
       });
 
-      sections.push({
-        label: 'Administracion',
-        items: [{ path: '/admin/users', label: 'Usuarios', icon: ShieldCheck }],
-      });
     }
 
     if (!isAdmin) {

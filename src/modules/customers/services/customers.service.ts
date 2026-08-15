@@ -49,8 +49,15 @@ export interface CustomerFiscalProfile {
   rfc: string;
   legal_name: string;
   tax_regime: string;
+  cfdi_use: string;
   fiscal_zip_code: string;
   billing_email: string;
+  billing_street: string | null;
+  billing_exterior_number: string | null;
+  billing_interior_number: string | null;
+  billing_neighborhood: string | null;
+  billing_municipality: string | null;
+  billing_state: string | null;
   is_default: boolean;
   is_active: boolean;
   created_at: string;
@@ -110,8 +117,15 @@ export interface FiscalFormValues {
   rfc: string;
   legal_name: string;
   tax_regime: string;
+  cfdi_use: string;
   fiscal_zip_code: string;
   billing_email: string;
+  billing_street?: string | null;
+  billing_exterior_number?: string | null;
+  billing_interior_number?: string | null;
+  billing_neighborhood?: string | null;
+  billing_municipality?: string | null;
+  billing_state?: string | null;
   is_default: boolean;
   is_active: boolean;
 }
@@ -152,6 +166,12 @@ export interface CustomerSaveResult {
 const trimOrNull = (value?: string | null) => {
   const trimmed = value?.trim();
   return trimmed ? trimmed : null;
+};
+
+const trimUpper = (value: string) => value.trim().toUpperCase();
+const trimUpperOrNull = (value?: string | null) => {
+  const trimmed = trimOrNull(value);
+  return trimmed ? trimmed.toUpperCase() : null;
 };
 
 const toNumberOrNull = (value?: string | number | null) => {
@@ -197,7 +217,7 @@ const invokeCustomers = async <T>(body: Record<string, unknown>, fallbackMessage
 };
 
 const normalizeCustomerPayload = (payload: CustomerFormValues) => ({
-  name: payload.name.trim(),
+  name: trimUpper(payload.name),
   email: payload.email.trim().toLowerCase(),
   phone: payload.phone.trim(),
   requires_invoice: payload.requires_invoice,
@@ -215,29 +235,36 @@ const validateCustomerPayload = (payload: CustomerFormValues) => {
 const normalizeFiscalPayload = (payload: FiscalFormValues) => ({
   customer_id: payload.customer_id,
   person_type: payload.person_type,
-  rfc: payload.rfc.trim().toUpperCase(),
-  legal_name: payload.legal_name.trim(),
-  tax_regime: payload.tax_regime.trim(),
+  rfc: trimUpper(payload.rfc),
+  legal_name: trimUpper(payload.legal_name),
+  tax_regime: trimUpper(payload.tax_regime),
+  cfdi_use: trimUpper(payload.cfdi_use),
   fiscal_zip_code: payload.fiscal_zip_code.trim(),
   billing_email: payload.billing_email.trim().toLowerCase(),
+  billing_street: trimUpperOrNull(payload.billing_street),
+  billing_exterior_number: trimUpperOrNull(payload.billing_exterior_number),
+  billing_interior_number: trimUpperOrNull(payload.billing_interior_number),
+  billing_neighborhood: trimUpperOrNull(payload.billing_neighborhood),
+  billing_municipality: trimUpperOrNull(payload.billing_municipality),
+  billing_state: trimUpperOrNull(payload.billing_state),
   is_default: payload.is_default,
   is_active: payload.is_active,
 });
 
 const normalizeBranchPayload = (payload: BranchFormValues) => ({
   customer_id: payload.customer_id,
-  name: payload.name.trim(),
-  manager_name: trimOrNull(payload.manager_name),
+  name: trimUpper(payload.name),
+  manager_name: trimUpperOrNull(payload.manager_name),
   phone_primary: payload.phone_primary.trim(),
   phone_secondary: trimOrNull(payload.phone_secondary),
-  street: trimOrNull(payload.street),
-  exterior_number: trimOrNull(payload.exterior_number),
-  interior_number: trimOrNull(payload.interior_number),
-  neighborhood: trimOrNull(payload.neighborhood),
+  street: trimUpperOrNull(payload.street),
+  exterior_number: trimUpperOrNull(payload.exterior_number),
+  interior_number: trimUpperOrNull(payload.interior_number),
+  neighborhood: trimUpperOrNull(payload.neighborhood),
   postal_code: trimOrNull(payload.postal_code),
-  municipality: trimOrNull(payload.municipality),
-  state: trimOrNull(payload.state),
-  location_references: trimOrNull(payload.location_references),
+  municipality: trimUpperOrNull(payload.municipality),
+  state: trimUpperOrNull(payload.state),
+  location_references: trimUpperOrNull(payload.location_references),
   latitude: toNumberOrNull(payload.latitude),
   longitude: toNumberOrNull(payload.longitude),
   route_id: trimOrNull(payload.route_id),

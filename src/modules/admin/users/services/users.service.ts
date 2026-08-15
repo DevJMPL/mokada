@@ -121,7 +121,7 @@ const getFileName = (path: string | null) => {
 export const userTypeLabels: Record<UserType, string> = {
   CUSTOMER: 'Cliente',
   AGENT: 'Agente',
-  ADMIN: 'Admin',
+  ADMIN: 'Administrador',
 };
 
 export const agentFunctionLabels: Record<AgentFunction, string> = {

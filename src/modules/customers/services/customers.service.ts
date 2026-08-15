@@ -49,8 +49,15 @@ export interface CustomerFiscalProfile {
   rfc: string;
   legal_name: string;
   tax_regime: string;
+  cfdi_use: string;
   fiscal_zip_code: string;
   billing_email: string;
+  billing_street: string | null;
+  billing_exterior_number: string | null;
+  billing_interior_number: string | null;
+  billing_neighborhood: string | null;
+  billing_municipality: string | null;
+  billing_state: string | null;
   is_default: boolean;
   is_active: boolean;
   created_at: string;
@@ -110,8 +117,15 @@ export interface FiscalFormValues {
   rfc: string;
   legal_name: string;
   tax_regime: string;
+  cfdi_use: string;
   fiscal_zip_code: string;
   billing_email: string;
+  billing_street?: string | null;
+  billing_exterior_number?: string | null;
+  billing_interior_number?: string | null;
+  billing_neighborhood?: string | null;
+  billing_municipality?: string | null;
+  billing_state?: string | null;
   is_default: boolean;
   is_active: boolean;
 }
@@ -224,8 +238,15 @@ const normalizeFiscalPayload = (payload: FiscalFormValues) => ({
   rfc: trimUpper(payload.rfc),
   legal_name: trimUpper(payload.legal_name),
   tax_regime: trimUpper(payload.tax_regime),
+  cfdi_use: trimUpper(payload.cfdi_use),
   fiscal_zip_code: payload.fiscal_zip_code.trim(),
   billing_email: payload.billing_email.trim().toLowerCase(),
+  billing_street: trimUpperOrNull(payload.billing_street),
+  billing_exterior_number: trimUpperOrNull(payload.billing_exterior_number),
+  billing_interior_number: trimUpperOrNull(payload.billing_interior_number),
+  billing_neighborhood: trimUpperOrNull(payload.billing_neighborhood),
+  billing_municipality: trimUpperOrNull(payload.billing_municipality),
+  billing_state: trimUpperOrNull(payload.billing_state),
   is_default: payload.is_default,
   is_active: payload.is_active,
 });

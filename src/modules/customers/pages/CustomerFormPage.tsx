@@ -27,6 +27,7 @@ import { ConfirmModal } from '../../../components/ui/ConfirmModal';
 import { IconButton } from '../../../components/ui/IconButton';
 import mokadaLogo from '../../../assets/logo.svg';
 import { createBrandedQrDataUrl } from '../../../utils/qr';
+import { cfdiUseOptions, fiscalRegimeOptions } from '../../../utils/fiscalCatalogs';
 import { CustomerBranchFormModal } from '../components/CustomerBranchFormModal';
 import {
   useCustomer,
@@ -66,31 +67,18 @@ interface CredentialNotice {
   password: string;
 }
 
-const fiscalRegimeOptions: Array<{
-  value: string;
-  label: string;
-  personTypes: FiscalPersonType[];
-}> = [
-  { value: '601', label: '601 - GENERAL DE LEY PERSONAS MORALES', personTypes: ['LEGAL_ENTITY'] },
-  { value: '603', label: '603 - PERSONAS MORALES CON FINES NO LUCRATIVOS', personTypes: ['LEGAL_ENTITY'] },
-  { value: '605', label: '605 - SUELDOS Y SALARIOS E INGRESOS ASIMILADOS A SALARIOS', personTypes: ['INDIVIDUAL'] },
-  { value: '606', label: '606 - ARRENDAMIENTO', personTypes: ['INDIVIDUAL'] },
-  { value: '607', label: '607 - RÉGIMEN DE ENAJENACIÓN O ADQUISICIÓN DE BIENES', personTypes: ['INDIVIDUAL'] },
-  { value: '608', label: '608 - DEMÁS INGRESOS', personTypes: ['INDIVIDUAL'] },
-  { value: '610', label: '610 - RESIDENTES EN EL EXTRANJERO SIN ESTABLECIMIENTO PERMANENTE EN MÉXICO', personTypes: ['INDIVIDUAL', 'LEGAL_ENTITY'] },
-  { value: '611', label: '611 - INGRESOS POR DIVIDENDOS', personTypes: ['INDIVIDUAL'] },
-  { value: '612', label: '612 - PERSONAS FÍSICAS CON ACTIVIDADES EMPRESARIALES Y PROFESIONALES', personTypes: ['INDIVIDUAL'] },
-  { value: '614', label: '614 - INGRESOS POR INTERESES', personTypes: ['INDIVIDUAL'] },
-  { value: '615', label: '615 - RÉGIMEN DE LOS INGRESOS POR OBTENCIÓN DE PREMIOS', personTypes: ['INDIVIDUAL'] },
-  { value: '616', label: '616 - SIN OBLIGACIONES FISCALES', personTypes: ['INDIVIDUAL'] },
-  { value: '620', label: '620 - SOCIEDADES COOPERATIVAS DE PRODUCCIÓN QUE OPTAN POR DIFERIR SUS INGRESOS', personTypes: ['LEGAL_ENTITY'] },
-  { value: '621', label: '621 - INCORPORACIÓN FISCAL', personTypes: ['INDIVIDUAL'] },
-  { value: '622', label: '622 - ACTIVIDADES AGRÍCOLAS, GANADERAS, SILVÍCOLAS Y PESQUERAS', personTypes: ['LEGAL_ENTITY'] },
-  { value: '623', label: '623 - OPCIONAL PARA GRUPOS DE SOCIEDADES', personTypes: ['LEGAL_ENTITY'] },
-  { value: '624', label: '624 - COORDINADOS', personTypes: ['LEGAL_ENTITY'] },
-  { value: '625', label: '625 - RÉGIMEN DE LAS ACTIVIDADES EMPRESARIALES CON INGRESOS A TRAVÉS DE PLATAFORMAS TECNOLÓGICAS', personTypes: ['INDIVIDUAL'] },
-  { value: '626', label: '626 - RÉGIMEN SIMPLIFICADO DE CONFIANZA', personTypes: ['INDIVIDUAL', 'LEGAL_ENTITY'] },
-];
+const sepomexApiUrl = 'https://sepomex.kurenn.dev/api/v1/zip_codes';
+
+interface SepomexZipCode {
+  d_asenta?: string;
+  d_mnpio?: string;
+  d_estado?: string;
+}
+
+interface SepomexResponse {
+  zip_codes?: SepomexZipCode[];
+  message?: string;
+}
 
 const emptyCustomerForm: CustomerFormValues = {
   name: '',
@@ -573,6 +561,7 @@ const BackLink = () => (
 
 const getFiscalRegimeLabel = (value: string) =>
   fiscalRegimeOptions.find((option) => option.value === value)?.label || value;
+const getCfdiUseLabel = (value: string) => cfdiUseOptions.find((option) => option.value === value)?.label || value;
 
 const FiscalProfileCard = ({
   profile,
@@ -584,8 +573,19 @@ const FiscalProfileCard = ({
   isPending: boolean;
   onEdit: () => void;
   onToggle: () => void;
-}) => (
-  <article className="rounded-lg border border-gray-200/70 bg-white p-3">
+}) => {
+  const billingAddress = [
+    profile.billing_street,
+    profile.billing_exterior_number,
+    profile.billing_interior_number ? `INT. ${profile.billing_interior_number}` : null,
+    profile.billing_neighborhood,
+    profile.fiscal_zip_code ? `CP ${profile.fiscal_zip_code}` : null,
+    profile.billing_municipality,
+    profile.billing_state,
+  ].filter(Boolean).join(', ');
+
+  return (
+    <article className="rounded-lg border border-gray-200/70 bg-white p-3">
     <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
       <div className="min-w-0">
         <div className="flex flex-wrap items-center gap-2">
@@ -597,7 +597,9 @@ const FiscalProfileCard = ({
         <p className="mt-1 text-[12px] text-[#86868B]">
           {fiscalPersonTypeLabels[profile.person_type]} - {getFiscalRegimeLabel(profile.tax_regime)} - CP {profile.fiscal_zip_code}
         </p>
+        <p className="mt-1 text-[12px] text-[#86868B]">{getCfdiUseLabel(profile.cfdi_use)}</p>
         <p className="mt-1 truncate text-[12px] text-[#424245]">{profile.billing_email}</p>
+        {billingAddress && <p className="mt-1 line-clamp-2 text-[12px] text-[#424245]">{billingAddress}</p>}
       </div>
       <div className="flex justify-end gap-2">
         <IconButton title="Editar" onClick={onEdit}>
@@ -609,7 +611,8 @@ const FiscalProfileCard = ({
       </div>
     </div>
   </article>
-);
+  );
+};
 
 const BranchCard = ({
   branch,
@@ -714,16 +717,115 @@ const FiscalFormModal = ({
     rfc: profile?.rfc || '',
     legal_name: profile?.legal_name || '',
     tax_regime: profile?.tax_regime || '',
+    cfdi_use: profile?.cfdi_use || '',
     fiscal_zip_code: profile?.fiscal_zip_code || '',
     billing_email: profile?.billing_email || customer.email,
+    billing_street: profile?.billing_street || '',
+    billing_exterior_number: profile?.billing_exterior_number || '',
+    billing_interior_number: profile?.billing_interior_number || '',
+    billing_neighborhood: profile?.billing_neighborhood || '',
+    billing_municipality: profile?.billing_municipality || '',
+    billing_state: profile?.billing_state || '',
     is_default: profile?.is_default || false,
     is_active: profile?.is_active ?? true,
   });
-  const availableRegimes = fiscalRegimeOptions.filter((option) => option.personTypes.includes(form.person_type));
+  const [isBillingPostalLoading, setIsBillingPostalLoading] = useState(false);
+  const [billingPostalError, setBillingPostalError] = useState('');
+  const [billingNeighborhoods, setBillingNeighborhoods] = useState<string[]>([]);
+  const availableRegimes = useMemo(
+    () => fiscalRegimeOptions.filter((option) => option.personTypes.includes(form.person_type)),
+    [form.person_type],
+  );
+  const availableCfdiUses = useMemo(
+    () => {
+      const personTypeOptions = cfdiUseOptions.filter((option) => option.personTypes.includes(form.person_type));
+      if (!form.tax_regime) return personTypeOptions;
+
+      const regimeOptions = personTypeOptions.filter((option) => option.regimes.includes(form.tax_regime));
+      return regimeOptions.length ? regimeOptions : personTypeOptions;
+    },
+    [form.person_type, form.tax_regime],
+  );
+
+  useEffect(() => {
+    const currentUseIsValid = availableCfdiUses.some((option) => option.value === form.cfdi_use);
+    if (form.cfdi_use && !currentUseIsValid) {
+      setForm((current) => ({ ...current, cfdi_use: '' }));
+    }
+  }, [availableCfdiUses, form.cfdi_use]);
+
+  useEffect(() => {
+    const postalCode = (form.fiscal_zip_code || '').replace(/\D/g, '').slice(0, 5);
+
+    if (postalCode.length !== 5) {
+      setBillingNeighborhoods([]);
+      setBillingPostalError('');
+      setIsBillingPostalLoading(false);
+      return;
+    }
+
+    const abortController = new AbortController();
+
+    const lookupBillingPostalCode = async () => {
+      setIsBillingPostalLoading(true);
+      setBillingPostalError('');
+
+      try {
+        const params = new URLSearchParams({ zip_code: postalCode, per_page: '200' });
+        const response = await fetch(`${sepomexApiUrl}?${params.toString()}`, { signal: abortController.signal });
+        const data = (await response.json()) as SepomexResponse;
+        const zipCodes = data.zip_codes || [];
+
+        if (!response.ok || !zipCodes.length) {
+          throw new Error(data.message || 'No se encontró información para este código postal.');
+        }
+
+        const firstZipCode = zipCodes[0];
+        const neighborhoods = Array.from(
+          new Set(zipCodes.map((zipCode) => zipCode.d_asenta).filter((neighborhood): neighborhood is string => Boolean(neighborhood))),
+        );
+
+        setBillingNeighborhoods(neighborhoods);
+        setForm((current) => ({
+          ...current,
+          billing_neighborhood:
+            current.billing_neighborhood && neighborhoods.includes(current.billing_neighborhood)
+              ? current.billing_neighborhood
+              : neighborhoods[0] || current.billing_neighborhood,
+          billing_municipality: firstZipCode?.d_mnpio || current.billing_municipality,
+          billing_state: firstZipCode?.d_estado || current.billing_state,
+        }));
+      } catch (error) {
+        if (error instanceof DOMException && error.name === 'AbortError') return;
+        const message = error instanceof Error ? error.message : 'No se pudo consultar el código postal.';
+        setBillingNeighborhoods([]);
+        setBillingPostalError(message);
+      } finally {
+        if (!abortController.signal.aborted) setIsBillingPostalLoading(false);
+      }
+    };
+
+    lookupBillingPostalCode();
+
+    return () => abortController.abort();
+  }, [form.fiscal_zip_code]);
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     onSubmit(form);
+  };
+
+  const handleFiscalZipCodeChange = (value: string) => {
+    const postalCode = value.replace(/\D/g, '').slice(0, 5);
+    setBillingNeighborhoods([]);
+    setBillingPostalError('');
+    setForm((current) => ({
+      ...current,
+      fiscal_zip_code: postalCode,
+      billing_neighborhood: postalCode === current.fiscal_zip_code ? current.billing_neighborhood : '',
+      billing_municipality: postalCode === current.fiscal_zip_code ? current.billing_municipality : '',
+      billing_state: postalCode === current.fiscal_zip_code ? current.billing_state : '',
+    }));
   };
 
   return (
@@ -745,6 +847,7 @@ const FiscalFormModal = ({
                     ...current,
                     person_type: personType,
                     tax_regime: currentRegimeIsValid ? current.tax_regime : '',
+                    cfdi_use: '',
                   };
                 })
               }
@@ -785,16 +888,24 @@ const FiscalFormModal = ({
               ))}
             </select>
           </label>
-          <TextInput
-            label="Código postal fiscal"
-            value={form.fiscal_zip_code}
-            inputMode="numeric"
-            pattern="[0-9]{5}"
-            maxLength={5}
-            onChange={(value) =>
-              setForm((current) => ({ ...current, fiscal_zip_code: value.replace(/\D/g, '').slice(0, 5) }))
-            }
-          />
+          <label className="block min-w-0">
+            <span className="mb-1.5 block text-[13px] font-medium text-[#1D1D1F]">Uso del CFDI</span>
+            <select
+              value={form.cfdi_use}
+              onChange={(event) => setForm((current) => ({ ...current, cfdi_use: event.target.value }))}
+              required
+              className="h-10 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm outline-none focus:border-[#0066CC] focus:ring-2 focus:ring-[#0066CC]/15"
+            >
+              <option value="" disabled>
+                Selecciona un uso
+              </option>
+              {availableCfdiUses.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
           <TextInput
             label="Correo de facturación"
             type="email"
@@ -803,6 +914,51 @@ const FiscalFormModal = ({
             onChange={(value) => setForm((current) => ({ ...current, billing_email: value }))}
             className="sm:col-span-2"
           />
+        </div>
+
+        <div className="rounded-xl border border-gray-200 bg-white p-3">
+          <div className="mb-3">
+            <h3 className="text-sm font-semibold text-[#1D1D1F]">Dirección de facturación</h3>
+            <p className="mt-0.5 text-[12px] text-[#86868B]">Captura el código postal para completar estado, municipio y colonia.</p>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="min-w-0 sm:col-span-2">
+              <TextInput
+                label="Código postal"
+                value={form.fiscal_zip_code}
+                inputMode="numeric"
+                pattern="[0-9]{5}"
+                maxLength={5}
+                onChange={handleFiscalZipCodeChange}
+              />
+              {isBillingPostalLoading && <p className="mt-1 text-[12px] text-[#86868B]">Consultando código postal...</p>}
+              {billingPostalError && <p className="mt-1 text-[12px] text-red-600">{billingPostalError}</p>}
+            </div>
+            <TextInput label="Calle" value={form.billing_street || ''} required={false} maxLength={120} onChange={(value) => setForm((current) => ({ ...current, billing_street: value }))} />
+            <TextInput label="Número exterior" value={form.billing_exterior_number || ''} required={false} maxLength={20} onChange={(value) => setForm((current) => ({ ...current, billing_exterior_number: value }))} />
+            <TextInput label="Número interior" value={form.billing_interior_number || ''} required={false} maxLength={20} onChange={(value) => setForm((current) => ({ ...current, billing_interior_number: value }))} />
+            <TextInput label="Estado" value={form.billing_state || ''} required={false} maxLength={90} disabled={billingNeighborhoods.length > 0} onChange={(value) => setForm((current) => ({ ...current, billing_state: value }))} />
+            <TextInput label="Municipio o alcaldía" value={form.billing_municipality || ''} required={false} maxLength={90} disabled={billingNeighborhoods.length > 0} onChange={(value) => setForm((current) => ({ ...current, billing_municipality: value }))} />
+            {billingNeighborhoods.length ? (
+              <label className="block min-w-0 sm:col-span-2">
+                <span className="mb-1.5 block text-[13px] font-medium text-[#1D1D1F]">Colonia</span>
+                <select
+                  value={form.billing_neighborhood || ''}
+                  disabled={billingNeighborhoods.length === 1}
+                  onChange={(event) => setForm((current) => ({ ...current, billing_neighborhood: event.target.value }))}
+                  className="h-10 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm outline-none focus:border-[#0066CC] focus:ring-2 focus:ring-[#0066CC]/15 disabled:bg-gray-50 disabled:text-[#86868B]"
+                >
+                  {billingNeighborhoods.map((neighborhood) => (
+                    <option key={neighborhood} value={neighborhood}>
+                      {neighborhood}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            ) : (
+              <TextInput label="Colonia" value={form.billing_neighborhood || ''} required={false} maxLength={90} className="sm:col-span-2" onChange={(value) => setForm((current) => ({ ...current, billing_neighborhood: value }))} />
+            )}
+          </div>
         </div>
 
         <div className="grid gap-2 sm:grid-cols-2">
@@ -972,6 +1128,7 @@ const TextInput = ({
   maxLength,
   pattern,
   inputMode,
+  disabled = false,
 }: {
   label: string;
   value: string;
@@ -985,6 +1142,7 @@ const TextInput = ({
   maxLength?: number;
   pattern?: string;
   inputMode?: 'text' | 'numeric' | 'tel' | 'email' | 'decimal';
+  disabled?: boolean;
 }) => (
   <label className={`block min-w-0 ${className}`}>
     <span className="mb-1.5 block text-[13px] font-medium text-[#1D1D1F]">{label}</span>
@@ -998,8 +1156,9 @@ const TextInput = ({
       maxLength={maxLength}
       pattern={pattern}
       inputMode={inputMode}
+      disabled={disabled}
       onChange={(event) => onChange(event.target.value)}
-      className="h-10 w-full min-w-0 rounded-lg border border-gray-300 px-3 text-sm outline-none focus:border-[#0066CC] focus:ring-2 focus:ring-[#0066CC]/15"
+      className="h-10 w-full min-w-0 rounded-lg border border-gray-300 px-3 text-sm outline-none focus:border-[#0066CC] focus:ring-2 focus:ring-[#0066CC]/15 disabled:bg-gray-50 disabled:text-[#86868B]"
     />
   </label>
 );

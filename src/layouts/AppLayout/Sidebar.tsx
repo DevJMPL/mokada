@@ -6,6 +6,7 @@ import {
   Building2,
   CarFront,
   ClipboardCheck,
+  Handshake,
   LayoutDashboard,
   ListTree,
   MapPin,
@@ -66,8 +67,11 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
       ],
     });
 
-    if (canManageCustomers) {
-      sections.push({ path: '/customers', label: 'Clientes', icon: Users });
+  if (canManageCustomers) {
+      sections.push({
+        label: 'Comercial',
+        items: [{ path: '/customers', label: 'Clientes', icon: Handshake }],
+      });
     }
 
     if (isAdmin) {

@@ -24,28 +24,20 @@ interface Props {
 }
 
 const onlyDigits = (value: string, maxLength: number) => value.replace(/\D/g, '').slice(0, maxLength);
-const COPOMEX_TOKEN = import.meta.env.VITE_COPOMEX_TOKEN || '';
+const SEPOMEX_API_URL = 'https://sepomex.kurenn.dev/api/v1/zip_codes';
 
-interface CopomexAddress {
-  asentamiento?: string | string[];
-  municipio?: string;
-  estado?: string;
-  ciudad?: string;
+interface SepomexZipCode {
+  d_asenta?: string;
+  d_mnpio?: string;
+  d_estado?: string;
+  d_ciudad?: string;
 }
 
-interface CopomexResponse {
-  error?: boolean;
-  error_message?: string | null;
-  response?: CopomexAddress;
+interface SepomexResponse {
+  zip_codes?: SepomexZipCode[];
+  error?: string;
+  message?: string;
 }
-
-const getCopomexResponses = (payload: CopomexResponse | CopomexResponse[]) =>
-  Array.isArray(payload) ? payload : [payload];
-
-const getCopomexNeighborhoods = (address?: CopomexAddress) => {
-  if (!address?.asentamiento) return [];
-  return Array.isArray(address.asentamiento) ? address.asentamiento : [address.asentamiento];
-};
 
 const normalizeCoordinate = (value?: string | number | null) => {
   if (value === null || value === undefined || value === '') return null;
@@ -156,13 +148,6 @@ export const CustomerBranchFormModal = ({
       return;
     }
 
-    if (!COPOMEX_TOKEN) {
-      setPostalNeighborhoods([]);
-      setPostalLookupError('');
-      setIsPostalLookupLoading(false);
-      return;
-    }
-
     const abortController = new AbortController();
 
     const lookupPostalCode = async () => {
@@ -170,21 +155,19 @@ export const CustomerBranchFormModal = ({
       setPostalLookupError('');
 
       try {
-        const params = new URLSearchParams({ type: 'simplified', token: COPOMEX_TOKEN });
-        const response = await fetch(
-          `https://api.copomex.com/query/info_cp/${postalCode}?${params.toString()}`,
-          { signal: abortController.signal },
-        );
-        const data = (await response.json()) as CopomexResponse | CopomexResponse[];
-        const responses = getCopomexResponses(data);
-        const successfulResponse = responses.find((item) => !item.error && item.response)?.response;
+        const params = new URLSearchParams({ zip_code: postalCode, per_page: '200' });
+        const response = await fetch(`${SEPOMEX_API_URL}?${params.toString()}`, { signal: abortController.signal });
+        const data = (await response.json()) as SepomexResponse;
+        const zipCodes = data.zip_codes || [];
 
-        if (!response.ok || !successfulResponse) {
-          const message = responses.find((item) => item.error_message)?.error_message;
-          throw new Error(message || 'No se encontró información para este código postal.');
+        if (!response.ok || !zipCodes.length) {
+          throw new Error(data.message || 'No se encontró información para este código postal.');
         }
 
-        const neighborhoods = Array.from(new Set(getCopomexNeighborhoods(successfulResponse).filter(Boolean)));
+        const firstZipCode = zipCodes[0];
+        const neighborhoods = Array.from(
+          new Set(zipCodes.map((zipCode) => zipCode.d_asenta).filter((neighborhood): neighborhood is string => Boolean(neighborhood))),
+        );
         setPostalNeighborhoods(neighborhoods);
 
         setForm((current) => ({
@@ -193,8 +176,8 @@ export const CustomerBranchFormModal = ({
             current.neighborhood && (!neighborhoods.length || neighborhoods.includes(current.neighborhood))
               ? current.neighborhood
               : neighborhoods[0] || current.neighborhood,
-          municipality: successfulResponse.municipio || current.municipality,
-          state: successfulResponse.estado || current.state,
+          municipality: firstZipCode?.d_mnpio || current.municipality,
+          state: firstZipCode?.d_estado || current.state,
         }));
       } catch (error) {
         if (error instanceof DOMException && error.name === 'AbortError') return;

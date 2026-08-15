@@ -24,7 +24,7 @@ interface Props {
 }
 
 const onlyDigits = (value: string, maxLength: number) => value.replace(/\D/g, '').slice(0, maxLength);
-const COPOMEX_TOKEN = import.meta.env.VITE_COPOMEX_TOKEN || 'pruebas';
+const COPOMEX_TOKEN = import.meta.env.VITE_COPOMEX_TOKEN || '';
 
 interface CopomexAddress {
   asentamiento?: string | string[];
@@ -150,6 +150,13 @@ export const CustomerBranchFormModal = ({
     const postalCode = onlyDigits(form.postal_code || '', 5);
 
     if (postalCode.length !== 5) {
+      setPostalNeighborhoods([]);
+      setPostalLookupError('');
+      setIsPostalLookupLoading(false);
+      return;
+    }
+
+    if (!COPOMEX_TOKEN) {
       setPostalNeighborhoods([]);
       setPostalLookupError('');
       setIsPostalLookupLoading(false);

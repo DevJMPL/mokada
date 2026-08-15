@@ -154,6 +154,12 @@ const trimOrNull = (value?: string | null) => {
   return trimmed ? trimmed : null;
 };
 
+const trimUpper = (value: string) => value.trim().toUpperCase();
+const trimUpperOrNull = (value?: string | null) => {
+  const trimmed = trimOrNull(value);
+  return trimmed ? trimmed.toUpperCase() : null;
+};
+
 const toNumberOrNull = (value?: string | number | null) => {
   if (value === null || value === undefined || value === '') return null;
   const parsed = Number(value);
@@ -197,7 +203,7 @@ const invokeCustomers = async <T>(body: Record<string, unknown>, fallbackMessage
 };
 
 const normalizeCustomerPayload = (payload: CustomerFormValues) => ({
-  name: payload.name.trim(),
+  name: trimUpper(payload.name),
   email: payload.email.trim().toLowerCase(),
   phone: payload.phone.trim(),
   requires_invoice: payload.requires_invoice,
@@ -215,9 +221,9 @@ const validateCustomerPayload = (payload: CustomerFormValues) => {
 const normalizeFiscalPayload = (payload: FiscalFormValues) => ({
   customer_id: payload.customer_id,
   person_type: payload.person_type,
-  rfc: payload.rfc.trim().toUpperCase(),
-  legal_name: payload.legal_name.trim(),
-  tax_regime: payload.tax_regime.trim(),
+  rfc: trimUpper(payload.rfc),
+  legal_name: trimUpper(payload.legal_name),
+  tax_regime: trimUpper(payload.tax_regime),
   fiscal_zip_code: payload.fiscal_zip_code.trim(),
   billing_email: payload.billing_email.trim().toLowerCase(),
   is_default: payload.is_default,
@@ -226,18 +232,18 @@ const normalizeFiscalPayload = (payload: FiscalFormValues) => ({
 
 const normalizeBranchPayload = (payload: BranchFormValues) => ({
   customer_id: payload.customer_id,
-  name: payload.name.trim(),
-  manager_name: trimOrNull(payload.manager_name),
+  name: trimUpper(payload.name),
+  manager_name: trimUpperOrNull(payload.manager_name),
   phone_primary: payload.phone_primary.trim(),
   phone_secondary: trimOrNull(payload.phone_secondary),
-  street: trimOrNull(payload.street),
-  exterior_number: trimOrNull(payload.exterior_number),
-  interior_number: trimOrNull(payload.interior_number),
-  neighborhood: trimOrNull(payload.neighborhood),
+  street: trimUpperOrNull(payload.street),
+  exterior_number: trimUpperOrNull(payload.exterior_number),
+  interior_number: trimUpperOrNull(payload.interior_number),
+  neighborhood: trimUpperOrNull(payload.neighborhood),
   postal_code: trimOrNull(payload.postal_code),
-  municipality: trimOrNull(payload.municipality),
-  state: trimOrNull(payload.state),
-  location_references: trimOrNull(payload.location_references),
+  municipality: trimUpperOrNull(payload.municipality),
+  state: trimUpperOrNull(payload.state),
+  location_references: trimUpperOrNull(payload.location_references),
   latitude: toNumberOrNull(payload.latitude),
   longitude: toNumberOrNull(payload.longitude),
   route_id: trimOrNull(payload.route_id),

@@ -390,7 +390,7 @@ export const UsersPage = () => {
           <option value="ALL">Todos los tipos</option>
           <option value="CUSTOMER">Clientes</option>
           <option value="AGENT">Agentes</option>
-          <option value="ADMIN">Admins</option>
+          <option value="ADMIN">Administradores</option>
         </select>
         <select
           value={statusFilter}
@@ -950,7 +950,7 @@ const UserFormDialog = ({
                   className="h-10 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm outline-none focus:border-[#0066CC] focus:ring-2 focus:ring-[#0066CC]/15 sm:h-11"
                 >
                   <option value="AGENT">Agente</option>
-                  <option value="ADMIN">Admin</option>
+                  <option value="ADMIN">Administrador</option>
                 </select>
               )}
               </label>

@@ -1,8 +1,29 @@
+import { useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { inventoryService } from '../services/inventory.service';
 import { inventoryKeys } from '../../../utils/queryKeys';
+import { supabase } from '../../../lib/supabase/client';
 
 export const useStock = () => {
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    const channel = supabase
+      .channel('stock_changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'product_inventory' },
+        () => {
+          queryClient.invalidateQueries({ queryKey: inventoryKeys.stock() });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
+
   return useQuery({
     queryKey: inventoryKeys.stock(),
     queryFn: inventoryService.getStock,
@@ -11,7 +32,7 @@ export const useStock = () => {
 
 export const useMovements = (warehouseId?: string) => {
   return useQuery({
-    queryKey: ['inventory_movements', warehouseId],
+    queryKey: inventoryKeys.movements(warehouseId),
     queryFn: () => inventoryService.getMovements(warehouseId),
   });
 };
@@ -69,14 +90,37 @@ export const useSaveTransfer = () => {
   });
 };
 
+export const useUpdateTransfer = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, payload }: { id: string, payload: any }) => inventoryService.updateTransfer(id, payload),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['inventory_transfers'] });
+      queryClient.invalidateQueries({ queryKey: ['inventory_transfers', variables.id] });
+    },
+  });
+};
+
+export const useCancelTransfer = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: inventoryService.cancelTransfer,
+    onSuccess: (_, id) => {
+      queryClient.invalidateQueries({ queryKey: ['inventory_transfers'] });
+      queryClient.invalidateQueries({ queryKey: ['inventory_transfers', id] });
+    },
+  });
+};
+
 export const useCompleteTransfer = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: inventoryService.completeTransfer,
-    onSuccess: () => {
+    onSuccess: (_, id) => {
       queryClient.invalidateQueries({ queryKey: ['inventory_transfers'] });
-      queryClient.invalidateQueries({ queryKey: inventoryKeys.movements() });
-      queryClient.invalidateQueries({ queryKey: inventoryKeys.stock() });
+      queryClient.invalidateQueries({ queryKey: ['inventory_transfers', id] });
+      queryClient.invalidateQueries({ queryKey: ['inventory_available'] });
+      queryClient.invalidateQueries({ queryKey: ['inventory_movements'] });
     },
   });
 };

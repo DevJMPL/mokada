@@ -345,7 +345,49 @@ export const UsersPage = () => {
   };
 
   if (isLoading) {
-    return <LoadingState message="Cargando usuarios..." />;
+    return (
+      <div className="space-y-6">
+        <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+          <div className="space-y-2">
+            <div className="h-8 w-32 animate-pulse rounded-lg bg-gray-200" />
+            <div className="h-4 w-64 animate-pulse rounded-lg bg-gray-200" />
+          </div>
+          <div className="h-10 w-36 animate-pulse rounded-lg bg-gray-200" />
+        </div>
+        
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <div className="h-11 w-full flex-1 animate-pulse rounded-lg bg-gray-200" />
+          <div className="h-11 w-full sm:w-40 animate-pulse rounded-lg bg-gray-200" />
+          <div className="h-11 w-full sm:w-40 animate-pulse rounded-lg bg-gray-200" />
+        </div>
+
+        <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+          <div className="border-b border-gray-200 bg-gray-50/50 p-4">
+            <div className="flex justify-between gap-4">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="h-4 w-24 animate-pulse rounded bg-gray-200" />
+              ))}
+            </div>
+          </div>
+          <div className="divide-y divide-gray-100">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="flex items-center justify-between gap-4 p-4">
+                <div className="flex items-center gap-4">
+                  <div className="h-10 w-10 shrink-0 animate-pulse rounded-full bg-gray-200" />
+                  <div className="space-y-2">
+                    <div className="h-4 w-32 animate-pulse rounded bg-gray-200" />
+                    <div className="h-3 w-24 animate-pulse rounded bg-gray-200" />
+                  </div>
+                </div>
+                <div className="h-6 w-20 animate-pulse rounded-full bg-gray-200" />
+                <div className="hidden h-4 w-24 animate-pulse rounded bg-gray-200 md:block" />
+                <div className="hidden h-8 w-8 animate-pulse rounded-lg bg-gray-200 sm:block" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (isError) {

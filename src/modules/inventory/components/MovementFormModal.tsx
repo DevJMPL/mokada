@@ -1,8 +1,11 @@
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { Modal } from '../../../components/ui/Modal';
+import { SearchSelect } from '../../../components/ui/SearchSelect';
 import { useCreateMovement, useWarehouses } from '../hooks/useInventory';
 import { useProducts } from '../../catalog/hooks/useCatalog';
 import { useEffect } from 'react';
+import { Package } from 'lucide-react';
+import { catalogService } from '../../catalog/services/catalog.service';
 
 interface Props {
   isOpen: boolean;
@@ -10,7 +13,7 @@ interface Props {
 }
 
 export const MovementFormModal = ({ isOpen, onClose }: Props) => {
-  const { register, handleSubmit, reset, formState: { errors } } = useForm();
+  const { register, handleSubmit, reset, control, watch, formState: { errors } } = useForm();
   const { mutateAsync: createMovement, isPending } = useCreateMovement();
   
   const { data: warehouses } = useWarehouses();
@@ -49,32 +52,84 @@ export const MovementFormModal = ({ isOpen, onClose }: Props) => {
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         
-        <div>
-          <label className="block text-[13px] font-medium text-[#1D1D1F] mb-1.5">Producto *</label>
-          <select
-            {...register('product_id', { required: 'El producto es obligatorio' })}
-            className="w-full px-3 py-2 bg-white border border-gray-200/60 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0066CC]/20 focus:border-[#0066CC] text-[14px]"
-          >
-            <option value="">Selecciona un producto</option>
-            {products.map((p: any) => (
-              <option key={p.id} value={p.id}>[{p.code}] {p.name}</option>
-            ))}
-          </select>
-          {errors.product_id && <p className="text-red-500 text-xs mt-1">{errors.product_id.message?.toString()}</p>}
-        </div>
+        <div className="space-y-4">
+          <Controller
+            name="product_id"
+            control={control}
+            rules={{ required: 'El producto es obligatorio' }}
+            render={({ field }) => {
+              const selectedProduct = products.find((p: any) => p.id === field.value);
+              const imageUrl = selectedProduct?.image_url ? catalogService.getProductImageUrl(selectedProduct.image_url) : null;
 
-        <div>
-          <label className="block text-[13px] font-medium text-[#1D1D1F] mb-1.5">Almacén *</label>
-          <select
-            {...register('warehouse_id', { required: 'El almacén es obligatorio' })}
-            className="w-full px-3 py-2 bg-white border border-gray-200/60 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0066CC]/20 focus:border-[#0066CC] text-[14px]"
-          >
-            <option value="">Selecciona un almacén</option>
-            {warehouses?.map((w: any) => (
-              <option key={w.id} value={w.id}>{w.name}</option>
-            ))}
-          </select>
-          {errors.warehouse_id && <p className="text-red-500 text-xs mt-1">{errors.warehouse_id.message?.toString()}</p>}
+              return (
+                <div>
+                  {!field.value ? (
+                    <SearchSelect
+                      label="Producto *"
+                      options={products.map((p: any) => ({
+                        value: p.id,
+                        label: `[${p.code}] ${p.name}`,
+                        keywords: p.code
+                      }))}
+                      value={field.value}
+                      onChange={field.onChange}
+                      placeholder="Busca y selecciona un producto..."
+                    />
+                  ) : (
+                    <div className="p-4 bg-gray-50 border border-gray-200/60 rounded-xl relative group">
+                      <label className="block text-[13px] font-medium text-[#1D1D1F] mb-3">Producto Seleccionado</label>
+                      <div className="flex items-start gap-4">
+                        <div className="w-16 h-16 flex items-center justify-center shrink-0 bg-white border border-gray-200/60 rounded-lg overflow-hidden shadow-sm">
+                          {imageUrl ? (
+                            <img src={imageUrl} alt={selectedProduct?.name} className="w-full h-full object-cover" />
+                          ) : (
+                            <Package className="w-8 h-8 text-gray-300 stroke-[1.5]" />
+                          )}
+                        </div>
+                        <div className="flex-1 mt-0.5">
+                          <span className="text-[12px] font-medium text-[#0066CC] block mb-0.5">
+                            {selectedProduct?.code}
+                          </span>
+                          <h4 className="text-[14px] font-semibold text-[#1D1D1F] line-clamp-2 pr-4">
+                            {selectedProduct?.name}
+                          </h4>
+                          <button
+                            type="button"
+                            onClick={() => field.onChange('')}
+                            className="mt-2 text-[12px] text-[#0066CC] hover:underline font-medium"
+                          >
+                            Cambiar producto
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  {errors.product_id && <p className="text-red-500 text-xs mt-1">{errors.product_id.message?.toString()}</p>}
+                </div>
+              );
+            }}
+          />
+
+          <Controller
+            name="warehouse_id"
+            control={control}
+            rules={{ required: 'El almacén es obligatorio' }}
+            render={({ field }) => (
+              <div>
+                <SearchSelect
+                  label="Almacén *"
+                  options={warehouses?.map((w: any) => ({
+                    value: w.id,
+                    label: w.name
+                  })) || []}
+                  value={field.value}
+                  onChange={field.onChange}
+                  placeholder="Selecciona un almacén..."
+                />
+                {errors.warehouse_id && <p className="text-red-500 text-xs mt-1">{errors.warehouse_id.message?.toString()}</p>}
+              </div>
+            )}
+          />
         </div>
 
         <div className="grid grid-cols-2 gap-4">

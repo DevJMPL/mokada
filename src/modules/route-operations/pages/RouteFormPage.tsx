@@ -1,21 +1,11 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Building2, Pencil, Plus, Save, User, X } from 'lucide-react';
-import {
-  useAssignBranchRoute,
-  useCustomerBranchOptions,
-  useCustomers,
-  useSaveBranch,
-  useUpdateBranchImage,
-  useUploadBranchImage,
-} from '../../customers/hooks/useCustomers';
-import { CustomerBranchFormModal } from '../../customers/components/CustomerBranchFormModal';
-import { useRoute, useRoutes, useSaveRoute } from '../hooks/useRouteOperations';
+import { ArrowLeft, ExternalLink, Save } from 'lucide-react';
+import { useCustomerBranchOptions } from '../../customers/hooks/useCustomers';
+import { useRoute, useSaveRoute } from '../hooks/useRouteOperations';
 import { LoadingState } from '../../../components/ui/LoadingState';
-import { SearchSelect } from '../../../components/ui/SearchSelect';
 import { AlertModal } from '../../../components/ui/AlertModal';
-import { ConfirmModal } from '../../../components/ui/ConfirmModal';
-import type { BranchFormValues, CustomerBranchOption, CustomerRouteOption } from '../../customers/services/customers.service';
+import type { CustomerBranchOption } from '../../customers/services/customers.service';
 
 const DAYS = [
   { value: 'L', label: 'L', title: 'Lunes' },
@@ -36,24 +26,34 @@ const emptyForm = {
   is_active: true,
 };
 
+const getRouteMapUrl = (branches: CustomerBranchOption[]) => {
+  const points = branches
+    .map((branch) => ({ latitude: Number(branch.latitude), longitude: Number(branch.longitude) }))
+    .filter((branch) => Number.isFinite(branch.latitude) && Number.isFinite(branch.longitude))
+    .map((branch) => `${branch.latitude},${branch.longitude}`);
+
+  if (!points.length) return null;
+  if (points.length === 1) return `https://www.google.com/maps/search/?api=1&query=${points[0]}`;
+
+  const params = new URLSearchParams({
+    api: '1',
+    origin: points[0],
+    destination: points[points.length - 1],
+  });
+
+  if (points.length > 2) params.set('waypoints', points.slice(1, -1).join('|'));
+
+  return `https://www.google.com/maps/dir/?${params.toString()}`;
+};
+
 export const RouteFormPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const isEditing = Boolean(id);
   const { data: route, isLoading: isRouteLoading } = useRoute(id || null);
-  const { data: routes = [] } = useRoutes();
   const { data: branchOptions = [] } = useCustomerBranchOptions();
-  const { data: customers = [] } = useCustomers({});
   const saveRoute = useSaveRoute();
-  const assignBranchRoute = useAssignBranchRoute();
-  const saveBranch = useSaveBranch();
-  const uploadBranchImage = useUploadBranchImage();
-  const updateBranchImage = useUpdateBranchImage();
   const [form, setForm] = useState(emptyForm);
-  const [selectedBranchId, setSelectedBranchId] = useState('');
-  const [branchDialog, setBranchDialog] = useState<{ mode: 'create' } | { mode: 'edit'; branch: CustomerBranchOption } | null>(null);
-  const [branchError, setBranchError] = useState('');
-  const [branchToRemove, setBranchToRemove] = useState<CustomerBranchOption | null>(null);
   const [alertModal, setAlertModal] = useState<{ isOpen: boolean; title: string; message: string; type: 'error' | 'success' | 'info' }>({
     isOpen: false,
     title: '',
@@ -78,21 +78,7 @@ export const RouteFormPage = () => {
 
   const routeId = id || null;
   const assignedBranches = branchOptions.filter((branch) => branch.route_id === routeId);
-  const routeOptionsForBranches = routes as CustomerRouteOption[];
-  const branchSearchOptions = branchOptions
-    .filter((branch) => branch.is_active)
-    .map((branch) => {
-      const customerName = branch.customers?.name || 'Sin cliente';
-      const location = [branch.municipality, branch.state].filter(Boolean).join(', ');
-      const routeLabel = branch.routes ? `Asignada a ${branch.routes.code}` : 'Sin ruta';
-
-      return {
-        value: branch.id,
-        label: branch.name,
-        description: `${customerName}${location ? ` - ${location}` : ''} - ${routeLabel}`,
-        keywords: `${branch.name} ${customerName} ${branch.phone_primary || ''} ${branch.municipality || ''} ${branch.state || ''}`,
-      };
-    });
+  const routeMapUrl = getRouteMapUrl(assignedBranches);
 
   const toggleDay = (day: string) => {
     setForm((current) => {
@@ -129,67 +115,6 @@ export const RouteFormPage = () => {
       setAlertModal({
         isOpen: true,
         title: 'No se pudo guardar la ruta',
-        message,
-        type: 'error',
-      });
-    }
-  };
-
-  const assignSelectedBranch = async (branchId: string) => {
-    if (!routeId) return;
-    setAlertModal((current) => ({ ...current, isOpen: false }));
-
-    try {
-      setSelectedBranchId(branchId);
-      await assignBranchRoute.mutateAsync({ branchId, routeId });
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'No se pudo asignar la sucursal.';
-      setAlertModal({
-        isOpen: true,
-        title: 'No se pudo asignar la sucursal',
-        message,
-        type: 'error',
-      });
-    } finally {
-      setSelectedBranchId('');
-    }
-  };
-
-  const handleSaveBranch = async (payload: BranchFormValues, imageFile: File | null) => {
-    setBranchError('');
-
-    try {
-      const savedBranch = await saveBranch.mutateAsync(payload);
-
-      if (imageFile) {
-        const imagePath = await uploadBranchImage.mutateAsync({ branchId: savedBranch.id, file: imageFile });
-        await saveBranch.mutateAsync({ ...payload, id: savedBranch.id, image_path: imagePath });
-      }
-
-      setBranchDialog(null);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'No se pudo guardar la sucursal.';
-      setBranchError(message);
-    }
-  };
-
-  const handleBranchImageUpload = async (branchId: string, file: File) => {
-    const imagePath = await uploadBranchImage.mutateAsync({ branchId, file });
-    await updateBranchImage.mutateAsync({ branchId, imagePath });
-    return imagePath;
-  };
-
-  const removeBranchFromRoute = async () => {
-    if (!branchToRemove) return;
-
-    try {
-      await assignBranchRoute.mutateAsync({ branchId: branchToRemove.id, routeId: null });
-      setBranchToRemove(null);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'No se pudo quitar la sucursal de la ruta.';
-      setAlertModal({
-        isOpen: true,
-        title: 'No se pudo quitar la sucursal',
         message,
         type: 'error',
       });
@@ -283,94 +208,34 @@ export const RouteFormPage = () => {
         </label>
       </form>
 
-      <section>
-        <div className="rounded-2xl border border-gray-200/60 bg-white p-4 shadow-sm sm:p-6">
-          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+      {isEditing && (
+        <section className="rounded-2xl border border-gray-200/60 bg-white p-4 shadow-sm sm:p-6">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h3 className="text-base font-semibold text-[#1D1D1F]">Sucursales de la ruta</h3>
-              <p className="mt-0.5 text-[13px] text-[#86868B]">Busca por sucursal, cliente, teléfono o ubicación.</p>
+              <h3 className="text-base font-semibold text-[#1D1D1F]">Detalles de ruta</h3>
+              <p className="mt-0.5 text-[13px] text-[#86868B]">
+                {routeMapUrl
+                  ? 'Abre el recorrido con las coordenadas disponibles.'
+                  : 'No hay sucursales con coordenadas para abrir el mapa.'}
+              </p>
             </div>
-            {routeId && (
-              <button
-                type="button"
-                onClick={() => {
-                  setBranchError('');
-                  setBranchDialog({ mode: 'create' });
-                }}
-                className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-3 text-[13px] font-semibold text-[#1D1D1F] transition-colors hover:bg-gray-50"
-              >
-                <Plus className="h-4 w-4" />
-                Nueva sucursal
-              </button>
-            )}
+            <a
+              href={routeMapUrl || undefined}
+              target="_blank"
+              rel="noreferrer"
+              aria-disabled={!routeMapUrl}
+              className={`inline-flex h-10 items-center justify-center gap-2 rounded-xl px-4 text-sm font-semibold transition-colors ${
+                routeMapUrl
+                  ? 'bg-[#0066CC] text-white hover:bg-[#0057AD]'
+                  : 'pointer-events-none bg-gray-200 text-gray-400'
+              }`}
+            >
+              <ExternalLink className="h-4 w-4" />
+              Abrir mapa
+            </a>
           </div>
-
-          {routeId ? (
-            <div className="space-y-3">
-              <SearchSelect
-                label="Agregar sucursal"
-                options={branchSearchOptions}
-                value={selectedBranchId}
-                placeholder="Buscar sucursal o cliente"
-                emptyMessage="No hay sucursales con ese texto"
-                disabled={assignBranchRoute.isPending}
-                onChange={assignSelectedBranch}
-                onClear={() => setSelectedBranchId('')}
-              />
-
-              {!assignedBranches.length ? (
-                <div className="rounded-lg border border-dashed border-gray-300 bg-[#F5F5F7] px-3 py-6 text-center text-[13px] text-[#86868B]">
-                  Esta ruta aún no tiene sucursales asignadas.
-                </div>
-              ) : (
-                <div className="grid gap-2">
-                  {assignedBranches.map((branch) => (
-                    <BranchRouteCard
-                      key={branch.id}
-                      branch={branch}
-                      isPending={assignBranchRoute.isPending}
-                      onEdit={() => {
-                        setBranchError('');
-                        setBranchDialog({ mode: 'edit', branch });
-                      }}
-                      onRemove={() => setBranchToRemove(branch)}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="rounded-lg border border-dashed border-gray-300 bg-[#F5F5F7] px-3 py-6 text-center text-[13px] text-[#86868B]">
-              Guarda la ruta para poder agregar sucursales.
-            </div>
-          )}
-        </div>
-      </section>
-
-      {branchDialog && routeId && (
-        <CustomerBranchFormModal
-          branch={branchDialog.mode === 'edit' ? branchDialog.branch : null}
-          customers={customers}
-          defaultRouteId={routeId}
-          routeOptions={routeOptionsForBranches}
-          isPending={saveBranch.isPending || uploadBranchImage.isPending || updateBranchImage.isPending}
-          errorMessage={branchError}
-          onClose={() => setBranchDialog(null)}
-          onImageUpload={handleBranchImageUpload}
-          onSubmit={handleSaveBranch}
-        />
+        </section>
       )}
-
-      <ConfirmModal
-        isOpen={Boolean(branchToRemove)}
-        onClose={() => setBranchToRemove(null)}
-        onConfirm={() => void removeBranchFromRoute()}
-        title="Quitar sucursal de la ruta"
-        message={`La sucursal ${branchToRemove?.name || ''} quedará sin ruta asignada.`}
-        confirmText="Quitar"
-        isDestructive
-        isPending={assignBranchRoute.isPending}
-      />
 
       <AlertModal
         isOpen={alertModal.isOpen}
@@ -382,50 +247,6 @@ export const RouteFormPage = () => {
     </div>
   );
 };
-
-const BranchRouteCard = ({
-  branch,
-  isPending,
-  onEdit,
-  onRemove,
-}: {
-  branch: CustomerBranchOption;
-  isPending: boolean;
-  onEdit: () => void;
-  onRemove: () => void;
-}) => (
-  <article className="flex flex-col gap-3 rounded-lg border border-gray-200 bg-white p-3 sm:flex-row sm:items-center sm:justify-between">
-    <div className="min-w-0">
-      <p className="truncate text-[13px] font-semibold text-[#1D1D1F]">
-        <Building2 className="mr-1.5 inline h-3.5 w-3.5 text-[#0066CC]" />
-        {branch.name}
-      </p>
-      <p className="mt-1 truncate text-[12px] text-[#86868B]">
-        <User className="mr-1.5 inline h-3.5 w-3.5" />
-        {branch.customers?.name || 'Sin cliente'} - {[branch.municipality, branch.state].filter(Boolean).join(', ') || 'Ubicación pendiente'}
-      </p>
-    </div>
-    <div className="flex gap-2">
-      <button
-        type="button"
-        onClick={onEdit}
-        className="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 text-[12px] font-medium text-[#424245] transition-colors hover:bg-gray-50"
-      >
-        <Pencil className="h-3.5 w-3.5" />
-        Editar
-      </button>
-      <button
-        type="button"
-        onClick={onRemove}
-        disabled={isPending}
-        className="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 text-[12px] font-medium text-[#424245] transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:text-gray-300"
-      >
-        <X className="h-3.5 w-3.5" />
-        Quitar
-      </button>
-    </div>
-  </article>
-);
 
 const TextInput = ({
   label,

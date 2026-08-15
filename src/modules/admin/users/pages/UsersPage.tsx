@@ -958,15 +958,8 @@ const UserFormDialog = ({
               {form.user_type === 'AGENT' && (
               <AgentFunctionPicker
                 values={form.agent_functions}
-                onToggle={(agentFunction) =>
-                  onChange((current) => {
-                    const hasFunction = current.agent_functions.includes(agentFunction);
-                    const nextFunctions = hasFunction
-                      ? current.agent_functions.filter((value) => value !== agentFunction)
-                      : [...current.agent_functions, agentFunction];
-
-                    return { ...current, agent_functions: nextFunctions };
-                  })
+                onChange={(agentFunction) =>
+                  onChange((current) => ({ ...current, agent_functions: [agentFunction] }))
                 }
               />
             )}
@@ -1043,40 +1036,27 @@ interface TextInputProps {
 
 interface AgentFunctionPickerProps {
   values: AgentFunction[];
-  onToggle: (agentFunction: AgentFunction) => void;
+  onChange: (agentFunction: AgentFunction) => void;
 }
 
 const agentFunctionOptions: AgentFunction[] = ['DRIVER', 'SALESPERSON', 'WAREHOUSE'];
 
-const AgentFunctionPicker = ({ values, onToggle }: AgentFunctionPickerProps) => {
+const AgentFunctionPicker = ({ values, onChange }: AgentFunctionPickerProps) => {
   return (
-    <fieldset className="block min-w-0">
-      <legend className="mb-1.5 block text-[13px] font-medium text-[#1D1D1F]">Funciones</legend>
-      <div className="grid min-w-0 gap-2 sm:grid-cols-3 md:grid-cols-1 xl:grid-cols-3">
-        {agentFunctionOptions.map((agentFunction) => {
-          const isChecked = values.includes(agentFunction);
-
-          return (
-            <label
-              key={agentFunction}
-              className={`flex h-10 min-w-0 cursor-pointer items-center justify-center rounded-lg border px-3 text-[12px] font-semibold transition-colors ${
-                isChecked
-                  ? 'border-[#0066CC] bg-[#0066CC] text-white'
-                  : 'border-gray-300 bg-white text-[#424245] hover:bg-gray-50'
-              }`}
-            >
-              <input
-                type="checkbox"
-                checked={isChecked}
-                onChange={() => onToggle(agentFunction)}
-                className="sr-only"
-              />
-              <span className="truncate">{agentFunctionLabels[agentFunction]}</span>
-              </label>
-          );
-        })}
-      </div>
-    </fieldset>
+    <label className="block min-w-0">
+      <span className="mb-1.5 block text-[13px] font-medium text-[#1D1D1F]">Funciones</span>
+      <select
+        value={values[0] || 'DRIVER'}
+        onChange={(event) => onChange(event.target.value as AgentFunction)}
+        className="h-10 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm outline-none focus:border-[#0066CC] focus:ring-2 focus:ring-[#0066CC]/15 sm:h-11"
+      >
+        {agentFunctionOptions.map((agentFunction) => (
+          <option key={agentFunction} value={agentFunction}>
+            {agentFunctionLabels[agentFunction]}
+          </option>
+        ))}
+      </select>
+    </label>
   );
 };
 

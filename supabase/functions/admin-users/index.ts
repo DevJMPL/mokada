@@ -190,6 +190,11 @@ Deno.serve(async (req) => {
 
     if (body.action === 'create') {
       const normalized = normalizeProfile(body.payload, true);
+
+      if (normalized.profile.user_type === 'CUSTOMER') {
+        throw new Error('Los clientes se crean desde el modulo de clientes.');
+      }
+
       const { data: createdUser, error: createError } = await adminClient.auth.admin.createUser({
         email: normalized.auth.email,
         password: normalized.auth.password,

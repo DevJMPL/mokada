@@ -58,8 +58,8 @@ const emptyForm: UserFormState = {
   phone: '',
   avatar_path: null,
   identity_document_path: null,
-  user_type: 'CUSTOMER',
-  agent_functions: [],
+  user_type: 'AGENT',
+  agent_functions: ['DRIVER'],
   is_active: true,
   avatarFile: null,
   documentFile: null,
@@ -948,15 +948,22 @@ const UserFormDialog = ({
             />
             <label className="block min-w-0">
               <span className="mb-1.5 block text-[13px] font-medium text-[#1D1D1F]">Tipo</span>
-              <select
-                value={form.user_type}
-                onChange={(event) => onUserTypeChange(event.target.value as UserType)}
-                className="h-10 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm outline-none focus:border-[#0066CC] focus:ring-2 focus:ring-[#0066CC]/15 sm:h-11"
-              >
-                <option value="CUSTOMER">Cliente</option>
-                <option value="AGENT">Agente</option>
-                <option value="ADMIN">Admin</option>
-              </select>
+              {isEditing && form.user_type === 'CUSTOMER' ? (
+                <input
+                  value="Cliente"
+                  disabled
+                  className="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-[#86868B] outline-none sm:h-11"
+                />
+              ) : (
+                <select
+                  value={form.user_type}
+                  onChange={(event) => onUserTypeChange(event.target.value as UserType)}
+                  className="h-10 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm outline-none focus:border-[#0066CC] focus:ring-2 focus:ring-[#0066CC]/15 sm:h-11"
+                >
+                  <option value="AGENT">Agente</option>
+                  <option value="ADMIN">Admin</option>
+                </select>
+              )}
             </label>
 
             {form.user_type === 'AGENT' && (

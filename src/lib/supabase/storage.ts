@@ -1,6 +1,12 @@
 import { supabase } from './client';
 
-export type StorageBucket = 'user-avatars' | 'identity-documents' | 'products' | 'expense-evidence' | 'fleet-vehicles';
+export type StorageBucket =
+  | 'user-avatars'
+  | 'identity-documents'
+  | 'products'
+  | 'expense-evidence'
+  | 'fleet-vehicles'
+  | 'customer-branches';
 
 interface UploadFileOptions {
   bucket: StorageBucket;

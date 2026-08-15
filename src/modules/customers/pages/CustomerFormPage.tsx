@@ -66,6 +66,32 @@ interface CredentialNotice {
   password: string;
 }
 
+const fiscalRegimeOptions: Array<{
+  value: string;
+  label: string;
+  personTypes: FiscalPersonType[];
+}> = [
+  { value: '601', label: '601 - GENERAL DE LEY PERSONAS MORALES', personTypes: ['LEGAL_ENTITY'] },
+  { value: '603', label: '603 - PERSONAS MORALES CON FINES NO LUCRATIVOS', personTypes: ['LEGAL_ENTITY'] },
+  { value: '605', label: '605 - SUELDOS Y SALARIOS E INGRESOS ASIMILADOS A SALARIOS', personTypes: ['INDIVIDUAL'] },
+  { value: '606', label: '606 - ARRENDAMIENTO', personTypes: ['INDIVIDUAL'] },
+  { value: '607', label: '607 - RÉGIMEN DE ENAJENACIÓN O ADQUISICIÓN DE BIENES', personTypes: ['INDIVIDUAL'] },
+  { value: '608', label: '608 - DEMÁS INGRESOS', personTypes: ['INDIVIDUAL'] },
+  { value: '610', label: '610 - RESIDENTES EN EL EXTRANJERO SIN ESTABLECIMIENTO PERMANENTE EN MÉXICO', personTypes: ['INDIVIDUAL', 'LEGAL_ENTITY'] },
+  { value: '611', label: '611 - INGRESOS POR DIVIDENDOS', personTypes: ['INDIVIDUAL'] },
+  { value: '612', label: '612 - PERSONAS FÍSICAS CON ACTIVIDADES EMPRESARIALES Y PROFESIONALES', personTypes: ['INDIVIDUAL'] },
+  { value: '614', label: '614 - INGRESOS POR INTERESES', personTypes: ['INDIVIDUAL'] },
+  { value: '615', label: '615 - RÉGIMEN DE LOS INGRESOS POR OBTENCIÓN DE PREMIOS', personTypes: ['INDIVIDUAL'] },
+  { value: '616', label: '616 - SIN OBLIGACIONES FISCALES', personTypes: ['INDIVIDUAL'] },
+  { value: '620', label: '620 - SOCIEDADES COOPERATIVAS DE PRODUCCIÓN QUE OPTAN POR DIFERIR SUS INGRESOS', personTypes: ['LEGAL_ENTITY'] },
+  { value: '621', label: '621 - INCORPORACIÓN FISCAL', personTypes: ['INDIVIDUAL'] },
+  { value: '622', label: '622 - ACTIVIDADES AGRÍCOLAS, GANADERAS, SILVÍCOLAS Y PESQUERAS', personTypes: ['LEGAL_ENTITY'] },
+  { value: '623', label: '623 - OPCIONAL PARA GRUPOS DE SOCIEDADES', personTypes: ['LEGAL_ENTITY'] },
+  { value: '624', label: '624 - COORDINADOS', personTypes: ['LEGAL_ENTITY'] },
+  { value: '625', label: '625 - RÉGIMEN DE LAS ACTIVIDADES EMPRESARIALES CON INGRESOS A TRAVÉS DE PLATAFORMAS TECNOLÓGICAS', personTypes: ['INDIVIDUAL'] },
+  { value: '626', label: '626 - RÉGIMEN SIMPLIFICADO DE CONFIANZA', personTypes: ['INDIVIDUAL', 'LEGAL_ENTITY'] },
+];
+
 const emptyCustomerForm: CustomerFormValues = {
   name: '',
   email: '',
@@ -545,6 +571,9 @@ const BackLink = () => (
   </Link>
 );
 
+const getFiscalRegimeLabel = (value: string) =>
+  fiscalRegimeOptions.find((option) => option.value === value)?.label || value;
+
 const FiscalProfileCard = ({
   profile,
   isPending,
@@ -566,7 +595,7 @@ const FiscalProfileCard = ({
         </div>
         <p className="mt-1 text-[12px] font-medium text-[#0066CC]">{profile.rfc}</p>
         <p className="mt-1 text-[12px] text-[#86868B]">
-          {fiscalPersonTypeLabels[profile.person_type]} - {profile.tax_regime} - CP {profile.fiscal_zip_code}
+          {fiscalPersonTypeLabels[profile.person_type]} - {getFiscalRegimeLabel(profile.tax_regime)} - CP {profile.fiscal_zip_code}
         </p>
         <p className="mt-1 truncate text-[12px] text-[#424245]">{profile.billing_email}</p>
       </div>
@@ -690,6 +719,7 @@ const FiscalFormModal = ({
     is_default: profile?.is_default || false,
     is_active: profile?.is_active ?? true,
   });
+  const availableRegimes = fiscalRegimeOptions.filter((option) => option.personTypes.includes(form.person_type));
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -705,7 +735,18 @@ const FiscalFormModal = ({
             <select
               value={form.person_type}
               onChange={(event) =>
-                setForm((current) => ({ ...current, person_type: event.target.value as FiscalPersonType }))
+                setForm((current) => {
+                  const personType = event.target.value as FiscalPersonType;
+                  const currentRegimeIsValid = fiscalRegimeOptions
+                    .find((option) => option.value === current.tax_regime)
+                    ?.personTypes.includes(personType);
+
+                  return {
+                    ...current,
+                    person_type: personType,
+                    tax_regime: currentRegimeIsValid ? current.tax_regime : '',
+                  };
+                })
               }
               className="h-10 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm outline-none focus:border-[#0066CC] focus:ring-2 focus:ring-[#0066CC]/15"
             >
@@ -726,12 +767,24 @@ const FiscalFormModal = ({
             onChange={(value) => setForm((current) => ({ ...current, legal_name: value }))}
             className="sm:col-span-2"
           />
-          <TextInput
-            label="Régimen fiscal"
-            value={form.tax_regime}
-            maxLength={120}
-            onChange={(value) => setForm((current) => ({ ...current, tax_regime: value }))}
-          />
+          <label className="block min-w-0">
+            <span className="mb-1.5 block text-[13px] font-medium text-[#1D1D1F]">Régimen fiscal</span>
+            <select
+              value={form.tax_regime}
+              onChange={(event) => setForm((current) => ({ ...current, tax_regime: event.target.value }))}
+              required
+              className="h-10 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm outline-none focus:border-[#0066CC] focus:ring-2 focus:ring-[#0066CC]/15"
+            >
+              <option value="" disabled>
+                Selecciona un régimen
+              </option>
+              {availableRegimes.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
           <TextInput
             label="Código postal fiscal"
             value={form.fiscal_zip_code}

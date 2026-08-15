@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Building2, MapPin, Pencil, Plus, Save, User, X } from 'lucide-react';
+import { ArrowLeft, Building2, Pencil, Plus, Save, User, X } from 'lucide-react';
 import {
   useAssignBranchRoute,
   useCustomerBranchOptions,
@@ -34,57 +34,6 @@ const emptyForm = {
   working_days: ['L', 'M', 'X', 'J', 'V'] as string[],
   default_weekly_budget: 0,
   is_active: true,
-};
-
-const toNumber = (value: unknown) => {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : null;
-};
-
-const getLocatedBranches = (branches: CustomerBranchOption[]) => {
-  return branches
-    .map((branch) => ({
-      ...branch,
-      latitude: toNumber(branch.latitude),
-      longitude: toNumber(branch.longitude),
-    }))
-    .filter(
-      (branch): branch is CustomerBranchOption & { latitude: number; longitude: number } =>
-        branch.latitude !== null && branch.longitude !== null,
-    );
-};
-
-const getMapBounds = (branches: Array<CustomerBranchOption & { latitude: number; longitude: number }>) => {
-  const locatedBranches = branches
-    .map((branch) => ({ latitude: branch.latitude, longitude: branch.longitude }));
-
-  const latitudes = locatedBranches.map((branch) => branch.latitude);
-  const longitudes = locatedBranches.map((branch) => branch.longitude);
-
-  return {
-    minLat: Math.min(...latitudes),
-    maxLat: Math.max(...latitudes),
-    minLng: Math.min(...longitudes),
-    maxLng: Math.max(...longitudes),
-  };
-};
-
-const markerStyle = (
-  branch: CustomerBranchOption & { latitude: number; longitude: number },
-  branches: Array<CustomerBranchOption & { latitude: number; longitude: number }>,
-) => {
-  if (!branches.length) {
-    return { left: '50%', top: '50%' };
-  }
-
-  const bounds = getMapBounds(branches);
-  const latRange = bounds.maxLat - bounds.minLat || 0.01;
-  const lngRange = bounds.maxLng - bounds.minLng || 0.01;
-
-  return {
-    left: `${((branch.longitude - bounds.minLng) / lngRange) * 82 + 9}%`,
-    top: `${(1 - (branch.latitude - bounds.minLat) / latRange) * 76 + 12}%`,
-  };
 };
 
 export const RouteFormPage = () => {
@@ -129,7 +78,6 @@ export const RouteFormPage = () => {
 
   const routeId = id || null;
   const assignedBranches = branchOptions.filter((branch) => branch.route_id === routeId);
-  const locatedBranches = getLocatedBranches(assignedBranches);
   const routeOptionsForBranches = routes as CustomerRouteOption[];
   const branchSearchOptions = branchOptions
     .filter((branch) => branch.is_active)
@@ -263,7 +211,7 @@ export const RouteFormPage = () => {
               {isEditing ? 'Editar ruta' : 'Nueva ruta'}
             </h2>
             <p className="mt-1 text-[14px] text-[#86868B] sm:text-[15px]">
-              Datos de la ruta, sucursales asignadas y mapa operativo.
+              Datos de la ruta y sucursales asignadas.
             </p>
           </div>
         </div>
@@ -335,7 +283,7 @@ export const RouteFormPage = () => {
         </label>
       </form>
 
-      <section className="grid gap-5 xl:grid-cols-[minmax(0,0.95fr)_minmax(360px,0.65fr)]">
+      <section>
         <div className="rounded-2xl border border-gray-200/60 bg-white p-4 shadow-sm sm:p-6">
           <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div>
@@ -397,8 +345,6 @@ export const RouteFormPage = () => {
             </div>
           )}
         </div>
-
-        <RouteBranchesMap branches={assignedBranches} locatedBranches={locatedBranches} />
       </section>
 
       {branchDialog && routeId && (
@@ -479,73 +425,6 @@ const BranchRouteCard = ({
       </button>
     </div>
   </article>
-);
-
-const RouteBranchesMap = ({
-  branches,
-  locatedBranches,
-}: {
-  branches: CustomerBranchOption[];
-  locatedBranches: Array<CustomerBranchOption & { latitude: number; longitude: number }>;
-}) => (
-  <aside className="rounded-2xl border border-gray-200/60 bg-white p-4 shadow-sm sm:p-6">
-    <div className="mb-4">
-      <h3 className="inline-flex items-center gap-2 text-base font-semibold text-[#1D1D1F]">
-        <MapPin className="h-5 w-5 text-[#0066CC]" />
-        Mapa de sucursales
-      </h3>
-      <p className="mt-0.5 text-[13px] text-[#86868B]">
-        {locatedBranches.length} de {branches.length} sucursales tienen coordenadas.
-      </p>
-    </div>
-
-    {locatedBranches.length ? (
-      <div className="relative min-h-[360px] overflow-hidden rounded-xl border border-gray-200 bg-[#EEF3F8]">
-        <div className="absolute left-[8%] top-[18%] h-[68%] w-[2px] rotate-[24deg] rounded-full bg-white/80" />
-        <div className="absolute left-[22%] top-[12%] h-[2px] w-[72%] rotate-[-10deg] rounded-full bg-white/80" />
-        <div className="absolute left-[14%] top-[68%] h-[2px] w-[72%] rotate-[6deg] rounded-full bg-white/80" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_30%,rgba(0,102,204,0.08),transparent_28%),radial-gradient(circle_at_80%_68%,rgba(52,199,89,0.10),transparent_30%)]" />
-        <div className="absolute inset-0">
-          {locatedBranches.map((branch, index) => (
-            <a
-              key={branch.id}
-              href={`https://www.google.com/maps?q=${branch.latitude},${branch.longitude}`}
-              target="_blank"
-              rel="noreferrer"
-              style={markerStyle(branch, locatedBranches)}
-              className="absolute z-10 flex h-9 w-9 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-[#0066CC] text-[12px] font-bold text-white shadow-lg ring-4 ring-white transition-transform hover:scale-110"
-              title={branch.name}
-            >
-              {index + 1}
-            </a>
-          ))}
-        </div>
-      </div>
-    ) : (
-      <div className="rounded-xl border border-dashed border-gray-300 bg-[#F5F5F7] px-3 py-10 text-center text-[13px] text-[#86868B]">
-        Agrega coordenadas a las sucursales para verlas en el mapa.
-      </div>
-    )}
-
-    {!!locatedBranches.length && (
-      <div className="mt-3 grid gap-2">
-        {locatedBranches.map((branch, index) => (
-          <a
-            key={branch.id}
-            href={`https://www.google.com/maps?q=${branch.latitude},${branch.longitude}`}
-            target="_blank"
-            rel="noreferrer"
-            className="flex min-w-0 items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-[12px] transition-colors hover:bg-[#F5F5F7]"
-          >
-            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#0066CC] text-[10px] font-bold text-white">
-              {index + 1}
-            </span>
-            <span className="min-w-0 flex-1 truncate font-medium text-[#1D1D1F]">{branch.name}</span>
-          </a>
-        ))}
-      </div>
-    )}
-  </aside>
 );
 
 const TextInput = ({

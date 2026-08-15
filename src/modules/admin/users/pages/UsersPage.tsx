@@ -7,6 +7,7 @@ import {
   Plus,
   Search,
   ShieldCheck,
+  ChevronDown,
   ToggleLeft,
   ToggleRight,
   UserRound,
@@ -958,8 +959,8 @@ const UserFormDialog = ({
               {form.user_type === 'AGENT' && (
               <AgentFunctionPicker
                 values={form.agent_functions}
-                onChange={(agentFunction) =>
-                  onChange((current) => ({ ...current, agent_functions: [agentFunction] }))
+                onChange={(nextFunctions) =>
+                  onChange((current) => ({ ...current, agent_functions: nextFunctions }))
                 }
               />
             )}
@@ -1036,27 +1037,76 @@ interface TextInputProps {
 
 interface AgentFunctionPickerProps {
   values: AgentFunction[];
-  onChange: (agentFunction: AgentFunction) => void;
+  onChange: (agentFunctions: AgentFunction[]) => void;
 }
 
 const agentFunctionOptions: AgentFunction[] = ['DRIVER', 'SALESPERSON', 'WAREHOUSE'];
 
 const AgentFunctionPicker = ({ values, onChange }: AgentFunctionPickerProps) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const pickerRef = useRef<HTMLDivElement>(null);
+  const selectedLabel = values.length
+    ? values.map((agentFunction) => agentFunctionLabels[agentFunction]).join(', ')
+    : 'Selecciona funciones';
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handlePointerDown = (event: PointerEvent) => {
+      if (!pickerRef.current?.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('pointerdown', handlePointerDown);
+    return () => document.removeEventListener('pointerdown', handlePointerDown);
+  }, [isOpen]);
+
+  const toggleFunction = (agentFunction: AgentFunction) => {
+    const nextFunctions = values.includes(agentFunction)
+      ? values.filter((value) => value !== agentFunction)
+      : [...values, agentFunction];
+
+    onChange(nextFunctions);
+  };
+
   return (
-    <label className="block min-w-0">
+    <div ref={pickerRef} className="relative block min-w-0">
       <span className="mb-1.5 block text-[13px] font-medium text-[#1D1D1F]">Funciones</span>
-      <select
-        value={values[0] || 'DRIVER'}
-        onChange={(event) => onChange(event.target.value as AgentFunction)}
-        className="h-10 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm outline-none focus:border-[#0066CC] focus:ring-2 focus:ring-[#0066CC]/15 sm:h-11"
+      <button
+        type="button"
+        onClick={() => setIsOpen((current) => !current)}
+        className="flex h-10 w-full min-w-0 items-center justify-between gap-2 rounded-lg border border-gray-300 bg-white px-3 text-left text-sm outline-none transition-colors hover:bg-gray-50 focus:border-[#0066CC] focus:ring-2 focus:ring-[#0066CC]/15 sm:h-11"
       >
-        {agentFunctionOptions.map((agentFunction) => (
-          <option key={agentFunction} value={agentFunction}>
-            {agentFunctionLabels[agentFunction]}
-          </option>
-        ))}
-      </select>
-    </label>
+        <span className={`min-w-0 flex-1 truncate ${values.length ? 'text-[#1D1D1F]' : 'text-[#86868B]'}`}>
+          {selectedLabel}
+        </span>
+        <ChevronDown className={`h-4 w-4 shrink-0 text-[#86868B] transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+
+      {isOpen && (
+        <div className="absolute left-0 right-0 top-[calc(100%+0.35rem)] z-20 overflow-hidden rounded-lg border border-gray-200 bg-white p-1 shadow-lg">
+          {agentFunctionOptions.map((agentFunction) => {
+            const isChecked = values.includes(agentFunction);
+
+            return (
+              <label
+                key={agentFunction}
+                className="flex h-9 cursor-pointer items-center gap-2 rounded-md px-2 text-sm text-[#1D1D1F] transition-colors hover:bg-[#F5F5F7]"
+              >
+                <input
+                  type="checkbox"
+                  checked={isChecked}
+                  onChange={() => toggleFunction(agentFunction)}
+                  className="h-4 w-4 rounded border-gray-300 text-[#0066CC] focus:ring-[#0066CC]"
+                />
+                <span className="truncate">{agentFunctionLabels[agentFunction]}</span>
+              </label>
+            );
+          })}
+        </div>
+      )}
+    </div>
   );
 };
 

@@ -21,6 +21,8 @@ import {
 import { LoadingState } from '../../../components/ui/LoadingState';
 import { Modal } from '../../../components/ui/Modal';
 import { StatusBadge } from '../../../components/ui/StatusBadge';
+import { AlertModal } from '../../../components/ui/AlertModal';
+import { ConfirmModal } from '../../../components/ui/ConfirmModal';
 import mokadaLogo from '../../../assets/logo.svg';
 import { createBrandedQrDataUrl } from '../../../utils/qr';
 import { CustomerBranchFormModal } from '../components/CustomerBranchFormModal';
@@ -53,6 +55,9 @@ import {
 type TabId = 'general' | 'fiscal' | 'branches';
 type FiscalDialogState = { mode: 'create' } | { mode: 'edit'; profile: CustomerFiscalProfile };
 type BranchDialogState = { mode: 'create' } | { mode: 'edit'; branch: CustomerBranch };
+type ConfirmAction =
+  | { type: 'fiscal'; profile: CustomerFiscalProfile }
+  | { type: 'branch'; branch: CustomerBranch };
 
 interface CredentialNotice {
   email: string;
@@ -85,6 +90,13 @@ export const CustomerFormPage = () => {
   const [qrBranch, setQrBranch] = useState<CustomerBranch | null>(null);
   const [fiscalError, setFiscalError] = useState('');
   const [branchError, setBranchError] = useState('');
+  const [confirmAction, setConfirmAction] = useState<ConfirmAction | null>(null);
+  const [alertModal, setAlertModal] = useState<{ isOpen: boolean; title: string; message: string; type: 'error' | 'success' | 'info' }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    type: 'error',
+  });
 
   const { data: customer, isLoading: isCustomerLoading, isError, error } = useCustomer(id || null);
   const { data: fiscalProfiles = [], isLoading: isFiscalLoading } = useCustomerFiscalProfiles(id || null);
@@ -124,6 +136,7 @@ export const CustomerFormPage = () => {
   const persistCustomer = async () => {
     setErrorMessage('');
     setSavedMessage('');
+    setAlertModal((current) => ({ ...current, isOpen: false }));
 
     try {
       const result = await saveCustomer.mutateAsync({ id, payload: form });
@@ -144,9 +157,21 @@ export const CustomerFormPage = () => {
       }
 
       setSavedMessage('Cliente actualizado.');
+      setAlertModal({
+        isOpen: true,
+        title: 'Cliente actualizado',
+        message: 'Los cambios del cliente se guardaron correctamente.',
+        type: 'success',
+      });
     } catch (error) {
       const message = error instanceof Error ? error.message : 'No se pudo guardar el cliente.';
       setErrorMessage(message);
+      setAlertModal({
+        isOpen: true,
+        title: 'No se pudo guardar el cliente',
+        message,
+        type: 'error',
+      });
     }
   };
 
@@ -189,6 +214,28 @@ export const CustomerFormPage = () => {
     const imagePath = await uploadBranchImage.mutateAsync({ branchId, file });
     await updateBranchImage.mutateAsync({ branchId, imagePath });
     return imagePath;
+  };
+
+  const handleConfirmAction = async () => {
+    if (!confirmAction) return;
+
+    try {
+      if (confirmAction.type === 'fiscal') {
+        await toggleFiscalProfile.mutateAsync(confirmAction.profile);
+      } else {
+        await toggleBranch.mutateAsync(confirmAction.branch);
+      }
+
+      setConfirmAction(null);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'No se pudo actualizar el registro.';
+      setAlertModal({
+        isOpen: true,
+        title: 'No se pudo completar la acción',
+        message,
+        type: 'error',
+      });
+    }
   };
 
   const copyCredentials = async () => {
@@ -351,7 +398,7 @@ export const CustomerFormPage = () => {
                     setFiscalError('');
                     setFiscalDialog({ mode: 'edit', profile });
                   }}
-                  onToggle={() => toggleFiscalProfile.mutate(profile)}
+                  onToggle={() => setConfirmAction({ type: 'fiscal', profile })}
                 />
               ))}
             </div>
@@ -387,7 +434,7 @@ export const CustomerFormPage = () => {
                     setBranchDialog({ mode: 'edit', branch });
                   }}
                   onShowQr={() => setQrBranch(branch)}
-                  onToggle={() => toggleBranch.mutate(branch)}
+                  onToggle={() => setConfirmAction({ type: 'branch', branch })}
                 />
               ))}
             </div>
@@ -426,6 +473,53 @@ export const CustomerFormPage = () => {
           onClose={() => setQrBranch(null)}
         />
       )}
+
+      <ConfirmModal
+        isOpen={Boolean(confirmAction)}
+        onClose={() => setConfirmAction(null)}
+        onConfirm={() => void handleConfirmAction()}
+        title={
+          confirmAction?.type === 'fiscal'
+            ? confirmAction.profile.is_active
+              ? 'Desactivar información fiscal'
+              : 'Activar información fiscal'
+            : confirmAction?.branch.is_active
+              ? 'Desactivar sucursal'
+              : 'Activar sucursal'
+        }
+        message={
+          confirmAction?.type === 'fiscal'
+            ? confirmAction.profile.is_active
+              ? `La información fiscal ${confirmAction.profile.rfc} dejará de estar activa.`
+              : `La información fiscal ${confirmAction.profile.rfc} volverá a estar activa.`
+            : confirmAction?.branch.is_active
+              ? `La sucursal ${confirmAction.branch.name} dejará de estar activa.`
+              : `La sucursal ${confirmAction?.branch.name || ''} volverá a estar activa.`
+        }
+        confirmText={
+          confirmAction?.type === 'fiscal'
+            ? confirmAction.profile.is_active
+              ? 'Desactivar'
+              : 'Activar'
+            : confirmAction?.branch.is_active
+              ? 'Desactivar'
+              : 'Activar'
+        }
+        isDestructive={
+          confirmAction?.type === 'fiscal'
+            ? confirmAction.profile.is_active
+            : Boolean(confirmAction?.branch.is_active)
+        }
+        isPending={toggleFiscalProfile.isPending || toggleBranch.isPending}
+      />
+
+      <AlertModal
+        isOpen={alertModal.isOpen}
+        onClose={() => setAlertModal((current) => ({ ...current, isOpen: false }))}
+        title={alertModal.title}
+        message={alertModal.message}
+        type={alertModal.type}
+      />
     </div>
   );
 };

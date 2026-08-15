@@ -1,6 +1,8 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Building2, Pencil, Phone, Plus, ReceiptText, Search, ToggleLeft, ToggleRight, Users } from 'lucide-react';
+import { AlertModal } from '../../../components/ui/AlertModal';
+import { ConfirmModal } from '../../../components/ui/ConfirmModal';
 import { EmptyState } from '../../../components/ui/EmptyState';
 import { ErrorState } from '../../../components/ui/ErrorState';
 import { LoadingState } from '../../../components/ui/LoadingState';
@@ -11,12 +13,18 @@ import type { CustomerSummary } from '../services/customers.service';
 export const CustomersPage = () => {
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
+  const [customerToToggle, setCustomerToToggle] = useState<CustomerSummary | null>(null);
+  const [alertModal, setAlertModal] = useState<{ isOpen: boolean; title: string; message: string; type: 'error' | 'success' | 'info' }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    type: 'error',
+  });
   const { data: customers = [], isLoading, isError, error, refetch } = useCustomers({ search });
   const saveCustomer = useSaveCustomer();
 
   const handleToggleCustomer = (customer: CustomerSummary) => {
-    setErrorMessage('');
+    setAlertModal((current) => ({ ...current, isOpen: false }));
     saveCustomer.mutate(
       {
         id: customer.id,
@@ -29,9 +37,15 @@ export const CustomersPage = () => {
         },
       },
       {
+        onSuccess: () => setCustomerToToggle(null),
         onError: (mutationError) => {
           const message = mutationError instanceof Error ? mutationError.message : 'No se pudo actualizar el cliente.';
-          setErrorMessage(message);
+          setAlertModal({
+            isOpen: true,
+            title: 'No se pudo actualizar el cliente',
+            message,
+            type: 'error',
+          });
         },
       },
     );
@@ -62,12 +76,6 @@ export const CustomersPage = () => {
           Nuevo cliente
         </button>
       </div>
-
-      {errorMessage && (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-[13px] text-red-700">
-          {errorMessage}
-        </div>
-      )}
 
       <label className="flex h-11 items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 shadow-sm focus-within:border-[#0066CC] focus-within:ring-2 focus-within:ring-[#0066CC]/15">
         <Search className="h-4 w-4 text-[#86868B]" />
@@ -146,7 +154,7 @@ export const CustomersPage = () => {
                         customer={customer}
                         isPending={saveCustomer.isPending}
                         onEdit={() => navigate(`/customers/${customer.id}`)}
-                        onToggle={() => handleToggleCustomer(customer)}
+                        onToggle={() => setCustomerToToggle(customer)}
                       />
                     </td>
                   </tr>
@@ -162,12 +170,37 @@ export const CustomersPage = () => {
                 customer={customer}
                 isPending={saveCustomer.isPending}
                 onEdit={() => navigate(`/customers/${customer.id}`)}
-                onToggle={() => handleToggleCustomer(customer)}
+                onToggle={() => setCustomerToToggle(customer)}
               />
             ))}
           </div>
         </>
       )}
+
+      <ConfirmModal
+        isOpen={Boolean(customerToToggle)}
+        onClose={() => setCustomerToToggle(null)}
+        onConfirm={() => {
+          if (customerToToggle) handleToggleCustomer(customerToToggle);
+        }}
+        title={customerToToggle?.is_active ? 'Desactivar cliente' : 'Activar cliente'}
+        message={
+          customerToToggle?.is_active
+            ? `El cliente ${customerToToggle.name} dejará de aparecer como activo.`
+            : `El cliente ${customerToToggle?.name || ''} volverá a estar activo.`
+        }
+        confirmText={customerToToggle?.is_active ? 'Desactivar' : 'Activar'}
+        isDestructive={customerToToggle?.is_active}
+        isPending={saveCustomer.isPending}
+      />
+
+      <AlertModal
+        isOpen={alertModal.isOpen}
+        onClose={() => setAlertModal((current) => ({ ...current, isOpen: false }))}
+        title={alertModal.title}
+        message={alertModal.message}
+        type={alertModal.type}
+      />
     </div>
   );
 };

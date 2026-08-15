@@ -13,6 +13,8 @@ import { CustomerBranchFormModal } from '../../customers/components/CustomerBran
 import { useRoute, useRoutes, useSaveRoute } from '../hooks/useRouteOperations';
 import { LoadingState } from '../../../components/ui/LoadingState';
 import { SearchSelect } from '../../../components/ui/SearchSelect';
+import { AlertModal } from '../../../components/ui/AlertModal';
+import { ConfirmModal } from '../../../components/ui/ConfirmModal';
 import type { BranchFormValues, CustomerBranchOption, CustomerRouteOption } from '../../customers/services/customers.service';
 
 const DAYS = [
@@ -102,6 +104,13 @@ export const RouteFormPage = () => {
   const [selectedBranchId, setSelectedBranchId] = useState('');
   const [branchDialog, setBranchDialog] = useState<{ mode: 'create' } | { mode: 'edit'; branch: CustomerBranchOption } | null>(null);
   const [branchError, setBranchError] = useState('');
+  const [branchToRemove, setBranchToRemove] = useState<CustomerBranchOption | null>(null);
+  const [alertModal, setAlertModal] = useState<{ isOpen: boolean; title: string; message: string; type: 'error' | 'success' | 'info' }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    type: 'error',
+  });
 
   useEffect(() => {
     if (!route) return;
@@ -151,18 +160,51 @@ export const RouteFormPage = () => {
 
   const handleSave = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const savedRoute = await saveRoute.mutateAsync({ id, ...form });
+    setAlertModal((current) => ({ ...current, isOpen: false }));
 
-    if (!id) {
-      navigate(`/route-operations/routes/${savedRoute.id}`, { replace: true });
+    try {
+      const savedRoute = await saveRoute.mutateAsync({ id, ...form });
+
+      if (!id) {
+        navigate(`/route-operations/routes/${savedRoute.id}`, { replace: true });
+        return;
+      }
+
+      setAlertModal({
+        isOpen: true,
+        title: 'Ruta actualizada',
+        message: 'Los cambios de la ruta se guardaron correctamente.',
+        type: 'success',
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'No se pudo guardar la ruta.';
+      setAlertModal({
+        isOpen: true,
+        title: 'No se pudo guardar la ruta',
+        message,
+        type: 'error',
+      });
     }
   };
 
   const assignSelectedBranch = async (branchId: string) => {
     if (!routeId) return;
-    setSelectedBranchId(branchId);
-    await assignBranchRoute.mutateAsync({ branchId, routeId });
-    setSelectedBranchId('');
+    setAlertModal((current) => ({ ...current, isOpen: false }));
+
+    try {
+      setSelectedBranchId(branchId);
+      await assignBranchRoute.mutateAsync({ branchId, routeId });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'No se pudo asignar la sucursal.';
+      setAlertModal({
+        isOpen: true,
+        title: 'No se pudo asignar la sucursal',
+        message,
+        type: 'error',
+      });
+    } finally {
+      setSelectedBranchId('');
+    }
   };
 
   const handleSaveBranch = async (payload: BranchFormValues, imageFile: File | null) => {
@@ -187,6 +229,23 @@ export const RouteFormPage = () => {
     const imagePath = await uploadBranchImage.mutateAsync({ branchId, file });
     await updateBranchImage.mutateAsync({ branchId, imagePath });
     return imagePath;
+  };
+
+  const removeBranchFromRoute = async () => {
+    if (!branchToRemove) return;
+
+    try {
+      await assignBranchRoute.mutateAsync({ branchId: branchToRemove.id, routeId: null });
+      setBranchToRemove(null);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'No se pudo quitar la sucursal de la ruta.';
+      setAlertModal({
+        isOpen: true,
+        title: 'No se pudo quitar la sucursal',
+        message,
+        type: 'error',
+      });
+    }
   };
 
   return (
@@ -326,7 +385,7 @@ export const RouteFormPage = () => {
                         setBranchError('');
                         setBranchDialog({ mode: 'edit', branch });
                       }}
-                      onRemove={() => assignBranchRoute.mutate({ branchId: branch.id, routeId: null })}
+                      onRemove={() => setBranchToRemove(branch)}
                     />
                   ))}
                 </div>
@@ -355,6 +414,25 @@ export const RouteFormPage = () => {
           onSubmit={handleSaveBranch}
         />
       )}
+
+      <ConfirmModal
+        isOpen={Boolean(branchToRemove)}
+        onClose={() => setBranchToRemove(null)}
+        onConfirm={() => void removeBranchFromRoute()}
+        title="Quitar sucursal de la ruta"
+        message={`La sucursal ${branchToRemove?.name || ''} quedará sin ruta asignada.`}
+        confirmText="Quitar"
+        isDestructive
+        isPending={assignBranchRoute.isPending}
+      />
+
+      <AlertModal
+        isOpen={alertModal.isOpen}
+        onClose={() => setAlertModal((current) => ({ ...current, isOpen: false }))}
+        title={alertModal.title}
+        message={alertModal.message}
+        type={alertModal.type}
+      />
     </div>
   );
 };

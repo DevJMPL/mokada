@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, ExternalLink, Save } from 'lucide-react';
+import { ArrowLeft, Building2, ExternalLink, Eye, MapPin, Save, User } from 'lucide-react';
 import { useCustomerBranchOptions } from '../../customers/hooks/useCustomers';
 import { useRoute, useSaveRoute } from '../hooks/useRouteOperations';
 import { LoadingState } from '../../../components/ui/LoadingState';
@@ -44,6 +44,15 @@ const getRouteMapUrl = (branches: CustomerBranchOption[]) => {
   if (points.length > 2) params.set('waypoints', points.slice(1, -1).join('|'));
 
   return `https://www.google.com/maps/dir/?${params.toString()}`;
+};
+
+const getBranchMapUrl = (branch: CustomerBranchOption) => {
+  const latitude = Number(branch.latitude);
+  const longitude = Number(branch.longitude);
+
+  if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return null;
+
+  return `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
 };
 
 export const RouteFormPage = () => {
@@ -210,14 +219,10 @@ export const RouteFormPage = () => {
 
       {isEditing && (
         <section className="rounded-2xl border border-gray-200/60 bg-white p-4 shadow-sm sm:p-6">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <h3 className="text-base font-semibold text-[#1D1D1F]">Detalles de ruta</h3>
-              <p className="mt-0.5 text-[13px] text-[#86868B]">
-                {routeMapUrl
-                  ? 'Abre el recorrido con las coordenadas disponibles.'
-                  : 'No hay sucursales con coordenadas para abrir el mapa.'}
-              </p>
+              <h3 className="text-base font-semibold text-[#1D1D1F]">Sucursales de la ruta</h3>
+              <p className="mt-0.5 text-[13px] text-[#86868B]">Consulta detalles o abre la ubicación de cada sucursal.</p>
             </div>
             <a
               href={routeMapUrl || undefined}
@@ -231,9 +236,21 @@ export const RouteFormPage = () => {
               }`}
             >
               <ExternalLink className="h-4 w-4" />
-              Abrir mapa
+              Abrir mapa de ruta
             </a>
           </div>
+
+          {!assignedBranches.length ? (
+            <div className="rounded-lg border border-dashed border-gray-300 bg-[#F5F5F7] px-3 py-6 text-center text-[13px] text-[#86868B]">
+              Esta ruta aún no tiene sucursales asignadas.
+            </div>
+          ) : (
+            <div className="grid gap-2">
+              {assignedBranches.map((branch) => (
+                <RouteBranchCard key={branch.id} branch={branch} />
+              ))}
+            </div>
+          )}
         </section>
       )}
 
@@ -245,6 +262,49 @@ export const RouteFormPage = () => {
         type={alertModal.type}
       />
     </div>
+  );
+};
+
+const RouteBranchCard = ({ branch }: { branch: CustomerBranchOption }) => {
+  const mapUrl = getBranchMapUrl(branch);
+  const location = [branch.municipality, branch.state].filter(Boolean).join(', ') || 'Ubicación pendiente';
+
+  return (
+    <article className="flex flex-col gap-3 rounded-lg border border-gray-200 bg-white p-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="min-w-0">
+        <p className="truncate text-[13px] font-semibold text-[#1D1D1F]">
+          <Building2 className="mr-1.5 inline h-3.5 w-3.5 text-[#0066CC]" />
+          {branch.name}
+        </p>
+        <p className="mt-1 truncate text-[12px] text-[#86868B]">
+          <User className="mr-1.5 inline h-3.5 w-3.5" />
+          {branch.customers?.name || 'Sin cliente'} - {location}
+        </p>
+      </div>
+      <div className="flex flex-wrap gap-2">
+        <Link
+          to={`/customers/${branch.customer_id}?tab=branches`}
+          className="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 text-[12px] font-medium text-[#424245] transition-colors hover:bg-gray-50"
+        >
+          <Eye className="h-3.5 w-3.5" />
+          Ver detalles
+        </Link>
+        <a
+          href={mapUrl || undefined}
+          target="_blank"
+          rel="noreferrer"
+          aria-disabled={!mapUrl}
+          className={`inline-flex h-8 items-center justify-center gap-1.5 rounded-lg px-3 text-[12px] font-medium transition-colors ${
+            mapUrl
+              ? 'border border-gray-200 bg-white text-[#424245] hover:bg-gray-50'
+              : 'pointer-events-none bg-gray-100 text-gray-400'
+          }`}
+        >
+          <MapPin className="h-3.5 w-3.5" />
+          Abrir mapa
+        </a>
+      </div>
+    </article>
   );
 };
 

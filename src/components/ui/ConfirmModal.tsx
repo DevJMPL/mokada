@@ -4,13 +4,14 @@ import { AlertTriangle, Info } from 'lucide-react';
 interface Props {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: () => void;
+  onConfirm: () => void | Promise<void>;
   title: string;
   message: string;
   confirmText?: string;
   cancelText?: string;
   isDestructive?: boolean;
   isPending?: boolean;
+  variant?: 'danger' | 'destructive' | 'warning' | 'info' | string;
 }
 
 export const ConfirmModal = ({ 
@@ -22,13 +23,16 @@ export const ConfirmModal = ({
   confirmText = 'Confirmar', 
   cancelText = 'Cancelar',
   isDestructive = false,
-  isPending = false
+  isPending = false,
+  variant
 }: Props) => {
+  const destructive = isDestructive || variant === 'danger' || variant === 'destructive';
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="">
       <div className="px-1 text-center">
-        <div className={`mx-auto w-12 h-12 rounded-full flex items-center justify-center mb-4 ${isDestructive ? 'bg-red-50 text-red-600' : 'bg-blue-50 text-blue-600'}`}>
-          {isDestructive ? (
+        <div className={`mx-auto w-12 h-12 rounded-full flex items-center justify-center mb-4 ${destructive ? 'bg-red-50 text-red-600' : 'bg-blue-50 text-blue-600'}`}>
+          {destructive ? (
             <AlertTriangle className="w-6 h-6" />
           ) : (
             <Info className="w-6 h-6" />
@@ -53,7 +57,7 @@ export const ConfirmModal = ({
           onClick={onConfirm}
           disabled={isPending}
           className={`px-4 py-2 text-[14px] font-medium text-white rounded-lg transition-colors disabled:opacity-50 ${
-            isDestructive 
+            destructive
               ? 'bg-red-600 hover:bg-red-700' 
               : 'bg-[#0066CC] hover:bg-[#0055FF]'
           }`}

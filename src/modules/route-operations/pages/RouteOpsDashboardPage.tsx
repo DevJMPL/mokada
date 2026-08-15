@@ -15,7 +15,7 @@ import {
   Cell,
   Legend
 } from 'recharts';
-import { Route, Truck, Users, DollarSign, AlertCircle, ClipboardCheck, TrendingUp, TrendingDown, PieChart as PieChartIcon, BarChart2 } from 'lucide-react';
+import { Route, Truck, Users, AlertCircle, ClipboardCheck, PieChart as PieChartIcon, BarChart2 } from 'lucide-react';
 
 export const RouteOpsDashboardPage = () => {
   const { data: stats, isLoading } = useRouteOpsDashboard();

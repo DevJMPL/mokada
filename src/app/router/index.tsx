@@ -18,6 +18,8 @@ import { MovementsPage } from '../../modules/inventory/pages/MovementsPage';
 import { WarehousesPage } from '../../modules/inventory/pages/WarehousesPage';
 import { TransfersPage } from '../../modules/inventory/pages/TransfersPage';
 import { TransferFormPage } from '../../modules/inventory/pages/TransferFormPage';
+import { CustomersPage } from '../../modules/customers/pages/CustomersPage';
+import { CustomerFormPage } from '../../modules/customers/pages/CustomerFormPage';
 
 import { UnitsPage } from '../../modules/configuration/pages/UnitsPage';
 import { PriceListsPage } from '../../modules/configuration/pages/PriceListsPage';
@@ -28,6 +30,7 @@ import { UsersPage } from '../../modules/admin/users/pages/UsersPage';
 import { FleetVehiclesPage } from '../../modules/fleet/pages/FleetVehiclesPage';
 import { RouteOpsDashboardPage } from '../../modules/route-operations/pages/RouteOpsDashboardPage';
 import { RoutesPage } from '../../modules/route-operations/pages/RoutesPage';
+import { RouteFormPage } from '../../modules/route-operations/pages/RouteFormPage';
 import { RouteTripsPage } from '../../modules/route-operations/pages/RouteTripsPage';
 import { TripDetailPage } from '../../modules/route-operations/pages/TripDetailPage';
 import { MyRoutePage } from '../../modules/route-operations/pages/MyRoutePage';
@@ -68,6 +71,14 @@ export const router = createBrowserRouter([
             ]
           },
           {
+            path: 'customers',
+            children: [
+              { index: true, element: <CustomersPage /> },
+              { path: 'new', element: <CustomerFormPage /> },
+              { path: ':id', element: <CustomerFormPage /> },
+            ]
+          },
+          {
             path: 'inventory',
             children: [
               { path: 'stock', element: <StockPage /> },
@@ -88,6 +99,8 @@ export const router = createBrowserRouter([
             children: [
               { path: 'dashboard', element: <RouteOpsDashboardPage /> },
               { path: 'routes', element: <RoutesPage /> },
+              { path: 'routes/new', element: <RouteFormPage /> },
+              { path: 'routes/:id', element: <RouteFormPage /> },
               { path: 'trips', element: <RouteTripsPage /> },
               { path: 'trips/:id', element: <TripDetailPage /> },
               { path: 'settlements', element: <SettlementsPage /> },

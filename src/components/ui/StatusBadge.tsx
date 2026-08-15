@@ -3,32 +3,33 @@ import { cn } from '../../utils/cn';
 interface Props {
   status: string;
   className?: string;
+  text?: string;
 }
 
-export const StatusBadge = ({ status, className }: Props) => {
-  let label = status;
+export const StatusBadge = ({ status, className, text }: Props) => {
+  let label = text || status;
   let colorClass = 'bg-gray-100 text-gray-700';
 
   switch (status) {
     case 'ACTIVE':
     case 'AVAILABLE':
-      label = status === 'ACTIVE' ? 'Activo' : 'Disponible';
+      label = text || (status === 'ACTIVE' ? 'Activo' : 'Disponible');
       colorClass = 'bg-green-500/10 text-green-700';
       break;
     case 'INACTIVE':
-      label = 'Inactivo';
+      label = text || 'Inactivo';
       colorClass = 'bg-gray-500/10 text-gray-700';
       break;
     case 'DISCONTINUED':
-      label = 'Descontinuado';
+      label = text || 'Descontinuado';
       colorClass = 'bg-red-500/10 text-red-700';
       break;
     case 'LOW_STOCK':
-      label = 'Stock Bajo';
+      label = text || 'Stock Bajo';
       colorClass = 'bg-orange-500/10 text-orange-700';
       break;
     case 'OUT_OF_STOCK':
-      label = 'Agotado';
+      label = text || 'Agotado';
       colorClass = 'bg-red-500/10 text-red-700';
       break;
     // Fleet vehicle statuses

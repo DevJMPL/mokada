@@ -16,7 +16,7 @@ import {
   Cell,
   Legend
 } from 'recharts';
-import { Package, HeartPulse, Boxes } from 'lucide-react';
+import { HeartPulse, Boxes } from 'lucide-react';
 
 export const DashboardPage = () => {
   const { isAdmin } = useAuth();

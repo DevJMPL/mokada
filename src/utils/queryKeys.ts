@@ -19,6 +19,16 @@ export const inventoryKeys = {
   warehouses: () => [...inventoryKeys.all, 'warehouses'] as const,
 };
 
+export const customerKeys = {
+  all: ['customers'] as const,
+  list: (filters?: any) => [...customerKeys.all, 'list', filters] as const,
+  detail: (customerId?: string | null) => [...customerKeys.all, 'detail', customerId] as const,
+  fiscalProfiles: (customerId?: string | null) => [...customerKeys.all, 'fiscalProfiles', customerId] as const,
+  branches: (customerId?: string | null) => [...customerKeys.all, 'branches', customerId] as const,
+  branchOptions: () => [...customerKeys.all, 'branchOptions'] as const,
+  routes: () => [...customerKeys.all, 'routes'] as const,
+};
+
 export const configKeys = {
   all: ['config'] as const,
   units: () => [...configKeys.all, 'units'] as const,

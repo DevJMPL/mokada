@@ -87,7 +87,7 @@ export const ProfilePage = () => {
   const openAvatarPreview = () => {
     const url = storageService.getPublicUrl('user-avatars', profile?.avatar_path || null);
     if (!url) {
-      setErrorMessage('Aun no tienes foto cargada.');
+      setErrorMessage('A?n no tienes foto cargada.');
       return;
     }
 
@@ -134,7 +134,7 @@ export const ProfilePage = () => {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h2 className="text-[26px] font-bold tracking-tight text-[#1D1D1F] sm:text-[28px]">Mi perfil</h2>
-          <p className="text-[14px] text-[#86868B] sm:text-[15px]">Actualiza tu informacion personal.</p>
+          <p className="text-[14px] text-[#86868B] sm:text-[15px]">Actualiza tu informaci?n personal.</p>
         </div>
         <button
           type="button"
@@ -142,12 +142,12 @@ export const ProfilePage = () => {
           className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-3 text-sm font-medium text-[#1D1D1F] transition-colors hover:bg-gray-50"
         >
           <KeyRound className="h-4 w-4" />
-          Cambiar contrasena
+          Cambiar contrase?a
         </button>
       </div>
 
-      <form onSubmit={handleSubmit} className="grid gap-5 lg:grid-cols-[280px_minmax(0,1fr)]">
-        <aside className="rounded-lg border border-gray-200/70 bg-white p-5 shadow-sm">
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <section className="rounded-lg border border-gray-200/70 bg-white p-5 shadow-sm">
           <div className="flex flex-col items-center text-center">
             <div className="group relative h-24 w-24 overflow-hidden rounded-full bg-[#0066CC]/10">
               <UserAvatar
@@ -185,7 +185,7 @@ export const ProfilePage = () => {
             </p>
             <p className="mt-0.5 max-w-full truncate text-[13px] text-[#86868B]">{profile?.email}</p>
           </div>
-        </aside>
+        </section>
 
         <section className="rounded-lg border border-gray-200/70 bg-white p-5 shadow-sm">
           <div className="mb-5 flex items-center gap-3">
@@ -201,7 +201,7 @@ export const ProfilePage = () => {
           <div className="grid gap-4 md:grid-cols-2">
             <TextInput label="Nombre" value={firstName} onChange={setFirstName} autoComplete="given-name" />
             <TextInput label="Apellidos" value={lastName} onChange={setLastName} autoComplete="family-name" />
-            <TextInput label="Telefono" value={phone} onChange={setPhone} autoComplete="tel" required={false} />
+            <TextInput label="Tel?fono" value={phone} onChange={setPhone} autoComplete="tel" required={false} />
             <label className="block">
               <span className="mb-1.5 block text-[13px] font-medium text-[#1D1D1F]">Correo</span>
               <input
@@ -288,24 +288,24 @@ const PasswordChangeDialog = ({ onClose, onUpdatePassword }: PasswordChangeDialo
     setSuccessMessage('');
 
     if (newPassword.length < 8) {
-      setErrorMessage('La nueva contrasena debe tener al menos 8 caracteres.');
+      setErrorMessage('La nueva contrase?a debe tener al menos 8 caracteres.');
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      setErrorMessage('La confirmacion no coincide.');
+      setErrorMessage('La confirmaci?n no coincide.');
       return;
     }
 
     setIsSubmitting(true);
     try {
       await onUpdatePassword(currentPassword, newPassword);
-      setSuccessMessage('Contrasena actualizada.');
+      setSuccessMessage('Contrase?a actualizada.');
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'No se pudo actualizar la contrasena.';
+      const message = error instanceof Error ? error.message : 'No se pudo actualizar la contrase?a.';
       setErrorMessage(message);
     } finally {
       setIsSubmitting(false);
@@ -324,8 +324,8 @@ const PasswordChangeDialog = ({ onClose, onUpdatePassword }: PasswordChangeDialo
               <KeyRound className="h-5 w-5" />
             </div>
             <div className="min-w-0">
-              <h3 className="truncate text-base font-semibold text-[#1D1D1F]">Cambiar contrasena</h3>
-              <p className="truncate text-[12px] text-[#86868B]">Usa 8 caracteres o mas.</p>
+              <h3 className="truncate text-base font-semibold text-[#1D1D1F]">Cambiar contrase?a</h3>
+              <p className="truncate text-[12px] text-[#86868B]">Usa 8 caracteres o m?s.</p>
             </div>
           </div>
           <button
@@ -341,19 +341,19 @@ const PasswordChangeDialog = ({ onClose, onUpdatePassword }: PasswordChangeDialo
         <div className="flex-1 overflow-y-auto px-4 py-4 sm:px-5">
           <div className="space-y-3 sm:space-y-4">
             <PasswordField
-              label="Contrasena actual"
+              label="Contrase?a actual"
               value={currentPassword}
               onChange={setCurrentPassword}
               autoComplete="current-password"
             />
             <PasswordField
-              label="Nueva contrasena"
+              label="Nueva contrase?a"
               value={newPassword}
               onChange={setNewPassword}
               autoComplete="new-password"
             />
             <PasswordField
-              label="Confirmar nueva contrasena"
+              label="Confirmar nueva contrase?a"
               value={confirmPassword}
               onChange={setConfirmPassword}
               autoComplete="new-password"

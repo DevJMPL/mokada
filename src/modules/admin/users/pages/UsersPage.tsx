@@ -3,7 +3,6 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   FileBadge,
   FileText,
-  ImageIcon,
   Pencil,
   Plus,
   Search,
@@ -461,7 +460,6 @@ export const UsersPage = () => {
                       <MediaActions
                         user={user}
                         loadingPreviewPath={loadingPreviewPath}
-                        onAvatarPreview={() => openAvatarPreview(user)}
                         onDocumentPreview={() => openDocumentPreview(user)}
                       />
                     </td>
@@ -575,12 +573,11 @@ const UserTypeBadge = ({ userType }: { userType: UserType }) => {
 interface MediaActionsProps {
   user: ManagedUserProfile;
   loadingPreviewPath: string | null;
-  onAvatarPreview: () => void;
   onDocumentPreview: () => void;
 }
 
-const MediaActions = ({ user, loadingPreviewPath, onAvatarPreview, onDocumentPreview }: MediaActionsProps) => {
-  const hasFiles = Boolean(user.avatar_path || user.identity_document_path);
+const MediaActions = ({ user, loadingPreviewPath, onDocumentPreview }: MediaActionsProps) => {
+  const hasFiles = Boolean(user.identity_document_path);
 
   if (!hasFiles) {
     return <span className="text-[12px] text-[#86868B]">Sin archivos</span>;
@@ -588,13 +585,6 @@ const MediaActions = ({ user, loadingPreviewPath, onAvatarPreview, onDocumentPre
 
   return (
     <div className="flex flex-wrap gap-2">
-      {user.avatar_path && (
-        <MediaButton
-          label="Foto"
-          icon={<ImageIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
-          onClick={onAvatarPreview}
-        />
-      )}
       {user.identity_document_path && (
         <MediaButton
           label={loadingPreviewPath === user.identity_document_path ? 'Abriendo...' : 'Documento'}
@@ -704,7 +694,6 @@ const UserCard = ({
         <MediaActions
           user={user}
           loadingPreviewPath={loadingPreviewPath}
-          onAvatarPreview={onAvatarPreview}
           onDocumentPreview={onDocumentPreview}
         />
         <RowActions user={user} isPending={isTogglePending} onEdit={onEdit} onToggle={onToggle} />
@@ -890,9 +879,9 @@ const UserFormDialog = ({
         </div>
 
         <div className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
-          <div className="grid min-w-0 gap-4 px-3 py-4 sm:px-6 sm:py-5 lg:grid-cols-[200px_minmax(0,1fr)] xl:grid-cols-[220px_minmax(0,1fr)]">
-          <aside className="min-w-0 rounded-lg border border-gray-200 bg-[#F5F5F7] p-3 sm:p-4">
-            <div className="flex flex-col items-center text-center">
+          <div className="min-w-0 space-y-4 px-3 py-4 sm:px-6 sm:py-5">
+            <div className="rounded-lg border border-gray-200 bg-[#F5F5F7] p-4">
+              <div className="flex flex-col items-center text-center">
               <EditableUserAvatar
                 firstName={form.first_name}
                 lastName={form.last_name}
@@ -906,10 +895,10 @@ const UserFormDialog = ({
                 {form.first_name || form.last_name ? `${form.first_name} ${form.last_name}` : 'Usuario'}
               </p>
               <p className="mt-0.5 max-w-full truncate text-[12px] text-[#86868B]">{form.email || 'sin correo'}</p>
+              </div>
             </div>
-          </aside>
 
-          <div className="grid min-w-0 gap-3 sm:gap-4 md:grid-cols-2">
+            <div className="grid min-w-0 gap-3 sm:gap-4 md:grid-cols-2">
             <TextInput
               label="Correo"
               type="email"
@@ -917,7 +906,7 @@ const UserFormDialog = ({
               autoComplete="email"
               onChange={(value) => onChange((current) => ({ ...current, email: value }))}
             />
-            <TextInput
+              <TextInput
               label={isEditing ? 'Nueva contrasena' : 'Contrasena temporal'}
               type="password"
               value={form.password}
@@ -926,19 +915,19 @@ const UserFormDialog = ({
               required={!isEditing}
               onChange={(value) => onChange((current) => ({ ...current, password: value }))}
             />
-            <TextInput
+              <TextInput
               label="Nombre"
               value={form.first_name}
               autoComplete="given-name"
               onChange={(value) => onChange((current) => ({ ...current, first_name: value }))}
             />
-            <TextInput
+              <TextInput
               label="Apellidos"
               value={form.last_name}
               autoComplete="family-name"
               onChange={(value) => onChange((current) => ({ ...current, last_name: value }))}
             />
-            <TextInput
+              <TextInput
               label="Telefono"
               type="tel"
               value={form.phone}
@@ -946,7 +935,7 @@ const UserFormDialog = ({
               required={false}
               onChange={(value) => onChange((current) => ({ ...current, phone: value }))}
             />
-            <label className="block min-w-0">
+              <label className="block min-w-0">
               <span className="mb-1.5 block text-[13px] font-medium text-[#1D1D1F]">Tipo</span>
               {isEditing && form.user_type === 'CUSTOMER' ? (
                 <input
@@ -964,9 +953,9 @@ const UserFormDialog = ({
                   <option value="ADMIN">Admin</option>
                 </select>
               )}
-            </label>
+              </label>
 
-            {form.user_type === 'AGENT' && (
+              {form.user_type === 'AGENT' && (
               <AgentFunctionPicker
                 values={form.agent_functions}
                 onToggle={(agentFunction) =>
@@ -982,7 +971,7 @@ const UserFormDialog = ({
               />
             )}
 
-            <div className="min-w-0 space-y-2">
+              <div className="min-w-0 space-y-2">
               <FileInput
                 label={`Documento oficial${requiresDocument ? ' *' : ''}`}
                 accept="image/png,image/jpeg,image/webp,application/pdf"
@@ -1002,7 +991,7 @@ const UserFormDialog = ({
               )}
             </div>
 
-            <label className="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 md:col-span-2">
+              <label className="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 md:col-span-2">
               <input
                 type="checkbox"
                 checked={form.is_active}
@@ -1010,7 +999,7 @@ const UserFormDialog = ({
                 className="h-4 w-4 rounded border-gray-300 text-[#0066CC] focus:ring-[#0066CC]"
               />
               <span className="text-sm font-medium text-[#1D1D1F]">Usuario activo</span>
-            </label>
+              </label>
           </div>
           </div>
 
@@ -1083,7 +1072,7 @@ const AgentFunctionPicker = ({ values, onToggle }: AgentFunctionPickerProps) => 
                 className="sr-only"
               />
               <span className="truncate">{agentFunctionLabels[agentFunction]}</span>
-            </label>
+              </label>
           );
         })}
       </div>

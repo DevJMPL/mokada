@@ -2,6 +2,9 @@ import { useForm } from 'react-hook-form';
 import { Modal } from '../../../components/ui/Modal';
 import { useSaveWarehouse } from '../hooks/useInventory';
 import { useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { configService } from '../../configuration/services/config.service';
+import toast from 'react-hot-toast';
 
 interface Props {
   isOpen: boolean;
@@ -12,6 +15,7 @@ interface Props {
 export const WarehouseFormModal = ({ isOpen, onClose, warehouse }: Props) => {
   const { register, handleSubmit, reset, formState: { errors } } = useForm();
   const { mutateAsync: saveWarehouse, isPending } = useSaveWarehouse();
+  const {data: priceLists, error: priceError} = useQuery({queryKey: ['price-lists'], queryFn: configService.getPriceLists, enabled: isOpen});
 
   useEffect(() => {
     if (isOpen) {
@@ -21,6 +25,7 @@ export const WarehouseFormModal = ({ isOpen, onClose, warehouse }: Props) => {
           code: warehouse.code || '',
           name: warehouse.name || '',
           description: warehouse.description || '',
+          price_list_id: warehouse.price_list_id || '',
           is_active: warehouse.is_active
         });
       } else {
@@ -29,6 +34,7 @@ export const WarehouseFormModal = ({ isOpen, onClose, warehouse }: Props) => {
           code: '',
           name: '',
           description: '',
+          price_list_id: '',
           is_active: true
         });
       }
@@ -37,10 +43,10 @@ export const WarehouseFormModal = ({ isOpen, onClose, warehouse }: Props) => {
 
   const onSubmit = async (data: any) => {
     try {
-      await saveWarehouse(data);
+      await saveWarehouse({...data, code: data.code.trim(), name: data.name.trim(), price_list_id: data.price_list_id || null});
       onClose();
     } catch (error) {
-      console.error('Error guardando almacén:', error);
+      toast.error((error as {message?: string})?.message || 'No se pudo guardar el almacén');
     }
   };
 
@@ -83,6 +89,15 @@ export const WarehouseFormModal = ({ isOpen, onClose, warehouse }: Props) => {
           />
         </div>
 
+        <div>
+          <label className="block text-[13px] font-medium text-[#1D1D1F] mb-1.5">Lista de venta predeterminada</label>
+          <select {...register('price_list_id')} disabled={!!priceError} className="w-full px-3 py-2 bg-white border border-gray-200/60 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0066CC]/20 focus:border-[#0066CC] text-[14px]">
+            <option value="">Sin lista predeterminada</option>
+            {priceLists?.filter(list => list.is_active || list.id === warehouse?.price_list_id).map(list => <option key={list.id} value={list.id}>{list.name}{!list.is_active ? ' (inactiva)' : ''}</option>)}
+          </select>
+          {priceError && <p className="text-red-600 text-xs mt-1">No se pudieron consultar las listas.</p>}
+          <p className="text-[12px] text-[#86868B] mt-2">Se sugiere al crear ventas desde este almacén. Los traspasos conservan los precios de venta.</p>
+        </div>
         <div className="flex items-center gap-2 mt-4">
           <input
             type="checkbox"

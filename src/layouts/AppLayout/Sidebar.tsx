@@ -18,7 +18,7 @@ import {
   Tags,
   Truck,
   UserRound,
-  Users,
+  Wallet,
   X,
   type LucideIcon,
 } from 'lucide-react';
@@ -68,10 +68,13 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
       ],
     });
 
-  if (canManageCustomers) {
+    if (canManageCustomers) {
       sections.push({
         label: 'Comercial',
-        items: [{ path: '/customers', label: 'Clientes', icon: Handshake }],
+        items: [
+          { path: '/customers', label: 'Clientes', icon: Handshake },
+          ...(isAdmin ? [{ path: '/admin/debts', label: 'Adeudos y Crédito', icon: Wallet }] : []),
+        ],
       });
     }
 
@@ -79,6 +82,7 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
       sections.push({
         label: 'Inventario',
         items: [
+          { path: '/admin/margins', label: 'Costos y ganancias', icon: Wallet },
           { path: '/inventory/stock', label: 'Existencias', icon: Boxes },
           { path: '/inventory/movements', label: 'Movimientos', icon: ArrowRightLeft },
           { path: '/inventory/transfers', label: 'Traspasos', icon: Truck },
@@ -102,7 +106,6 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
         label: 'Configuracion',
         icon: Settings,
       });
-
     }
 
     if (isAdmin || profile?.user_type === 'AGENT') {
@@ -119,6 +122,7 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
         label: 'Mi Ruta',
         items: [
           { path: '/my-route', label: 'Ruta Actual', icon: MapPin },
+          { path: '/route-operations/debts', label: 'Cobranza de Ruta', icon: Wallet },
           { path: '/fleet/expenses', label: 'Gastos Vehiculares', icon: Receipt },
         ],
       });
@@ -129,6 +133,7 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
         label: 'Mis Compras',
         items: [
           { path: '/my-orders', label: 'Mis Pedidos', icon: ShoppingCart },
+          { path: '/my-debts', label: 'Mis Adeudos', icon: Wallet },
         ],
       });
     }

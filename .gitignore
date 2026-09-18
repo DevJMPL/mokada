@@ -29,3 +29,6 @@ dist-ssr
 supabase/.temp/
 supabase/.branches/
 
+# Local verification builds, temporary SQL and PDF previews
+scratch/
+

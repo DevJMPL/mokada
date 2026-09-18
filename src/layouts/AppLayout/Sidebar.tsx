@@ -18,7 +18,6 @@ import {
   Tags,
   Truck,
   UserRound,
-  Users,
   Wallet,
   X,
   type LucideIcon,
@@ -83,6 +82,7 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
       sections.push({
         label: 'Inventario',
         items: [
+          { path: '/admin/margins', label: 'Costos y ganancias', icon: Wallet },
           { path: '/inventory/stock', label: 'Existencias', icon: Boxes },
           { path: '/inventory/movements', label: 'Movimientos', icon: ArrowRightLeft },
           { path: '/inventory/transfers', label: 'Traspasos', icon: Truck },

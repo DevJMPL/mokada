@@ -7,7 +7,6 @@ import { LoginPage } from '../../modules/auth/pages/LoginPage';
 import { ProfilePage } from '../../modules/auth/pages/ProfilePage';
 
 import { DashboardsHubPage } from '../../modules/dashboard/pages/DashboardsHubPage';
-import { DashboardPage } from '../../modules/dashboard/pages/DashboardPage';
 import { ProductsPage } from '../../modules/catalog/pages/ProductsPage';
 import { ProductFormPage } from '../../modules/catalog/pages/ProductFormPage';
 import { CategoriesPage } from '../../modules/catalog/pages/CategoriesPage';
@@ -32,7 +31,6 @@ import { UsersPage } from '../../modules/admin/users/pages/UsersPage';
 import { FleetVehiclesPage } from '../../modules/fleet/pages/FleetVehiclesPage';
 import { VehicleExpensesPage } from '../../modules/fleet/pages/VehicleExpensesPage';
 import { VehicleExpenseFormPage } from '../../modules/fleet/pages/VehicleExpenseFormPage';
-import { RouteOpsDashboardPage } from '../../modules/route-operations/pages/RouteOpsDashboardPage';
 import { RoutesPage } from '../../modules/route-operations/pages/RoutesPage';
 import { RouteFormPage } from '../../modules/route-operations/pages/RouteFormPage';
 import { RouteTripsPage } from '../../modules/route-operations/pages/RouteTripsPage';
@@ -44,8 +42,8 @@ import { CheckoutPage } from '../../modules/orders/pages/CheckoutPage';
 import { MyOrdersPage } from '../../modules/orders/pages/MyOrdersPage';
 import { MyDebtsPage } from '../../modules/orders/pages/MyDebtsPage';
 import { OrdersPage } from '../../modules/orders/pages/OrdersPage';
-import { OrdersDashboardPage } from '../../modules/orders/pages/OrdersDashboardPage';
 import { OrderDetailsAdminPage } from '../../modules/orders/pages/OrderDetailsAdminPage';
+import { MarginsPage } from '../../modules/inventory/pages/MarginsPage';
 import { AdminDebtsPage } from '../../modules/admin/debts/pages/AdminDebtsPage';
 import { RouteDebtsPage } from '../../modules/route-operations/pages/RouteDebtsPage';
 
@@ -93,6 +91,7 @@ export const router = createBrowserRouter([
           },
           {
             path: 'inventory',
+            element: <AdminRoute />,
             children: [
               { path: 'stock', element: <StockPage /> },
               { path: 'movements', element: <MovementsPage /> },
@@ -159,6 +158,7 @@ export const router = createBrowserRouter([
             children: [
               { path: 'users', element: <UsersPage /> },
               { path: 'debts', element: <AdminDebtsPage /> },
+              { path: 'margins', element: <MarginsPage /> },
             ]
           },
           {

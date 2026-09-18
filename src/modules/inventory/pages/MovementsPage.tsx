@@ -7,7 +7,7 @@ import { Plus, Filter } from 'lucide-react';
 
 export const MovementsPage = () => {
   const [selectedWarehouse, setSelectedWarehouse] = useState<string>('');
-  const { data, isLoading } = useMovements(selectedWarehouse || undefined);
+  const { data, isLoading, error } = useMovements(selectedWarehouse || undefined);
   const { data: warehouses } = useWarehouses();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -63,7 +63,7 @@ export const MovementsPage = () => {
     },
     { 
       header: 'Costo Unit.', 
-      cell: (item) => item.unit_cost ? formatCurrency(item.unit_cost) : '-',
+      cell: (item) => item.unit_cost != null ? formatCurrency(item.unit_cost) : 'Sin costo',
       className: 'text-right text-slate-500'
     }
   ];
@@ -98,11 +98,12 @@ export const MovementsPage = () => {
             className="flex items-center gap-2 px-4 py-2 bg-[#0066CC] text-white rounded-lg hover:bg-[#0055FF] transition-colors text-[14px] font-medium"
           >
             <Plus className="w-4 h-4" />
-            Ajuste Manual
+            Nuevo Movimiento
           </button>
         </div>
       </div>
 
+      {error && <p className="text-[13px] text-red-600 bg-red-50 border border-red-200 rounded-xl p-4">No se pudieron consultar los movimientos: {(error as Error).message}</p>}
       <Table 
         data={data || []} 
         columns={columns}

@@ -1,0 +1,58 @@
+BEGIN;
+DO $$
+DECLARE
+ v_admin uuid;v_requester uuid;v_customer uuid;v_branch uuid;
+ v_warehouse uuid:=gen_random_uuid();v_product uuid:=gen_random_uuid();v_list uuid:=gen_random_uuid();
+ v_order public.sales_orders;v_replacement public.sales_orders;v_item uuid;v_claim uuid:=gen_random_uuid();v_path text;
+ v_suffix text:=substr(gen_random_uuid()::text,1,8);v_count integer;v_profit numeric;
+BEGIN
+ SELECT auth_user_id INTO v_admin FROM public.user_profiles WHERE user_type='ADMIN' AND is_active LIMIT 1;
+ SELECT auth_user_id INTO v_requester FROM public.user_profiles WHERE user_type='AGENT' AND is_active LIMIT 1;
+ v_requester:=COALESCE(v_requester,v_admin);
+ SELECT c.id,b.id,c.auth_user_id INTO v_customer,v_branch,v_requester FROM public.customer_branches b JOIN public.customers c ON c.id=b.customer_id JOIN public.user_profiles u ON u.auth_user_id=c.auth_user_id WHERE u.is_active AND u.user_type='CUSTOMER' LIMIT 1;
+ IF v_admin IS NULL OR v_branch IS NULL THEN RAISE EXCEPTION 'Se requieren administrador y sucursal'; END IF;
+ PERFORM set_config('request.jwt.claim.sub',v_admin::text,true);
+ INSERT INTO public.warehouses(id,code,name)VALUES(v_warehouse,'QA-R-'||v_suffix,'QA Garantías');
+ INSERT INTO public.products(id,code,name)VALUES(v_product,'QA-R-'||v_suffix,'QA Pieza');
+ INSERT INTO public.price_lists(id,code,name)VALUES(v_list,'QA-R-'||v_suffix,'QA Lista');
+ INSERT INTO public.product_prices(product_id,price_list_id,amount)VALUES(v_product,v_list,180);
+ PERFORM public.receive_inventory(v_product,v_warehouse,'PURCHASE',10,100);
+ SELECT * INTO v_order FROM public.create_priced_order(jsonb_build_object('customer_id',v_customer,'branch_id',v_branch,'warehouse_id',v_warehouse,'price_list_id',v_list,'items',jsonb_build_array(jsonb_build_object('product_id',v_product,'quantity',2,'unit_price',999,'discount_percent',10,'discount_reason','Acuerdo QA'))));
+ SELECT id INTO v_item FROM public.sales_order_items WHERE order_id=v_order.id;
+ IF (SELECT unit_price FROM public.sales_order_items WHERE id=v_item)<>162 OR v_order.total_amount<>324 THEN RAISE EXCEPTION 'Descuento no aplicado'; END IF;
+ UPDATE public.sales_orders SET status='DELIVERED' WHERE id=v_order.id;
+ PERFORM set_config('request.jwt.claim.sub',v_requester::text,true);
+ v_path:=v_requester::text||'/'||v_order.id::text||'/'||v_claim::text||'/0.jpg';
+ INSERT INTO storage.objects(bucket_id,name,owner)VALUES('return-evidence',v_path,v_requester);
+ PERFORM public.request_order_return(v_claim,v_item,1,'Garantía QA',ARRAY[v_path]);
+ PERFORM public.request_order_return(v_claim,v_item,1,'Garantía QA',ARRAY[v_path]);
+ IF (SELECT count(*) FROM public.sales_order_returns WHERE id=v_claim)<>1 THEN RAISE EXCEPTION 'Garantía duplicada'; END IF;
+ IF (SELECT quantity FROM public.product_inventory WHERE product_id=v_product AND warehouse_id=v_warehouse AND location_id IS NULL)<>8 THEN RAISE EXCEPTION 'Garantía reintegró pieza defectuosa'; END IF;
+ SELECT gross_profit INTO v_profit FROM public.sales_margins WHERE order_id=v_order.id;
+ -- The management API role bypasses RLS, but the view explicitly requires admin.
+ PERFORM set_config('request.jwt.claim.sub',v_admin::text,true);
+ SELECT gross_profit INTO v_profit FROM public.sales_margins WHERE order_id=v_order.id;
+ IF v_profit<>124 THEN RAISE EXCEPTION 'Pérdida estimada incorrecta: %',v_profit; END IF;
+ SELECT count(*) INTO v_count FROM public.user_profiles WHERE is_active AND user_type='ADMIN';
+ IF (SELECT count(*) FROM public.notifications WHERE entity_id=v_claim::text)<>v_count THEN RAISE EXCEPTION 'Notificaciones duplicadas o faltantes'; END IF;
+ IF NOT EXISTS(SELECT 1 FROM public.notifications WHERE recipient_id=v_admin AND entity_id=v_claim::text AND target_path='/orders/'||v_order.id::text||'?return='||v_claim::text) THEN RAISE EXCEPTION 'Destino de notificación inválido'; END IF;
+ PERFORM public.mark_notifications_read((SELECT id FROM public.notifications WHERE recipient_id=v_admin AND entity_id=v_claim::text));
+ IF EXISTS(SELECT 1 FROM public.notifications WHERE recipient_id=v_admin AND entity_id=v_claim::text AND read_at IS NULL) THEN RAISE EXCEPTION 'No marcó leída'; END IF;
+ IF (SELECT status FROM public.sales_order_returns WHERE id=v_claim)<>'PENDING' THEN RAISE EXCEPTION 'Customer claim must wait for approval'; END IF;
+ PERFORM public.review_order_return(v_claim,true,'Approved QA');PERFORM public.review_order_return(v_claim,true,'Retry');
+ IF (SELECT gross_profit FROM public.sales_margins WHERE order_id=v_order.id)<>24 THEN RAISE EXCEPTION 'Approval did not recognize warranty expense'; END IF;
+ IF (SELECT count(*) FROM public.notifications WHERE recipient_id=v_requester AND event_key='warranty-review:'||v_claim::text)<>1 THEN RAISE EXCEPTION 'Decision notification duplicated or missing'; END IF;
+ PERFORM public.set_inventory_cost((SELECT id FROM public.product_inventory WHERE product_id=v_product AND warehouse_id=v_warehouse AND location_id IS NULL),140,110);
+ SELECT * INTO v_replacement FROM public.create_priced_order(jsonb_build_object('customer_id',v_customer,'branch_id',v_branch,'warehouse_id',v_warehouse,'price_list_id',v_list,'warranty_return_id',v_claim,'items',jsonb_build_array(jsonb_build_object('product_id',v_product,'quantity',1,'unit_price',999))));
+ PERFORM public.mark_order_paid_manually(v_replacement.id);PERFORM public.mark_order_paid_manually(v_replacement.id);
+ IF (SELECT amount_paid FROM public.sales_orders WHERE id=v_replacement.id)<>180 OR (SELECT count(*) FROM public.sales_order_payments WHERE order_id=v_replacement.id)<>1 THEN RAISE EXCEPTION 'Pago manual duplicado o incorrecto'; END IF;
+ IF NOT EXISTS(SELECT 1 FROM public.sales_order_payments WHERE order_id=v_replacement.id AND is_manual_settlement) THEN RAISE EXCEPTION 'Pago manual sin identificar'; END IF;
+ UPDATE public.sales_orders SET status='SHIPPED' WHERE id=v_replacement.id;UPDATE public.sales_orders SET status='DELIVERED' WHERE id=v_replacement.id;
+ IF EXISTS(SELECT 1 FROM public.sales_margins WHERE order_id=v_replacement.id) THEN RAISE EXCEPTION 'Reposición duplicó ingreso'; END IF;
+ SELECT gross_profit INTO v_profit FROM public.sales_margins WHERE order_id=v_order.id;
+ IF v_profit<>14 THEN RAISE EXCEPTION 'Costo real de reposición no sustituyó estimado: %',v_profit; END IF;
+ IF (SELECT quantity FROM public.product_inventory WHERE product_id=v_product AND warehouse_id=v_warehouse AND location_id IS NULL)<>7 THEN RAISE EXCEPTION 'Salida de reposición duplicada'; END IF;
+END;
+$$;
+ROLLBACK;
+SELECT 'PASS: descuentos, garantías, evidencia, notificaciones, pago manual, costo real de reposición y ausencia de duplicaciones; datos revertidos' AS result;

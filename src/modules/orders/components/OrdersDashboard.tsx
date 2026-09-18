@@ -15,7 +15,7 @@ export const OrdersDashboard = ({ orders, agents = [] }: { orders: any[], agents
     const totalOrders = orders.length;
     
     // Only consider non-cancelled orders for revenue
-    const validOrders = orders.filter(o => o.status !== 'CANCELLED');
+    const validOrders = orders.filter(o => o.status !== 'CANCELLED' && !o.warranty_return_id);
     
     const totalRevenue = validOrders.reduce((sum, order) => sum + (order.total_amount || 0), 0);
     const avgOrderValue = validOrders.length > 0 ? totalRevenue / validOrders.length : 0;
@@ -157,7 +157,7 @@ export const OrdersDashboard = ({ orders, agents = [] }: { orders: any[], agents
                 <Tooltip 
                   cursor={{ fill: '#F3F4F6' }}
                   contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)' }}
-                  formatter={(value: number) => [new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(value), 'Ingresos']}
+                  formatter={(value) => [new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(Number(value)), 'Ingresos']}
                 />
                 <Bar dataKey="total" fill="#0066CC" radius={[4, 4, 0, 0]} maxBarSize={50} />
               </BarChart>
@@ -180,7 +180,7 @@ export const OrdersDashboard = ({ orders, agents = [] }: { orders: any[], agents
                   paddingAngle={5}
                   dataKey="value"
                 >
-                  {metrics.statusData.map((entry, index) => (
+                  {metrics.statusData.map((_, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>

@@ -8,93 +8,40 @@ export type PaymentStatus = Database['public']['Enums']['payment_status'];
 export interface CreateOrderParams {
   customer_id: string;
   total_amount: number;
+  warehouse_id?: string;
+  price_list_id?: string;
   shipping_address?: string;
   branch_id?: string;
   payment_type?: 'CONTADO' | 'CREDITO';
   credit_term_days?: 8 | 15 | 21;
+  warranty_return_id?: string;
+  requires_invoice?: boolean;
+  fiscal_profile_id?: string;
+  invoice_payment_form?: string;
   items: {
     product_id: string;
     quantity: number;
     unit_price: number;
     subtotal: number;
+    discount_percent?: number;
+    discount_reason?: string;
   }[];
 }
 
 export const ordersService = {
+  async markPaidManually(orderId:string) {
+    const {error}=await supabase.rpc('mark_order_paid_manually',{p_order_id:orderId});
+    if(error)throw error;
+  },
+  async setItemDiscount(itemId: string, percent: number, reason: string) {
+    const {data, error} = await supabase.rpc('set_order_item_discount', {p_item_id:itemId,p_discount_percent:percent,p_reason:reason});
+    if (error) throw error;
+    return data;
+  },
   async createOrder(params: CreateOrderParams) {
-    // 1. Get current auth user
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error('Not authenticated');
-
-    // 2. Fetch user profile to check role for credit approval
-    const { data: profile } = await supabase
-      .from('user_profiles')
-      .select('user_type')
-      .eq('auth_user_id', user.id)
-      .maybeSingle();
-
-    const isStaff = profile?.user_type === 'AGENT' || profile?.user_type === 'ADMIN';
-    const isCredit = params.payment_type === 'CREDITO';
-
-    let creditApprovalStatus: 'NOT_REQUESTED' | 'PENDING' | 'APPROVED' | 'REJECTED' = 'NOT_REQUESTED';
-    let creditApprovedAt: string | null = null;
-    let creditApprovedBy: string | null = null;
-    let dueDate: string | null = null;
-
-    if (isCredit) {
-      if (isStaff) {
-        creditApprovalStatus = 'APPROVED';
-        creditApprovedAt = new Date().toISOString();
-        creditApprovedBy = user.id;
-
-        if (params.credit_term_days) {
-          const d = new Date();
-          d.setDate(d.getDate() + params.credit_term_days);
-          dueDate = d.toISOString().split('T')[0];
-        }
-      } else {
-        creditApprovalStatus = 'PENDING';
-      }
-    }
-
-    // 3. Insert order
-    const { data: order, error: orderError } = await supabase
-      .from('sales_orders')
-      .insert({
-        customer_id: params.customer_id,
-        created_by: user.id,
-        total_amount: params.total_amount,
-        shipping_address: params.shipping_address,
-        branch_id: params.branch_id || null,
-        payment_type: params.payment_type || 'CONTADO',
-        credit_term_days: params.credit_term_days || null,
-        credit_approval_status: creditApprovalStatus,
-        credit_approved_at: creditApprovedAt,
-        credit_approved_by: creditApprovedBy,
-        due_date: dueDate,
-        status: 'PENDING'
-      })
-      .select()
-      .single();
-
-    if (orderError) throw orderError;
-
-    // 4. Insert items
-    const itemsToInsert = params.items.map(item => ({
-      order_id: order.id,
-      product_id: item.product_id,
-      quantity: item.quantity,
-      unit_price: item.unit_price,
-      subtotal: item.subtotal
-    }));
-
-    const { error: itemsError } = await supabase
-      .from('sales_order_items')
-      .insert(itemsToInsert);
-
-    if (itemsError) throw itemsError;
-
-    return order;
+    const { data, error } = await (supabase.rpc as any)('create_priced_order', { p_payload: params });
+    if (error) throw error;
+    return data;
   },
 
   async getMyOrders() {
@@ -258,7 +205,7 @@ export const ordersService = {
     // To do this simply, we will pass status explicitly or determine it here.
     const { data: profile } = await supabase.from('user_profiles').select('user_type').eq('auth_user_id', user.id).single();
     
-    let status = 'PENDING';
+    let status: PaymentStatus = 'PENDING';
     if (method === 'CASH' && (profile?.user_type === 'AGENT' || profile?.user_type === 'ADMIN')) {
       status = 'APPROVED';
     }
@@ -443,6 +390,7 @@ export const ordersService = {
       .eq('route_id', routeId);
 
     const branchIds = branches?.map(b => b.id) || [];
+    if (!branchIds.length) return [];
 
     const startIso = `${weekStartDate}T00:00:00`;
     const endIso = `${weekEndDate}T23:59:59`;
@@ -463,6 +411,8 @@ export const ordersService = {
       `)
       .gte('created_at', startIso)
       .lte('created_at', endIso)
+      .eq('is_manual_settlement', false)
+      .eq('status', 'APPROVED')
       .order('created_at', { ascending: false });
 
     if (error) {

@@ -43,11 +43,12 @@ export const ProductsPage = () => {
               className="flex items-center justify-center gap-2 bg-[#0066CC] hover:bg-[#005bb5] text-white px-4 py-2 rounded-xl text-[14px] font-medium transition-colors whitespace-nowrap shadow-sm"
             >
               <Plus className="w-4 h-4" />
-              Nuevo
+              Nuevo producto
             </button>
           )}
-          {!isAdmin && (
             <button 
+              type="button"
+              aria-label="Abrir carrito"
               onClick={() => setIsCartOpen(true)}
               className="relative p-2 text-gray-500 hover:bg-gray-100 rounded-xl transition-colors"
             >
@@ -58,7 +59,6 @@ export const ProductsPage = () => {
                 </span>
               )}
             </button>
-          )}
         </div>
       </div>
 
@@ -157,8 +157,9 @@ export const ProductsPage = () => {
                     )}
                   </div>
 
-                  {!isAdmin && (
                     <button 
+                      type="button"
+                      disabled={item.status !== 'ACTIVE'}
                       onClick={(e) => {
                         e.stopPropagation();
                         addItem({
@@ -167,16 +168,15 @@ export const ProductsPage = () => {
                           code: item.code,
                           price: item.public_price || 0,
                           quantity: 1,
-                          image_url: imageUrl
+                          image_url: imageUrl ?? undefined
                         });
                         setIsCartOpen(true);
                       }}
-                      className="mt-4 w-full flex items-center justify-center gap-2 bg-[#0066CC]/10 text-[#0066CC] hover:bg-[#0066CC] hover:text-white px-4 py-2 rounded-xl text-[13px] font-medium transition-all"
+                      className="mt-4 w-full flex items-center justify-center gap-2 bg-[#0066CC]/10 text-[#0066CC] hover:bg-[#0066CC] hover:text-white px-4 py-2 rounded-xl text-[13px] font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <ShoppingCart className="w-4 h-4" />
                       Agregar al carrito
                     </button>
-                  )}
                 </div>
               </div>
             );

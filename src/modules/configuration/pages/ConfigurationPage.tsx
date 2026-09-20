@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import bg1 from "../../../assets/configuration/01.jpg";
 import bg2 from "../../../assets/configuration/02.jpg";
 import bg3 from "../../../assets/configuration/03.jpg";
@@ -9,7 +9,6 @@ import {
   BadgeDollarSign,
   Settings as SettingsIcon,
   ShieldCheck,
-  ChevronRight,
 } from "lucide-react";
 import { useAuth } from "../../auth/context/useAuth";
 
@@ -119,6 +118,7 @@ export const ConfigurationPage = () => {
         <div className="flex flex-wrap gap-6 md:gap-8">
           {configModules.map((module) => (
             <a
+              key={module.path}
               href={module.path}
               onClick={(e) => handleNavigate(e, module.path)}
               onMouseEnter={() => setHoveredModule(module)}

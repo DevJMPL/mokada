@@ -1,4 +1,5 @@
 import { supabase } from '../../../lib/supabase/client';
+import { createClientUuid } from '../../../utils/createClientUuid';
 import type { Database } from '../../../types/database.types';
 export type OrderReturn = Database['public']['Tables']['sales_order_returns']['Row'];
 export const returnsService = {
@@ -18,7 +19,7 @@ export const returnsService = {
     if(files.some(f=>f.size>10*1024*1024 || !['image/jpeg','image/png','image/webp','application/pdf'].includes(f.type)))throw Error('Usa imágenes JPG, PNG, WEBP o PDF de máximo 10 MB.');
     const {data:{user}}=await supabase.auth.getUser();
     if(!user)throw Error('Inicia sesión.');
-    const id=crypto.randomUUID();
+    const id=createClientUuid();
     const paths:string[]=[];
     try{
       for(const [index,file] of files.entries()){

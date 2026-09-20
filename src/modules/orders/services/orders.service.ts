@@ -1,5 +1,6 @@
 import { supabase } from '../../../lib/supabase/client';
 import type { Database } from '../../../types/database.types';
+import { createClientUuid } from '../../../utils/createClientUuid';
 
 export type SalesOrderStatus = Database['public']['Enums']['sales_order_status'];
 export type PaymentMethod = Database['public']['Enums']['payment_method'];
@@ -183,7 +184,7 @@ export const ordersService = {
   async markOrderAsDelivered(id: string, signedByName: string, signature: Blob) {
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     if (userError || !user) throw userError || new Error('Inicia sesión para confirmar la entrega');
-    const path = `${user.id}/${id}/${crypto.randomUUID()}.png`;
+    const path = `${user.id}/${id}/${createClientUuid()}.png`;
     const bucket = supabase.storage.from('delivery-signatures');
     const { error: uploadError } = await bucket.upload(path, signature, { contentType: 'image/png', upsert: false });
     if (uploadError) throw uploadError;

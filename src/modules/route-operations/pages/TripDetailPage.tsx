@@ -402,52 +402,54 @@ export const TripDetailPage = () => {
         {isExpensesOpen && (
           <div className="border-t border-gray-100">
             {expenses && expenses.length > 0 ? (
-              <table className="w-full text-[13px] text-left">
-                <thead className="bg-white border-b border-gray-200/60 text-[#86868B] font-semibold">
-                  <tr>
-                    <th className="px-5 py-3.5">Fecha</th>
-                    <th className="px-5 py-3.5">Categoría</th>
-                    <th className="px-5 py-3.5">Lugar</th>
-                    <th className="px-5 py-3.5">Descripción</th>
-                    <th className="px-5 py-3.5 text-right">Monto</th>
-                    <th className="px-5 py-3.5 text-center">Factura</th>
-                    <th className="px-5 py-3.5 text-center">Evidencias</th>
-                    <th className="px-5 py-3.5">Estado</th>
-                    <th className="px-5 py-3.5"></th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {expenses.map((exp: any) => (
-                    <tr key={exp.id} className="hover:bg-[#F5F5F7]/50 transition-colors">
-                      <td className="px-5 py-3.5">{new Date(exp.expense_date + 'T12:00:00').toLocaleDateString('es-MX', { day: 'numeric', month: 'short' })}</td>
-                      <td className="px-5 py-3.5 font-medium">{exp.expense_categories?.name}</td>
-                      <td className="px-5 py-3.5">{exp.place_name || exp.city || '—'}</td>
-                      <td className="px-5 py-3.5 max-w-[200px] truncate">{exp.description || '—'}</td>
-                      <td className="px-5 py-3.5 text-right font-medium">{formatCurrency(Number(exp.amount))}</td>
-                      <td className="px-5 py-3.5 text-center">{exp.invoice_available ? '✓' : '—'}</td>
-                      <td className="px-5 py-3.5 text-center">
-                        {exp.expense_attachments?.length > 0 && (
-                          <button 
-                            onClick={() => handleViewEvidence(exp.expense_attachments[0].storage_path)}
-                            className="inline-flex items-center gap-1 text-[#0066CC] hover:underline"
-                          >
-                            <Paperclip className="w-3.5 h-3.5" /> {exp.expense_attachments.length}
-                          </button>
-                        )}
-                      </td>
-                      <td className="px-5 py-3.5"><StatusBadge status={exp.status} /></td>
-                      <td className="px-5 py-3.5">
-                        {trip.status === 'UNDER_REVIEW' && exp.status === 'SUBMITTED' && (
-                          <div className="flex gap-2">
-                            <button onClick={() => updateExpenseStatus.mutate({ id: exp.id, status: 'APPROVED' })} className="text-green-600 text-[12px] font-medium hover:underline">Aprobar</button>
-                            <button onClick={() => updateExpenseStatus.mutate({ id: exp.id, status: 'REJECTED' })} className="text-red-600 text-[12px] font-medium hover:underline">Rechazar</button>
-                          </div>
-                        )}
-                      </td>
+              <div className="overflow-x-auto">
+                <table className="w-full text-[13px] text-left min-w-[900px]">
+                  <thead className="bg-white border-b border-gray-200/60 text-[#86868B] font-semibold">
+                    <tr>
+                      <th className="px-5 py-3.5">Fecha</th>
+                      <th className="px-5 py-3.5">Categoría</th>
+                      <th className="px-5 py-3.5">Lugar</th>
+                      <th className="px-5 py-3.5">Descripción</th>
+                      <th className="px-5 py-3.5 text-right">Monto</th>
+                      <th className="px-5 py-3.5 text-center">Factura</th>
+                      <th className="px-5 py-3.5 text-center">Evidencias</th>
+                      <th className="px-5 py-3.5">Estado</th>
+                      <th className="px-5 py-3.5"></th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {expenses.map((exp: any) => (
+                      <tr key={exp.id} className="hover:bg-[#F5F5F7]/50 transition-colors">
+                        <td className="px-5 py-3.5 whitespace-nowrap">{new Date(exp.expense_date + 'T12:00:00').toLocaleDateString('es-MX', { day: 'numeric', month: 'short' })}</td>
+                        <td className="px-5 py-3.5 font-medium whitespace-nowrap">{exp.expense_categories?.name}</td>
+                        <td className="px-5 py-3.5 whitespace-nowrap">{exp.place_name || exp.city || '—'}</td>
+                        <td className="px-5 py-3.5 max-w-[200px] truncate">{exp.description || '—'}</td>
+                        <td className="px-5 py-3.5 text-right font-medium whitespace-nowrap">{formatCurrency(Number(exp.amount))}</td>
+                        <td className="px-5 py-3.5 text-center">{exp.invoice_available ? '✓' : '—'}</td>
+                        <td className="px-5 py-3.5 text-center">
+                          {exp.expense_attachments?.length > 0 && (
+                            <button 
+                              onClick={() => handleViewEvidence(exp.expense_attachments[0].storage_path)}
+                              className="inline-flex items-center gap-1 text-[#0066CC] hover:underline"
+                            >
+                              <Paperclip className="w-3.5 h-3.5" /> {exp.expense_attachments.length}
+                            </button>
+                          )}
+                        </td>
+                        <td className="px-5 py-3.5 whitespace-nowrap"><StatusBadge status={exp.status} /></td>
+                        <td className="px-5 py-3.5 whitespace-nowrap">
+                          {trip.status === 'UNDER_REVIEW' && exp.status === 'SUBMITTED' && (
+                            <div className="flex gap-2">
+                              <button onClick={() => updateExpenseStatus.mutate({ id: exp.id, status: 'APPROVED' })} className="text-green-600 text-[12px] font-medium hover:underline">Aprobar</button>
+                              <button onClick={() => updateExpenseStatus.mutate({ id: exp.id, status: 'REJECTED' })} className="text-red-600 text-[12px] font-medium hover:underline">Rechazar</button>
+                            </div>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             ) : (
               <div className="px-6 py-8 text-center text-[#86868B]">No hay gastos registrados para este viaje.</div>
             )}

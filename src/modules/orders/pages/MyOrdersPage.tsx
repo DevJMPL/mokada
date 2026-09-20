@@ -163,7 +163,7 @@ export const MyOrdersPage = () => {
 
                   <div className="flex justify-between items-end mt-4 pt-4 border-t border-gray-50">
                     <p className="text-[13px] text-gray-600">
-                      {order.sales_order_items.length} artículo(s)
+                      {order.sales_order_items.reduce((total: number, item: {quantity: number}) => total + Number(item.quantity || 0), 0)} artículo(s)
                     </p>
                     <p className="text-[15px] font-bold text-[#1D1D1F]">
                       {new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(order.total_amount)}

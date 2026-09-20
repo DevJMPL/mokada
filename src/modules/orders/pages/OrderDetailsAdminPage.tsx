@@ -15,6 +15,7 @@ import { AddProductToOrderModal } from '../components/AddProductToOrderModal';
 import { OrderItemDiscount } from '../components/OrderItemDiscount';
 import { OrderReturns } from '../components/OrderReturns';
 import { OrderInvoiceModal } from '../components/OrderInvoiceModal';
+import { DeliverySignatureModal } from '../components/DeliverySignatureModal';
 
 export const OrderDetailsAdminPage = () => {
   const { id } = useParams();
@@ -23,6 +24,8 @@ export const OrderDetailsAdminPage = () => {
   const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isSignatureModalOpen, setIsSignatureModalOpen] = useState(false);
+  const [deliveryReceipt, setDeliveryReceipt] = useState<Awaited<ReturnType<typeof ordersService.getDeliveryReceipt>>>(null);
   const [currentUserProfile, setCurrentUserProfile] = useState<any>(null);
 
   // Form states
@@ -86,6 +89,8 @@ export const OrderDetailsAdminPage = () => {
       if (showLoader) setIsLoading(true);
       const data = await ordersService.getOrderById(orderId);
       setOrder(data);
+      const receipt = await ordersService.getDeliveryReceipt(orderId);
+      setDeliveryReceipt(receipt);
       setStatus(data.status);
       setWarehouseId((data as {warehouse_id?: string}).warehouse_id || '');
       setShippingCost(data.shipping_cost?.toString() || '0');
@@ -121,14 +126,14 @@ export const OrderDetailsAdminPage = () => {
     }
   };
 
-  const handleMarkDelivered = async () => {
+  const handleMarkDelivered = async (signedByName: string, signature: Blob) => {
     if (!id) return;
     try {
       setIsSaving(true);
-      await ordersService.markOrderAsDelivered(id);
-      setOrder({ ...order, status: 'DELIVERED' });
-      setStatus('DELIVERED');
-      toast.success('Pedido marcado como entregado');
+      await ordersService.markOrderAsDelivered(id, signedByName, signature);
+      await fetchOrder(id);
+      setIsSignatureModalOpen(false);
+      toast.success('Entrega confirmada con firma de recibido');
     } catch (error) {
       console.error(error);
       toast.error((error as {message?: string})?.message || 'Error al marcar como entregado');
@@ -304,27 +309,27 @@ export const OrderDetailsAdminPage = () => {
   const isShippedOrDelivered = order.status === 'SHIPPED' || order.status === 'DELIVERED' || order.status === 'CANCELLED';
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto">
-      <div className="flex items-center gap-4">
+    <div className="space-y-6 max-w-5xl min-w-0 mx-auto">
+      <div className="flex items-start gap-2 sm:gap-4">
         <button 
           onClick={() => navigate('/orders')}
-          className="p-2 hover:bg-gray-100 rounded-xl transition-colors text-gray-500"
+          className="shrink-0 p-2 hover:bg-gray-100 rounded-xl transition-colors text-gray-500"
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
-        <div className="flex-1 flex justify-between items-center">
-          <div>
-            <h2 className="text-[28px] font-bold tracking-tight text-[#1D1D1F]">
+        <div className="min-w-0 flex-1 flex flex-col gap-4 lg:flex-row lg:justify-between lg:items-start">
+          <div className="min-w-0">
+            <h2 className="text-[23px] sm:text-[28px] font-bold tracking-tight text-[#1D1D1F] break-words">
               Pedido #{order.id.split('-')[0].toUpperCase()}
             </h2>
-            <p className="text-[15px] text-[#86868B] mt-1">
+            <p className="text-[13px] sm:text-[15px] text-[#86868B] mt-1">
               Realizado el {format(new Date(order.created_at), "d 'de' MMMM, yyyy HH:mm", { locale: es })}
             </p>
           </div>
           
-          <div className="flex gap-3">
+          <div className="flex w-full lg:w-auto flex-col sm:flex-row sm:flex-wrap gap-2 sm:gap-3">
             {order.inventory_posted_at && order.status !== 'CANCELLED' && (
-              <button className="px-4 py-2.5 text-[14px] font-medium text-[#E02424] bg-white border border-gray-200 rounded-xl hover:bg-red-50 hover:border-red-200 transition-colors shadow-sm disabled:opacity-50" disabled={isSaving}
+              <button className="w-full sm:w-auto px-4 py-2.5 text-[14px] font-medium text-[#E02424] bg-white border border-gray-200 rounded-xl hover:bg-red-50 hover:border-red-200 transition-colors shadow-sm disabled:opacity-50" disabled={isSaving}
                 onClick={async () => {
                   if (!window.confirm('¿Cancelar el pedido y reintegrar los productos al almacén? Los pagos registrados se conservan para conciliarlos.')) return;
                   setIsSaving(true);
@@ -338,22 +343,22 @@ export const OrderDetailsAdminPage = () => {
             )}
             {order.status === 'SHIPPED' && (
               <button
-                onClick={handleMarkDelivered}
+                onClick={() => setIsSignatureModalOpen(true)}
                 disabled={isSaving}
-                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2.5 rounded-xl text-[14px] font-medium transition-colors disabled:opacity-50"
+                className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white px-4 py-2.5 rounded-xl text-[14px] font-medium transition-colors disabled:opacity-50"
               >
-                Marcar Entregado
+                Firmar y confirmar entrega
               </button>
             )}
             
-            <button
+            {!isShippedOrDelivered && <button
               onClick={handleSave}
               disabled={isSaving || isShippedOrDelivered}
-              className="bg-[#0066CC] hover:bg-[#005bb5] text-white px-6 py-2.5 rounded-xl text-[14px] font-medium transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center gap-2 shadow-sm"
+              className="w-full sm:w-auto justify-center bg-[#0066CC] hover:bg-[#005bb5] text-white px-6 py-2.5 rounded-xl text-[14px] font-medium transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center gap-2 shadow-sm"
             >
               {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
               Guardar Cambios
-            </button>
+            </button>}
           </div>
         </div>
       </div>
@@ -415,8 +420,8 @@ export const OrderDetailsAdminPage = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column: Form */}
-        <div className="lg:col-span-1 space-y-6">
-          <div className="bg-white border border-gray-200/60 rounded-2xl p-6 shadow-sm space-y-5">
+        <div className="lg:col-span-1 min-w-0 space-y-6">
+          <div className="bg-white border border-gray-200/60 rounded-2xl p-4 sm:p-6 shadow-sm space-y-5">
             <h3 className="font-semibold text-[#1D1D1F]">Gestión del Pedido</h3>
             <label className="block text-[13px] font-medium text-[#1D1D1F]">Almacén de salida
               <select value={warehouseId} disabled={!!order.inventory_posted_at || order.status === 'CANCELLED'} onChange={e => setWarehouseId(e.target.value)} className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0066CC]/20 focus:border-[#0066CC] transition-all disabled:opacity-50 text-[14px] text-[#1D1D1F] mt-1.5">
@@ -436,7 +441,7 @@ export const OrderDetailsAdminPage = () => {
                 disabled={isShippedOrDelivered}
                 className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0066CC]/20 focus:border-[#0066CC] disabled:opacity-70 transition-all text-sm"
               >
-                {Object.entries(statusConfig).map(([key, value]) => (
+                {Object.entries(statusConfig).filter(([key]) => key !== 'DELIVERED' || status === 'DELIVERED').map(([key, value]) => (
                   <option key={key} value={key}>{value.label}</option>
                 ))}
               </select>
@@ -492,19 +497,25 @@ export const OrderDetailsAdminPage = () => {
         </div>
 
         {/* Right Column: Customer & Items */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 min-w-0 space-y-6">
           {order.warranty_return_id && <p className="p-4 bg-blue-50 border border-blue-100 rounded-xl text-sm">Reposición por garantía · {order.warranty_return_id.slice(0,8)}. Su pago manual no representa una segunda venta en el reporte de ganancias.</p>}
           {currentUserProfile?.user_type==='ADMIN' && order.status!=='CANCELLED' && <button disabled={isSaving} className="self-start px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm text-[#0066CC] disabled:opacity-50" onClick={async()=>{
             setIsSaving(true);try{await ordersService.markPaidManually(order.id);await fetchOrder(order.id);toast.success('Pedido marcado pagado manualmente');}catch(error){toast.error((error as Error).message);}finally{setIsSaving(false);}
           }}>Marcar pagado manualmente</button>}
           <OrderReturns order={order} />
+          {deliveryReceipt && <div className="bg-white border border-gray-200/60 rounded-2xl p-6 shadow-sm">
+            <h3 className="text-[16px] font-semibold text-[#1D1D1F]">Firma de recibido</h3>
+            <p className="text-[13px] text-[#86868B] mt-2">Recibió {deliveryReceipt.signed_by_name} · {new Date(deliveryReceipt.received_at).toLocaleString('es-MX')}</p>
+            <button type="button" onClick={async () => { const tab = window.open('about:blank', '_blank'); if (tab) tab.opener = null; try { const url = await ordersService.getDeliverySignatureUrl(deliveryReceipt.signature_path); if (tab) tab.location.href = url; } catch (error) { tab?.close(); toast.error((error as Error).message); } }} className="mt-3 text-[13px] font-medium text-[#0066CC] hover:underline">Ver firma</button>
+          </div>}
+          <DeliverySignatureModal isOpen={isSignatureModalOpen} onClose={() => setIsSignatureModalOpen(false)} onConfirm={handleMarkDelivered} saving={isSaving} />
           {currentUserProfile?.user_type === 'ADMIN' && order.requires_invoice && order.invoice_details && <div className="bg-white border border-gray-200/60 rounded-2xl p-6 shadow-sm">
             <h3 className="text-[16px] font-semibold text-[#1D1D1F] mb-2">Factura solicitada</h3>
             <p className="text-[13px] text-[#86868B] mb-4">Revisa la información fiscal seleccionada para este pedido antes de enviarlo.</p>
             <button type="button" onClick={() => setIsInvoiceModalOpen(true)} className="bg-[#0066CC] text-white rounded-lg px-4 py-2 text-[13px] font-medium">Datos para facturación</button>
             <OrderInvoiceModal isOpen={isInvoiceModalOpen} onClose={() => setIsInvoiceModalOpen(false)} order={order} />
           </div>}
-          <div className="bg-white border border-gray-200/60 rounded-2xl p-6 shadow-sm flex flex-col sm:flex-row justify-between gap-4">
+          <div className="bg-white border border-gray-200/60 rounded-2xl p-4 sm:p-6 shadow-sm flex flex-col sm:flex-row justify-between gap-4">
             <div>
               <h3 className="text-[12px] font-semibold text-gray-500 uppercase tracking-wider mb-2">Cliente</h3>
               <p className="font-medium text-[#1D1D1F]">{order.customers?.name}</p>
@@ -519,8 +530,8 @@ export const OrderDetailsAdminPage = () => {
             )}
           </div>
 
-          <div className="bg-white border border-gray-200/60 rounded-2xl p-6 shadow-sm">
-            <div className="flex justify-between items-center mb-4">
+          <div className="bg-white border border-gray-200/60 rounded-2xl p-4 sm:p-6 shadow-sm">
+            <div className="flex flex-wrap justify-between items-center gap-3 mb-4">
               <h3 className="font-semibold text-[#1D1D1F]">Artículos del Pedido</h3>
               {!isShippedOrDelivered && (
                 <button

@@ -6,6 +6,7 @@ import { returnsService } from '../services/returns.service';
 import { useAuth } from '../../auth/context/useAuth';
 import { supabase } from '../../../lib/supabase/client';
 import { formatCurrency } from '../../../utils/formatters';
+import { Upload } from 'lucide-react';
 
 type Order = {id:string;status:string;sales_order_items:{id:string;quantity:number;products?:{name:string;code:string}|null}[]};
 export const OrderReturns=({order}:{order:Order})=>{
@@ -61,7 +62,14 @@ export const OrderReturns=({order}:{order:Order})=>{
           <label className="text-[13px]">Cantidad<input required disabled={saving || !itemId} type="number" min="1" step="1" max={remaining(itemId)} value={quantity} onChange={e=>setQuantity(e.target.value)} className="block w-full border border-gray-200 rounded-lg px-3 py-2 mt-1" /></label>
         </div>
         <label className="block text-[13px]">Motivo<textarea required maxLength={2000} disabled={saving} value={reason} onChange={e=>setReason(e.target.value)} className="block w-full border border-gray-200 rounded-lg px-3 py-2 mt-1" /></label>
-        <label className="block text-[13px]">Evidencia (1 a 5 archivos)<input key={fileKey} required disabled={saving} multiple type="file" accept="image/jpeg,image/png,image/webp,application/pdf" onChange={e=>setFiles(Array.from(e.target.files || []))} className="block w-full mt-2 text-[12px]" /></label>
+        <div className="text-[13px]">
+          <p className="mb-2">Evidencia (1 a 5 archivos)</p>
+          <label className={`inline-flex items-center gap-2 rounded-lg px-4 py-2.5 bg-[#0066CC] text-white font-semibold shadow-sm cursor-pointer hover:bg-[#005bb5] ${saving ? 'opacity-50 pointer-events-none' : ''}`}>
+            <Upload className="w-4 h-4" /> Cargar evidencia
+            <input key={fileKey} required disabled={saving} multiple type="file" accept="image/jpeg,image/png,image/webp,application/pdf" onChange={e=>setFiles(Array.from(e.target.files || []))} className="sr-only" />
+          </label>
+          <p className="mt-2 text-[#1D1D1F]">{files.length ? `${files.length} archivo(s): ${files.map(file => file.name).join(', ')}` : 'Ningún archivo seleccionado'}</p>
+        </div>
         <p className="text-[12px] text-[#86868B]">JPG, PNG, WEBP o PDF. Máximo 10 MB por archivo.</p>
         <button disabled={saving || !itemId || remaining(itemId)<1} className="px-4 py-2 bg-[#0066CC] text-white rounded-lg text-sm font-medium disabled:opacity-50">{saving?'Registrando…':'Solicitar devolución por garantía'}</button>
       </form>}

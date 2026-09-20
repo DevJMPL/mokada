@@ -1,5 +1,7 @@
 import { supabase } from '../../../lib/supabase/client';
 import type { Database } from '../../../types/database.types';
+import { createClientUuid } from '../../../utils/createClientUuid';
+import { getRoutePaymentDay } from '../../../utils/routePaymentDate';
 
 export type SalesOrderStatus = Database['public']['Enums']['sales_order_status'];
 export type PaymentMethod = Database['public']['Enums']['payment_method'];
@@ -180,8 +182,35 @@ export const ordersService = {
     if (error) throw error;
   },
 
-  async markOrderAsDelivered(id: string) {
-    return this.updateOrder(id, { status: 'DELIVERED' });
+  async markOrderAsDelivered(id: string, signedByName: string, signature: Blob) {
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) throw userError || new Error('Inicia sesión para confirmar la entrega');
+    const path = `${user.id}/${id}/${createClientUuid()}.png`;
+    const bucket = supabase.storage.from('delivery-signatures');
+    const { error: uploadError } = await bucket.upload(path, signature, { contentType: 'image/png', upsert: false });
+    if (uploadError) throw uploadError;
+    try {
+      const { data, error } = await supabase.rpc('confirm_order_delivery', {
+        p_order_id: id, p_signed_by_name: signedByName, p_signature_path: path,
+      });
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      await bucket.remove([path]);
+      throw error;
+    }
+  },
+
+  async getDeliveryReceipt(id: string) {
+    const { data, error } = await supabase.from('order_delivery_receipts').select('signed_by_name,signature_path,received_at').eq('order_id', id).maybeSingle();
+    if (error) throw error;
+    return data;
+  },
+
+  async getDeliverySignatureUrl(path: string) {
+    const { data, error } = await supabase.storage.from('delivery-signatures').createSignedUrl(path, 300);
+    if (error) throw error;
+    return data.signedUrl;
   },
 
   async registerPayment(orderId: string, amount: number, method: 'CASH' | 'TRANSFER' | 'CARD', evidenceFile?: File) {
@@ -383,7 +412,7 @@ export const ordersService = {
     return data;
   },
 
-  async getRoutePayments(routeId: string, weekStartDate: string, weekEndDate: string) {
+  async getRoutePayments(routeId: string, weekStartDate: string, weekEndDate: string, agentAuthUserId: string) {
     const { data: branches } = await supabase
       .from('customer_branches')
       .select('id')
@@ -392,8 +421,11 @@ export const ordersService = {
     const branchIds = branches?.map(b => b.id) || [];
     if (!branchIds.length) return [];
 
-    const startIso = `${weekStartDate}T00:00:00`;
-    const endIso = `${weekEndDate}T23:59:59`;
+    // Query a slightly wider UTC window, then apply the route's Mexico City
+    // calendar dates precisely. Supabase stores created_at in UTC.
+    const startIso = `${weekStartDate}T00:00:00Z`;
+    const endExclusive = new Date(`${weekEndDate}T00:00:00Z`);
+    endExclusive.setUTCDate(endExclusive.getUTCDate() + 2);
 
     const { data, error } = await supabase
       .from('sales_order_payments')
@@ -410,7 +442,8 @@ export const ordersService = {
         )
       `)
       .gte('created_at', startIso)
-      .lte('created_at', endIso)
+      .lt('created_at', endExclusive.toISOString())
+      .eq('created_by', agentAuthUserId)
       .eq('is_manual_settlement', false)
       .eq('status', 'APPROVED')
       .order('created_at', { ascending: false });
@@ -422,10 +455,11 @@ export const ordersService = {
 
     if (!data) return [];
 
-    if (branchIds.length > 0) {
-      return data.filter((p: any) => p.sales_orders && branchIds.includes(p.sales_orders.branch_id));
-    }
-
-    return data;
+    return data.filter((p: any) =>
+      p.sales_orders &&
+      branchIds.includes(p.sales_orders.branch_id) &&
+      getRoutePaymentDay(p.created_at) >= weekStartDate &&
+      getRoutePaymentDay(p.created_at) <= weekEndDate
+    );
   }
 };

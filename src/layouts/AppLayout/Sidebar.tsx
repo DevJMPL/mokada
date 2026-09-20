@@ -12,6 +12,7 @@ import {
   LayoutDashboard,
   ListTree,
   MapPin,
+  Menu,
   PackageSearch,
   Receipt,
   Route,
@@ -44,9 +45,10 @@ interface SidebarProps {
   isOpen: boolean;
   isDesktopOpen: boolean;
   onClose: () => void;
+  onDesktopToggle: () => void;
 }
 
-export const Sidebar = ({ isOpen, isDesktopOpen, onClose }: SidebarProps) => {
+export const Sidebar = ({ isOpen, isDesktopOpen, onClose, onDesktopToggle }: SidebarProps) => {
   const { isAdmin, profile } = useAuth();
   const canManageCustomers = isAdmin || profile?.user_type === 'AGENT';
   const [tooltip, setTooltip] = useState<{ label: string; left: number; top: number } | null>(null);
@@ -179,8 +181,18 @@ export const Sidebar = ({ isOpen, isDesktopOpen, onClose }: SidebarProps) => {
         <div className={`flex h-[3.25rem] items-center justify-between px-6 ${isDesktopOpen ? '' : 'lg:justify-center lg:px-2'}`}>
           <div className="flex items-center gap-2">
             <img src={logo} alt="Mokada" className={`h-6 w-auto ${isDesktopOpen ? '' : 'lg:hidden'}`} />
-            {!isDesktopOpen && <Boxes aria-label="Mokada" className="hidden h-5 w-5 text-[#0066CC] lg:block" />}
           </div>
+          <button
+            type="button"
+            onClick={onDesktopToggle}
+            aria-controls="main-sidebar"
+            aria-expanded={isDesktopOpen}
+            aria-label={isDesktopOpen ? 'Comprimir menú lateral' : 'Expandir menú lateral'}
+            title={isDesktopOpen ? 'Comprimir menú' : 'Expandir menú'}
+            className="hidden h-8 w-8 items-center justify-center rounded-lg text-[#424245] transition-colors hover:bg-black/5 lg:flex"
+          >
+            <Menu className="h-[18px] w-[18px]" />
+          </button>
           <button
             type="button"
             onClick={onClose}

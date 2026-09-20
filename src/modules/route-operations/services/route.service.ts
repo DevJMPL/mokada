@@ -107,7 +107,7 @@ export const routeService = {
   async getTrip(id: string) {
     const { data: trip, error: tripError } = await supabase
       .from('route_trips')
-      .select('*, routes(code, name, description), agent:user_profiles!route_trips_agent_id_fkey(id, first_name, last_name, email), vehicle:fleet_vehicles!route_trips_vehicle_id_fkey(internal_code, plate_number, brand, model)')
+      .select('*, routes(code, name, description), agent:user_profiles!route_trips_agent_id_fkey(id, auth_user_id, first_name, last_name, email), vehicle:fleet_vehicles!route_trips_vehicle_id_fkey(internal_code, plate_number, brand, model)')
       .eq('id', id)
       .single();
     if (tripError) throw tripError;

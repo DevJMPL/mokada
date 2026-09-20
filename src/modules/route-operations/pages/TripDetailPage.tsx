@@ -11,6 +11,7 @@ import { StatusBadge } from '../../../components/ui/StatusBadge';
 import { LoadingState } from '../../../components/ui/LoadingState';
 import { Modal } from '../../../components/ui/Modal';
 import { formatCurrency } from '../../../utils/formatters';
+import { formatRoutePaymentDate } from '../../../utils/routePaymentDate';
 import { ArrowLeft, MapPin, DollarSign, Truck, User, CalendarDays, Paperclip, Wallet, Banknote, Building2, FileText, ChevronDown, ChevronUp } from 'lucide-react';
 
 export const TripDetailPage = () => {
@@ -60,15 +61,15 @@ export const TripDetailPage = () => {
   }, [id, queryClient]);
 
   useEffect(() => {
-    if (trip?.route_id && trip?.week_start_date && trip?.week_end_date) {
+    if (trip?.route_id && trip?.week_start_date && trip?.week_end_date && trip?.agent?.auth_user_id) {
       setIsLoadingPayments(true);
       ordersService
-        .getRoutePayments(trip.route_id, trip.week_start_date, trip.week_end_date)
+        .getRoutePayments(trip.route_id, trip.week_start_date, trip.week_end_date, trip.agent.auth_user_id)
         .then((data) => setPayments(data || []))
         .catch((err) => console.error('Error fetching route payments:', err))
         .finally(() => setIsLoadingPayments(false));
     }
-  }, [trip?.route_id, trip?.week_start_date, trip?.week_end_date]);
+  }, [trip?.route_id, trip?.week_start_date, trip?.week_end_date, trip?.agent?.auth_user_id]);
 
   if (isLoading) return <LoadingState message="Cargando viaje..." />;
   if (!trip) return <div className="text-center py-12 text-[#86868B]">Viaje no encontrado</div>;
@@ -103,7 +104,7 @@ export const TripDetailPage = () => {
       totalCollected: totalCollected,
       netCashToDeliver: netCashToDeliver,
       payments: payments.map((p) => ({
-        date: new Date(p.created_at).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }),
+        date: formatRoutePaymentDate(p.created_at),
         orderId: p.sales_orders?.id || p.sales_order_id || '',
         customerName: p.sales_orders?.customers?.name || 'Cliente',
         branchName: p.sales_orders?.customer_branches?.name || 'Principal',
@@ -335,7 +336,7 @@ export const TripDetailPage = () => {
                           </span>
                         </div>
                         <p className="text-[12px] text-[#86868B] mt-0.5">
-                          Pedido #{pmt.sales_orders?.id?.slice(0, 8) || pmt.sales_order_id?.slice(0, 8)} · {pmt.payment_method === 'CASH' ? 'Efectivo' : 'Transferencia'} · {new Date(pmt.created_at).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                          Pedido #{pmt.sales_orders?.id?.slice(0, 8) || pmt.sales_order_id?.slice(0, 8)} · {pmt.payment_method === 'CASH' ? 'Efectivo' : 'Transferencia'} · {formatRoutePaymentDate(pmt.created_at)}
                         </p>
                         {pmt.evidence_path && (
                           <a

@@ -1,6 +1,7 @@
 import { supabase } from '../../../lib/supabase/client';
 import type { Database } from '../../../types/database.types';
 import { createClientUuid } from '../../../utils/createClientUuid';
+import { getRoutePaymentDay } from '../../../utils/routePaymentDate';
 
 export type SalesOrderStatus = Database['public']['Enums']['sales_order_status'];
 export type PaymentMethod = Database['public']['Enums']['payment_method'];
@@ -411,7 +412,7 @@ export const ordersService = {
     return data;
   },
 
-  async getRoutePayments(routeId: string, weekStartDate: string, weekEndDate: string) {
+  async getRoutePayments(routeId: string, weekStartDate: string, weekEndDate: string, agentAuthUserId: string) {
     const { data: branches } = await supabase
       .from('customer_branches')
       .select('id')
@@ -420,8 +421,11 @@ export const ordersService = {
     const branchIds = branches?.map(b => b.id) || [];
     if (!branchIds.length) return [];
 
-    const startIso = `${weekStartDate}T00:00:00`;
-    const endIso = `${weekEndDate}T23:59:59`;
+    // Query a slightly wider UTC window, then apply the route's Mexico City
+    // calendar dates precisely. Supabase stores created_at in UTC.
+    const startIso = `${weekStartDate}T00:00:00Z`;
+    const endExclusive = new Date(`${weekEndDate}T00:00:00Z`);
+    endExclusive.setUTCDate(endExclusive.getUTCDate() + 2);
 
     const { data, error } = await supabase
       .from('sales_order_payments')
@@ -438,7 +442,8 @@ export const ordersService = {
         )
       `)
       .gte('created_at', startIso)
-      .lte('created_at', endIso)
+      .lt('created_at', endExclusive.toISOString())
+      .eq('created_by', agentAuthUserId)
       .eq('is_manual_settlement', false)
       .eq('status', 'APPROVED')
       .order('created_at', { ascending: false });
@@ -450,10 +455,11 @@ export const ordersService = {
 
     if (!data) return [];
 
-    if (branchIds.length > 0) {
-      return data.filter((p: any) => p.sales_orders && branchIds.includes(p.sales_orders.branch_id));
-    }
-
-    return data;
+    return data.filter((p: any) =>
+      p.sales_orders &&
+      branchIds.includes(p.sales_orders.branch_id) &&
+      getRoutePaymentDay(p.created_at) >= weekStartDate &&
+      getRoutePaymentDay(p.created_at) <= weekEndDate
+    );
   }
 };

@@ -9,6 +9,7 @@ import { LoadingState } from '../../../components/ui/LoadingState';
 import { EmptyState } from '../../../components/ui/EmptyState';
 import { Modal } from '../../../components/ui/Modal';
 import { formatCurrency } from '../../../utils/formatters';
+import { formatRoutePaymentDate } from '../../../utils/routePaymentDate';
 import { MapPin, DollarSign, Plus, Truck, Upload, Wallet, Banknote, Building2, FileText, ChevronDown, ChevronUp } from 'lucide-react';
 
 export const MyRoutePage = () => {
@@ -40,15 +41,15 @@ export const MyRoutePage = () => {
   const [attachmentFile, setAttachmentFile] = useState<File | null>(null);
 
   useEffect(() => {
-    if (trip?.route_id && trip?.week_start_date && trip?.week_end_date) {
+    if (trip?.route_id && trip?.week_start_date && trip?.week_end_date && profile?.auth_user_id) {
       setIsLoadingPayments(true);
       ordersService
-        .getRoutePayments(trip.route_id, trip.week_start_date, trip.week_end_date)
+        .getRoutePayments(trip.route_id, trip.week_start_date, trip.week_end_date, profile.auth_user_id)
         .then((data) => setPayments(data || []))
         .catch((err) => console.error('Error fetching route payments:', err))
         .finally(() => setIsLoadingPayments(false));
     }
-  }, [trip?.route_id, trip?.week_start_date, trip?.week_end_date]);
+  }, [trip?.route_id, trip?.week_start_date, trip?.week_end_date, profile?.auth_user_id]);
 
   if (isLoading) return <LoadingState message="Buscando ruta asignada..." />;
   if (!trip) return <EmptyState title="Sin ruta asignada" description="No tienes una ruta asignada para esta semana." />;
@@ -83,7 +84,7 @@ export const MyRoutePage = () => {
       totalCollected: totalCollected,
       netCashToDeliver: netCashToDeliver,
       payments: payments.map((p) => ({
-        date: new Date(p.created_at).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }),
+        date: formatRoutePaymentDate(p.created_at),
         orderId: p.sales_orders?.id || p.sales_order_id || '',
         customerName: p.sales_orders?.customers?.name || 'Cliente',
         branchName: p.sales_orders?.customer_branches?.name || 'Principal',
@@ -329,7 +330,7 @@ export const MyRoutePage = () => {
                           </span>
                         </div>
                         <p className="text-[12px] text-[#86868B] mt-0.5">
-                          Pedido #{pmt.sales_orders?.id?.slice(0, 8) || pmt.sales_order_id?.slice(0, 8)} · {pmt.payment_method === 'CASH' ? 'Efectivo' : 'Transferencia'} · {new Date(pmt.created_at).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                          Pedido #{pmt.sales_orders?.id?.slice(0, 8) || pmt.sales_order_id?.slice(0, 8)} · {pmt.payment_method === 'CASH' ? 'Efectivo' : 'Transferencia'} · {formatRoutePaymentDate(pmt.created_at)}
                         </p>
                         {pmt.evidence_path && (
                           <a

@@ -15,6 +15,9 @@ export const catalogService = {
     const { data, count, error } = await query.range(from, to);
     if (error) throw error;
     
+    const hasNextPage = count !== null && to + 1 < count;
+    const nextPage = hasNextPage ? page + 1 : undefined;
+    
     if (data && data.length > 0) {
       const productIds = data.map((d: any) => d.id);
       
@@ -47,7 +50,7 @@ export const catalogService = {
       }
     }
 
-    return { data, count };
+    return { data, count, nextPage };
   },
 
   async getBrands() {

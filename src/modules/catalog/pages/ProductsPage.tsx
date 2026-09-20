@@ -1,22 +1,40 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useProducts } from '../hooks/useCatalog';
+import { useInfiniteProducts } from '../hooks/useCatalog';
 import { catalogService } from '../services/catalog.service';
 import { StatusBadge } from '../../../components/ui/StatusBadge';
-import { Search, Plus, PackageSearch, ShoppingCart } from 'lucide-react';
+import { Search, Plus, PackageSearch, ShoppingCart, Loader2 } from 'lucide-react';
 import { useAuth } from '../../auth/context/useAuth';
 import { useCartStore } from '../store/useCartStore';
 import { CartDrawer } from '../components/CartDrawer';
+import { useDebounce } from '../../../hooks/useDebounce';
+import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
 
 export const ProductsPage = () => {
   const navigate = useNavigate();
   const { isAdmin } = useAuth();
   const [search, setSearch] = useState('');
-  const { data, isLoading } = useProducts({ page: 1, pageSize: 25, search });
+  const debouncedSearch = useDebounce(search, 500);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const { addItem, getItemCount } = useCartStore();
 
-  const products = data?.data || [];
+  const { 
+    data, 
+    isLoading, 
+    fetchNextPage, 
+    hasNextPage, 
+    isFetchingNextPage 
+  } = useInfiniteProducts({ pageSize: 25, search: debouncedSearch });
+
+  const products = data?.pages.flatMap((page) => page.data) || [];
+
+  const [bottomRef, isIntersecting] = useIntersectionObserver({ threshold: 0.1 });
+
+  useEffect(() => {
+    if (isIntersecting && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [isIntersecting, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   return (
     <div className="space-y-6">
@@ -117,6 +135,7 @@ export const ProductsPage = () => {
                     <img 
                       src={imageUrl} 
                       alt={item.name} 
+                      loading="lazy"
                       className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
                     />
                   ) : (
@@ -181,6 +200,19 @@ export const ProductsPage = () => {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* Infinite Scroll trigger */}
+      {!isLoading && products.length > 0 && (
+        <div ref={bottomRef} className="py-6 flex justify-center">
+          {isFetchingNextPage ? (
+            <Loader2 className="w-6 h-6 text-[#0066CC] animate-spin" />
+          ) : hasNextPage ? (
+            <div className="h-6" />
+          ) : (
+            <span className="text-[13px] text-[#86868B]">No hay más productos</span>
+          )}
         </div>
       )}
       

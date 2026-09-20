@@ -13,14 +13,10 @@ export const AppLayout = () => {
         isOpen={isSidebarOpen}
         isDesktopOpen={isDesktopSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}
-        onDesktopClose={() => setIsDesktopSidebarOpen(false)}
+        onDesktopToggle={() => setIsDesktopSidebarOpen((open) => !open)}
       />
       <div className="flex-1 min-w-0 flex flex-col h-screen overflow-hidden relative">
-        <Header
-          onMenuClick={() => setIsSidebarOpen(true)}
-          onDesktopMenuClick={() => setIsDesktopSidebarOpen((open) => !open)}
-          isDesktopSidebarOpen={isDesktopSidebarOpen}
-        />
+        <Header onMenuClick={() => setIsSidebarOpen(true)} />
         <main className="flex-1 overflow-auto p-4 sm:p-6 md:p-8">
           <Outlet />
         </main>

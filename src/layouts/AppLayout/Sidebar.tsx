@@ -1,3 +1,5 @@
+import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { NavLink } from 'react-router-dom';
 import logo from '../../assets/logo.svg';
 import {
@@ -10,6 +12,7 @@ import {
   LayoutDashboard,
   ListTree,
   MapPin,
+  Menu,
   PackageSearch,
   Receipt,
   Route,
@@ -42,12 +45,19 @@ interface SidebarProps {
   isOpen: boolean;
   isDesktopOpen: boolean;
   onClose: () => void;
-  onDesktopClose: () => void;
+  onDesktopToggle: () => void;
 }
 
-export const Sidebar = ({ isOpen, isDesktopOpen, onClose, onDesktopClose }: SidebarProps) => {
+export const Sidebar = ({ isOpen, isDesktopOpen, onClose, onDesktopToggle }: SidebarProps) => {
   const { isAdmin, profile } = useAuth();
   const canManageCustomers = isAdmin || profile?.user_type === 'AGENT';
+  const [tooltip, setTooltip] = useState<{ label: string; left: number; top: number } | null>(null);
+
+  const showTooltip = (label: string, element: HTMLElement) => {
+    if (isDesktopOpen || !window.matchMedia('(min-width: 1024px)').matches) return;
+    const bounds = element.getBoundingClientRect();
+    setTooltip({ label, left: bounds.right + 10, top: bounds.top + bounds.height / 2 });
+  };
 
   const getNavSections = (): NavSection[] => {
     const sections: NavSection[] = [];
@@ -163,14 +173,26 @@ export const Sidebar = ({ isOpen, isDesktopOpen, onClose, onDesktopClose }: Side
 
       <aside
         id="main-sidebar"
-        className={`fixed inset-y-0 left-0 z-40 flex h-full w-[260px] flex-col border-r border-gray-200/50 bg-[#F5F5F7] transition-transform duration-200 lg:static ${isDesktopOpen ? 'lg:translate-x-0' : 'lg:hidden'} ${
+        onMouseLeave={() => setTooltip(null)}
+        className={`fixed inset-y-0 left-0 z-40 flex h-full w-[260px] shrink-0 flex-col border-r border-gray-200/50 bg-[#F5F5F7] transition-[transform,width] duration-200 lg:static lg:translate-x-0 ${isDesktopOpen ? 'lg:w-[260px]' : 'lg:w-[68px]'} ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        <div className="flex h-[3.25rem] items-center justify-between px-6">
+        <div className={`flex h-[3.25rem] items-center justify-between px-6 ${isDesktopOpen ? '' : 'lg:justify-center lg:px-2'}`}>
           <div className="flex items-center gap-2">
-            <img src={logo} alt="Mokada" className="h-6 w-auto" />
+            <img src={logo} alt="Mokada" className={`h-6 w-auto ${isDesktopOpen ? '' : 'lg:hidden'}`} />
           </div>
+          <button
+            type="button"
+            onClick={onDesktopToggle}
+            aria-controls="main-sidebar"
+            aria-expanded={isDesktopOpen}
+            aria-label={isDesktopOpen ? 'Comprimir menú lateral' : 'Expandir menú lateral'}
+            title={isDesktopOpen ? 'Comprimir menú' : 'Expandir menú'}
+            className="hidden h-8 w-8 items-center justify-center rounded-lg text-[#424245] transition-colors hover:bg-black/5 lg:flex"
+          >
+            <Menu className="h-[18px] w-[18px]" />
+          </button>
           <button
             type="button"
             onClick={onClose}
@@ -179,45 +201,52 @@ export const Sidebar = ({ isOpen, isDesktopOpen, onClose, onDesktopClose }: Side
           >
             <X className="h-4 w-4" />
           </button>
-          <button
-            type="button"
-            onClick={onDesktopClose}
-            className="hidden h-8 w-8 items-center justify-center rounded-lg text-[#86868B] transition-colors hover:bg-black/5 hover:text-[#1D1D1F] lg:flex"
-            aria-label="Cerrar menú lateral"
-            title="Cerrar menú"
-          >
-            <X className="h-4 w-4" />
-          </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto py-2">
-          <nav className="space-y-4">
+        <div className="flex-1 overflow-y-auto py-2" onScroll={() => setTooltip(null)}>
+          <nav className={`space-y-4 ${isDesktopOpen ? '' : 'lg:space-y-2'}`}>
             {sections.map((section, idx) => (
-              <div key={`${section.label || section.path}-${idx}`} className="px-3">
+              <div key={`${section.label || section.path}-${idx}`} className={`px-3 ${isDesktopOpen ? '' : `lg:px-2 ${idx > 0 ? 'lg:border-t lg:border-gray-200/60 lg:pt-2' : ''}`}`}>
                 {section.items ? (
                   <>
-                    <h3 className="px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-[#86868B]">
+                    <h3 className={`px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-[#86868B] ${isDesktopOpen ? '' : 'lg:sr-only'}`}>
                       {section.label}
                     </h3>
                     <div className="space-y-0.5">
                       {section.items.map((item) => (
-                        <NavItem key={item.path} item={item} onNavigate={onClose} />
+                        <NavItem key={item.path} item={item} isDesktopOpen={isDesktopOpen} onNavigate={onClose} onTooltip={showTooltip} onTooltipHide={() => setTooltip(null)} />
                       ))}
                     </div>
                   </>
                 ) : (
-                  <NavItem item={section as NavItemConfig} onNavigate={onClose} />
+                  <NavItem item={section as NavItemConfig} isDesktopOpen={isDesktopOpen} onNavigate={onClose} onTooltip={showTooltip} onTooltipHide={() => setTooltip(null)} />
                 )}
               </div>
             ))}
           </nav>
         </div>
       </aside>
+      {!isDesktopOpen && tooltip && createPortal(
+        <div
+          role="tooltip"
+          className="pointer-events-none fixed z-50 -translate-y-1/2 rounded-lg bg-[#1D1D1F] px-2.5 py-1.5 text-xs font-medium whitespace-nowrap text-white shadow-lg"
+          style={{ left: tooltip.left, top: tooltip.top }}
+        >
+          {tooltip.label}
+        </div>,
+        document.body
+      )}
     </>
   );
 };
 
-const NavItem = ({ item, onNavigate }: { item: NavItemConfig; onNavigate: () => void }) => {
+const NavItem = ({ item, isDesktopOpen, onNavigate, onTooltip, onTooltipHide }: {
+  item: NavItemConfig;
+  isDesktopOpen: boolean;
+  onNavigate: () => void;
+  onTooltip: (label: string, element: HTMLElement) => void;
+  onTooltipHide: () => void;
+}) => {
   const Icon = item.icon;
 
   if (item.disabled) {
@@ -233,15 +262,22 @@ const NavItem = ({ item, onNavigate }: { item: NavItemConfig; onNavigate: () => 
     <NavLink
       to={item.path}
       end={item.path === '/orders' || item.path === '/'}
-      onClick={onNavigate}
+      onClick={() => {
+        onTooltipHide();
+        onNavigate();
+      }}
+      onMouseEnter={(event) => onTooltip(item.label, event.currentTarget)}
+      onMouseLeave={onTooltipHide}
+      onFocus={(event) => onTooltip(item.label, event.currentTarget)}
+      onBlur={onTooltipHide}
       className={({ isActive }) =>
-        `flex items-center gap-2.5 rounded-lg px-3 py-1.5 text-[13px] transition-colors ${
+        `flex items-center gap-2.5 rounded-lg px-3 py-1.5 text-[13px] transition-colors ${isDesktopOpen ? '' : 'lg:h-10 lg:justify-center lg:px-0'} ${
           isActive ? 'bg-[#0066CC] font-medium text-white shadow-sm' : 'text-[#1D1D1F] hover:bg-black/5'
         }`
       }
     >
-      <Icon className="h-4 w-4" />
-      {item.label}
+      <Icon className="h-4 w-4 shrink-0" />
+      <span className={isDesktopOpen ? '' : 'lg:sr-only'}>{item.label}</span>
     </NavLink>
   );
 };

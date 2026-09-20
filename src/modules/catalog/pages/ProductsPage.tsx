@@ -178,14 +178,14 @@ export const ProductsPage = () => {
 
                     <button 
                       type="button"
-                      disabled={item.status !== 'ACTIVE'}
+                      disabled={item.status !== 'ACTIVE' || !(Number(item.public_price) > 0)}
                       onClick={(e) => {
                         e.stopPropagation();
                         addItem({
                           product_id: item.id,
                           name: item.name,
                           code: item.code,
-                          price: item.public_price || 0,
+                          price: item.public_price,
                           quantity: 1,
                           image_url: imageUrl ?? undefined
                         });
@@ -194,7 +194,7 @@ export const ProductsPage = () => {
                       className="mt-4 w-full flex items-center justify-center gap-2 bg-[#0066CC]/10 text-[#0066CC] hover:bg-[#0066CC] hover:text-white px-4 py-2 rounded-xl text-[13px] font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <ShoppingCart className="w-4 h-4" />
-                      Agregar al carrito
+                      {Number(item.public_price) > 0 ? 'Agregar al carrito' : 'Sin precio público'}
                     </button>
                 </div>
               </div>

@@ -23,7 +23,8 @@ export const WarehousesPage = () => {
   const columns: Column<any>[] = [
     { header: 'Código', accessorKey: 'code', className: 'font-medium text-slate-900' },
     { header: 'Nombre', accessorKey: 'name' },
-    { header: 'Lista de venta', cell: item => <span className="text-[#86868B]">{item.price_lists?.name || 'Sin lista predeterminada'}</span> },
+    { header: 'Función', cell: item => <span className="text-[#86868B]">{item.warehouse_role === 'PURCHASE' ? 'Compras y abastecimiento' : 'Ventas a clientes'}</span> },
+    { header: 'Lista de venta', cell: item => <span className="text-[#86868B]">{item.warehouse_role === 'PURCHASE' ? 'No aplica' : item.price_lists?.name || 'Sin lista predeterminada'}</span> },
     { header: 'Descripción', accessorKey: 'description', cell: (item) => <span className="text-gray-500">{item.description || '-'}</span> },
     { 
       header: 'Estado', 

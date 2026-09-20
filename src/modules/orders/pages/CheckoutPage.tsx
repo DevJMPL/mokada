@@ -282,8 +282,9 @@ export const CheckoutPage = () => {
                   setPriceListId((warehouse as { price_list_id?: string })?.price_list_id || '');
                 }}>
                   <option value="">Selecciona el almacén</option>
-                  {warehouses?.filter(w => w.is_active).map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
+                  {warehouses?.filter(w => w.is_active && w.warehouse_role === 'SALES').map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
                 </select>
+                <p className="text-xs text-gray-500">Los pedidos salen del almacén de ventas. El principal se usa para compras y traspasos.</p>
                 <label className="block text-[13px] font-medium text-[#1D1D1F]">Lista de venta (público / mayoreo) *</label>
                 <select className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0066CC]/20 focus:border-[#0066CC] transition-all disabled:opacity-50 text-[14px] text-[#1D1D1F]" value={priceListId} onChange={e => setPriceListId(e.target.value)}>
                   <option value="">Selecciona una lista</option>

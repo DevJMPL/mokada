@@ -8,6 +8,7 @@ import { SearchSelect } from '../../../components/ui/SearchSelect';
 import { Modal } from '../../../components/ui/Modal';
 import { catalogService } from '../../catalog/services/catalog.service';
 import { InventoryProductInfo } from '../components/InventoryProductInfo';
+import { createClientUuid } from '../../../utils/createClientUuid';
 
 export const TransferFormPage = () => {
   const navigate = useNavigate();
@@ -32,7 +33,7 @@ export const TransferFormPage = () => {
 
   const { register, control, handleSubmit, watch, setValue, reset, formState: { errors, isDirty } } = useForm({
     defaultValues: {
-      transfer_number: `TR-${crypto.randomUUID().slice(0, 8).toUpperCase()}`,
+      transfer_number: `TR-${createClientUuid().slice(0, 8).toUpperCase()}`,
       source_warehouse_id: '',
       destination_warehouse_id: '',
       notes: '',
@@ -92,11 +93,15 @@ export const TransferFormPage = () => {
       if (loadingStock || stockError) throw new Error('No se pudo verificar el inventario. Actualiza los datos antes de guardar.');
       if (id && transferData?.status !== 'DRAFT') throw new Error('Solo se pueden editar traspasos en borrador.');
       if (!sourceWarehouse?.is_active || !destinationWarehouse?.is_active) throw new Error('Selecciona almacenes activos.');
+      if (sourceWarehouse.warehouse_role !== 'PURCHASE' || destinationWarehouse.warehouse_role !== 'SALES') throw new Error('El traspaso debe ir del almacén de compras al de ventas.');
       if (new Set(validItems.map((item: any) => item.product_id)).size !== validItems.length) throw new Error('El producto está repetido. Agrupa la cantidad en una sola partida.');
       for (const item of validItems) {
         const stock = availableStock.find(row => row.product_id === item.product_id);
         if (!Number.isFinite(Number(item.quantity)) || !stock || Number(item.quantity) > Number(stock.available_quantity)) throw new Error('La cantidad de un producto supera el disponible del almacén de origen.');
         if (item.unit_price == null || item.unit_price === '' || !Number.isFinite(Number(item.unit_price)) || Number(item.unit_price) < 0) throw new Error('Captura un precio interno válido para cada producto.');
+        if (stock.average_cost != null && Number(item.unit_price) <= Number(stock.average_cost)) throw new Error('El precio interno debe ser mayor que el costo promedio del almacén de compras.');
+        const destinationStock = stockData?.find(row => row.product_id === item.product_id && row.warehouse_id === data.destination_warehouse_id && row.location_id == null);
+        if (destinationStock && Number(destinationStock.quantity) > 0 && (destinationStock.average_cost == null || destinationStock.original_average_cost == null)) throw new Error('Hay existencias antiguas sin costo en el almacén de ventas. Configura sus costos antes de completar el traspaso.');
       }
       
       if (validItems.length === 0) {
@@ -170,7 +175,7 @@ export const TransferFormPage = () => {
                 <div>
                   <SearchSelect
                     label="Almacén Origen *"
-                    options={warehouses?.filter(w => w.is_active).map((w: any) => ({
+                    options={warehouses?.filter(w => w.is_active && w.warehouse_role === 'PURCHASE').map((w: any) => ({
                       value: w.id,
                       label: w.name
                     })) || []}
@@ -197,7 +202,7 @@ export const TransferFormPage = () => {
                 <div>
                   <SearchSelect
                     label="Almacén Destino *"
-                    options={warehouses?.filter((w: any) => w.is_active && w.id !== sourceWarehouseId).map((w: any) => ({
+                    options={warehouses?.filter((w: any) => w.is_active && w.warehouse_role === 'SALES' && w.id !== sourceWarehouseId).map((w: any) => ({
                       value: w.id,
                       label: w.name
                     })) || []}
@@ -213,7 +218,7 @@ export const TransferFormPage = () => {
 
           <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-xl text-[13px] text-amber-800">
             <Tag className="w-5 h-5 shrink-0" />
-            El precio interno es lo que paga el almacén destino por cada unidad. Los precios al público y de mayoreo se configuran en el producto y se conservan al traspasar.
+            El precio interno debe ser mayor que el costo promedio de compra. Se convierte en el costo del almacén de ventas; el precio público, los descuentos y mayoreo se configuran en el producto.
           </div>
 
           <div>

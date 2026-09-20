@@ -62,8 +62,8 @@ export const MovementsPage = () => {
       )
     },
     { 
-      header: 'Costo Unit.', 
-      cell: (item) => item.unit_cost != null ? formatCurrency(item.unit_cost) : 'Sin costo',
+      header: 'Valor unitario',
+      cell: (item) => <span>{item.unit_cost != null ? formatCurrency(item.unit_cost) : 'Sin costo'}<span className="block text-[11px] text-[#86868B]">{item.movement_type === 'TRANSFER_IN' ? 'Precio interno' : item.movement_type === 'PURCHASE' ? 'Compra' : 'Costo del almacén'}</span></span>,
       className: 'text-right text-slate-500'
     }
   ];
@@ -73,7 +73,7 @@ export const MovementsPage = () => {
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-[28px] font-bold tracking-tight text-[#1D1D1F]">Movimientos</h2>
-          <p className="text-[15px] text-[#86868B]">Historial de entradas y salidas de inventario</p>
+          <p className="text-[15px] text-[#86868B]">Compras en el principal, traspasos al secundario y salidas por venta</p>
         </div>
 
         <div className="flex items-center gap-4">

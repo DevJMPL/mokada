@@ -426,10 +426,10 @@ export const OrderDetailsAdminPage = () => {
             <label className="block text-[13px] font-medium text-[#1D1D1F]">Almacén de salida
               <select value={warehouseId} disabled={!!order.inventory_posted_at || order.status === 'CANCELLED'} onChange={e => setWarehouseId(e.target.value)} className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0066CC]/20 focus:border-[#0066CC] transition-all disabled:opacity-50 text-[14px] text-[#1D1D1F] mt-1.5">
                 <option value="">Selecciona el almacén</option>
-                {warehouses?.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
+                {warehouses?.filter(w => (w.is_active && w.warehouse_role === 'SALES') || w.id === warehouseId).map(w => <option key={w.id} value={w.id} disabled={w.warehouse_role !== 'SALES'}>{w.name}{w.warehouse_role !== 'SALES' ? ' · no apto para venta' : ''}</option>)}
               </select>
             </label>
-            <p className="text-xs text-gray-500">Enviar o entregar descuenta existencias y guarda los costos para calcular la ganancia.</p>
+            <p className="text-xs text-gray-500">Los pedidos salen del almacén de ventas. Enviar o entregar descuenta existencias y guarda los costos para calcular la ganancia.</p>
             
             <div>
               <label className="block text-[13px] font-medium text-gray-700 mb-1">

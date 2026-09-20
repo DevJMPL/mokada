@@ -93,10 +93,19 @@ export const generateRouteSettlementPdf = (data: RouteSettlementPdfData) => {
   doc.text(`Total Cobrado General: $${data.totalCollected.toFixed(2)}`, 110, 67);
   doc.text(`Total Gastado en Ruta: $${data.totalExpenses.toFixed(2)}`, 110, 73);
 
+  const viaticosBalance = data.budgetAmount - data.totalExpenses;
+  if (viaticosBalance >= 0) {
+    doc.text(`Viáticos Restantes: $${viaticosBalance.toFixed(2)}`, 110, 79);
+  } else {
+    doc.setTextColor(220, 38, 38);
+    doc.text(`Viáticos Excedidos: $${Math.abs(viaticosBalance).toFixed(2)}`, 110, 79);
+    doc.setTextColor(0, 0, 0);
+  }
+
   doc.setFontSize(10);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(0, 102, 204);
-  doc.text(`EFECTIVO A ENTREGAR EN CAJA: $${data.netCashToDeliver.toFixed(2)}`, 110, 81);
+  doc.text(`EFECTIVO A ENTREGAR EN CAJA: $${data.netCashToDeliver.toFixed(2)}`, 110, 87);
   doc.setTextColor(0, 0, 0);
 
   let currentY = 98;

@@ -64,7 +64,7 @@ export const MyRoutePage = () => {
 
   const budget = Number(trip.budget_amount || 0);
   const available = budget - totalExpenses;
-  const netCashToDeliver = totalCashCollected + available;
+  const netCashToDeliver = totalCashCollected; // separated from viáticos
 
   const startDate = new Date(trip.week_start_date + 'T12:00:00');
   const endDate = new Date(trip.week_end_date + 'T12:00:00');
@@ -211,27 +211,27 @@ export const MyRoutePage = () => {
             </span>
           </div>
 
-          <div className="rounded-xl border border-gray-100 bg-gray-50/70 p-4">
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-[#86868B]">
+          <div className={`rounded-xl border ${available >= 0 ? 'border-gray-100 bg-gray-50/70' : 'border-red-100 bg-red-50/70'} p-4`}>
+            <span className={`text-[11px] font-semibold uppercase tracking-wider ${available >= 0 ? 'text-[#86868B]' : 'text-red-600'}`}>
               Gastos de Ruta
             </span>
             <p className="mt-1 text-xl font-bold text-[#1D1D1F]">
               {formatCurrency(totalExpenses)}
             </p>
-            <span className="text-[11px] text-[#86868B]">
-              Viáticos rest.: {formatCurrency(available)}
+            <span className={`text-[11px] ${available >= 0 ? 'text-[#86868B]' : 'text-red-600'}`}>
+              {available >= 0 ? 'Viáticos rest.: ' : 'Excedente: '}{formatCurrency(Math.abs(available))}
             </span>
           </div>
 
           <div className="rounded-xl border border-blue-100 bg-blue-50/70 p-4">
             <span className="text-[11px] font-semibold uppercase tracking-wider text-[#0066CC]">
-              Efectivo a Entregar
+              Efectivo a Entregar en Caja
             </span>
             <p className="mt-1 text-2xl font-bold text-[#0066CC]">
               {formatCurrency(netCashToDeliver)}
             </p>
             <span className="text-[11px] text-blue-800">
-              Efectivo en mano para caja
+              Efectivo íntegro cobrado en ruta
             </span>
           </div>
         </div>
@@ -252,7 +252,7 @@ export const MyRoutePage = () => {
         <div className="flex justify-between text-[13px] text-[#86868B]">
           <span>Gastado: {formatCurrency(totalExpenses)}</span>
           <span className={available >= 0 ? 'text-green-600 font-medium' : 'text-red-600 font-medium'}>
-            Disponible: {formatCurrency(available)}
+            {available >= 0 ? 'Disponible: ' : 'Excedido: '}{formatCurrency(Math.abs(available))}
           </span>
         </div>
       </div>

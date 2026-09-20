@@ -9,7 +9,7 @@ import { Link } from 'react-router-dom';
 
 export const SettlementsPage = () => {
   const { profile } = useAuth();
-  const { data, isLoading } = useFinancialSummary({ status: 'UNDER_REVIEW' });
+  const { data, isLoading } = useFinancialSummary({ statuses: ['COMPLETED', 'UNDER_REVIEW'] });
   const createSettlement = useCreateSettlement();
   const [confirmTrip, setConfirmTrip] = useState<any>(null);
 

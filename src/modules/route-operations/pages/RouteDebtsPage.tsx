@@ -1,6 +1,6 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { ordersService } from '../../orders/services/orders.service';
-import { routeService } from '../services/route.service';
+import { useMyCurrentTrip } from '../hooks/useRouteOperations';
 import { useAuth } from '../../auth/context/useAuth';
 import { Table, type Column } from '../../../components/ui/Table';
 import { StatusBadge } from '../../../components/ui/StatusBadge';
@@ -13,8 +13,8 @@ import toast from 'react-hot-toast';
 
 export const RouteDebtsPage = () => {
   const { profile } = useAuth();
-  const [routes, setRoutes] = useState<any[]>([]);
-  const [selectedRouteId, setSelectedRouteId] = useState<string>('');
+  const { data: assignedTrip, isLoading: isLoadingTrip, error: tripError } = useMyCurrentTrip(profile?.id || null);
+  const selectedRouteId = assignedTrip?.route_id || '';
   const [orders, setOrders] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'ALL' | 'PENDING' | 'OVERDUE' | 'PAID'>('PENDING');
@@ -26,22 +26,7 @@ export const RouteDebtsPage = () => {
   const [evidenceFile, setEvidenceFile] = useState<File | null>(null);
   const [isSubmittingPayment, setIsSubmittingPayment] = useState(false);
 
-  useEffect(() => {
-    const loadRoutes = async () => {
-      try {
-        const data = await routeService.getRoutes();
-        setRoutes(data || []);
-        if (data && data.length > 0) {
-          setSelectedRouteId(data[0].id);
-        }
-      } catch (error) {
-        console.error('Error loading routes:', error);
-      }
-    };
-    loadRoutes();
-  }, []);
-
-  const fetchDebts = async () => {
+  const fetchDebts = useCallback(async () => {
     if (!selectedRouteId) {
       setOrders([]);
       setIsLoading(false);
@@ -58,11 +43,11 @@ export const RouteDebtsPage = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [selectedRouteId]);
 
   useEffect(() => {
     fetchDebts();
-  }, [selectedRouteId]);
+  }, [fetchDebts]);
 
   const todayStr = new Date().toISOString().split('T')[0];
 
@@ -276,21 +261,13 @@ export const RouteDebtsPage = () => {
           </p>
         </div>
 
-        {/* Route Selector */}
-        <label className="flex h-11 items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 shadow-sm focus-within:border-[#0066CC] focus-within:ring-2 focus-within:ring-[#0066CC]/15">
+        <div className="flex min-h-11 items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 shadow-sm">
           <Route className="h-4 w-4 text-[#0066CC]" />
-          <select
-            value={selectedRouteId}
-            onChange={(e) => setSelectedRouteId(e.target.value)}
-            className="min-w-0 flex-1 bg-transparent text-sm font-semibold text-[#1D1D1F] outline-none"
-          >
-            {routes.map((r) => (
-              <option key={r.id} value={r.id}>
-                Ruta: {r.code} - {r.name}
-              </option>
-            ))}
-          </select>
-        </label>
+          <div className="min-w-0">
+            <p className="text-[11px] text-[#86868B]">Ruta asignada de la semana</p>
+            <p className="text-sm font-semibold text-[#1D1D1F]">{isLoadingTrip ? 'Cargando...' : assignedTrip ? `${assignedTrip.routes?.code} - ${assignedTrip.routes?.name} · ${assignedTrip.week_start_date} al ${assignedTrip.week_end_date}` : tripError ? 'No se pudo consultar la ruta' : 'Sin ruta asignada esta semana'}</p>
+          </div>
+        </div>
       </div>
 
       {/* Metrics */}
@@ -522,4 +499,3 @@ export const RouteDebtsPage = () => {
     </div>
   );
 };
-

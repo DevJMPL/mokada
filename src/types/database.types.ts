@@ -1054,6 +1054,45 @@ export type Database = {
         }
         Relationships: []
       }
+      order_delivery_receipts: {
+        Row: {
+          order_id: string
+          received_at: string
+          recorded_by: string
+          signature_path: string
+          signed_by_name: string
+        }
+        Insert: {
+          order_id: string
+          received_at?: string
+          recorded_by: string
+          signature_path: string
+          signed_by_name: string
+        }
+        Update: {
+          order_id?: string
+          received_at?: string
+          recorded_by?: string
+          signature_path?: string
+          signed_by_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_delivery_receipts_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: true
+            referencedRelation: "sales_margins"
+            referencedColumns: ["order_id"]
+          },
+          {
+            foreignKeyName: "order_delivery_receipts_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: true
+            referencedRelation: "sales_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       price_lists: {
         Row: {
           code: string
@@ -3421,6 +3460,49 @@ export type Database = {
       }
     }
     Functions: {
+      confirm_order_delivery: {
+        Args: {
+          p_order_id: string
+          p_signature_path: string
+          p_signed_by_name: string
+        }
+        Returns: {
+          admin_comments: string | null
+          amount_paid: number
+          branch_id: string | null
+          created_at: string
+          created_by: string
+          credit_approval_status: string
+          credit_approved_at: string | null
+          credit_approved_by: string | null
+          credit_term_days: number | null
+          customer_id: string
+          due_date: string | null
+          estimated_delivery_date: string | null
+          fiscal_profile_id: string | null
+          id: string
+          inventory_posted_at: string | null
+          inventory_tracking_enabled: boolean
+          invoice_details: Json | null
+          invoice_payment_form: string | null
+          payment_type: string
+          price_list_id: string | null
+          requires_invoice: boolean
+          shipping_address: string | null
+          shipping_cost: number | null
+          status: Database["public"]["Enums"]["sales_order_status"]
+          total_amount: number
+          updated_at: string
+          warehouse_id: string | null
+          warranty_return_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "sales_orders"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       create_or_update_product_full:
         | {
             Args: {

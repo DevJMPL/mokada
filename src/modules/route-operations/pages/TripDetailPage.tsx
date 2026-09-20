@@ -84,7 +84,7 @@ export const TripDetailPage = () => {
 
   const budget = Number(trip.budget_amount || 0);
   const balance = budget - totalExpenses;
-  const netCashToDeliver = totalCashCollected + balance;
+  const netCashToDeliver = totalCashCollected; // separated from viáticos
 
   const startDate = new Date(trip.week_start_date + 'T12:00:00');
   const endDate = new Date(trip.week_end_date + 'T12:00:00');
@@ -189,7 +189,7 @@ export const TripDetailPage = () => {
             <CalendarDays className="w-4 h-4" /> <span className="text-[12px] font-medium uppercase tracking-wide">Saldo Viáticos</span>
           </div>
           <p className={`text-[17px] font-semibold ${balance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-            {balance >= 0 ? '+' : ''}{formatCurrency(balance)}
+            {balance >= 0 ? '+' : ''}{formatCurrency(Math.abs(balance))}
           </p>
           <p className="text-[13px] text-[#86868B]">{balance > 0 ? 'Agente devuelve' : balance < 0 ? 'Empresa reembolsa' : 'Balanceado'}</p>
         </div>
@@ -221,15 +221,15 @@ export const TripDetailPage = () => {
             </span>
           </div>
 
-          <div className="rounded-xl border border-gray-100 bg-gray-50/70 p-4">
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-[#86868B]">
+          <div className={`rounded-xl border ${balance >= 0 ? 'border-gray-100 bg-gray-50/70' : 'border-red-100 bg-red-50/70'} p-4`}>
+            <span className={`text-[11px] font-semibold uppercase tracking-wider ${balance >= 0 ? 'text-[#86868B]' : 'text-red-600'}`}>
               Gastos de Ruta
             </span>
             <p className="mt-1 text-xl font-bold text-[#1D1D1F]">
               {formatCurrency(totalExpenses)}
             </p>
-            <span className="text-[11px] text-[#86868B]">
-              Viáticos rest.: {formatCurrency(balance)}
+            <span className={`text-[11px] ${balance >= 0 ? 'text-[#86868B]' : 'text-red-600'}`}>
+              {balance >= 0 ? 'Viáticos rest.: ' : 'Excedente: '}{formatCurrency(Math.abs(balance))}
             </span>
           </div>
 
@@ -241,7 +241,7 @@ export const TripDetailPage = () => {
               {formatCurrency(netCashToDeliver)}
             </p>
             <span className="text-[11px] text-blue-800">
-              Efectivo neto en mano
+              Efectivo íntegro cobrado en ruta
             </span>
           </div>
         </div>

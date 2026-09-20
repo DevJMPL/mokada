@@ -13,7 +13,6 @@ export const AppLayout = () => {
         isOpen={isSidebarOpen}
         isDesktopOpen={isDesktopSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}
-        onDesktopClose={() => setIsDesktopSidebarOpen(false)}
       />
       <div className="flex-1 min-w-0 flex flex-col h-screen overflow-hidden relative">
         <Header

@@ -44,10 +44,9 @@ interface SidebarProps {
   isOpen: boolean;
   isDesktopOpen: boolean;
   onClose: () => void;
-  onDesktopClose: () => void;
 }
 
-export const Sidebar = ({ isOpen, isDesktopOpen, onClose, onDesktopClose }: SidebarProps) => {
+export const Sidebar = ({ isOpen, isDesktopOpen, onClose }: SidebarProps) => {
   const { isAdmin, profile } = useAuth();
   const canManageCustomers = isAdmin || profile?.user_type === 'AGENT';
   const [tooltip, setTooltip] = useState<{ label: string; left: number; top: number } | null>(null);
@@ -190,15 +189,6 @@ export const Sidebar = ({ isOpen, isDesktopOpen, onClose, onDesktopClose }: Side
           >
             <X className="h-4 w-4" />
           </button>
-          {isDesktopOpen && <button
-            type="button"
-            onClick={onDesktopClose}
-            className="hidden h-8 w-8 items-center justify-center rounded-lg text-[#86868B] transition-colors hover:bg-black/5 hover:text-[#1D1D1F] lg:flex"
-            aria-label="Cerrar menú lateral"
-            title="Cerrar menú"
-          >
-            <X className="h-4 w-4" />
-          </button>}
         </div>
 
         <div className="flex-1 overflow-y-auto py-2" onScroll={() => setTooltip(null)}>

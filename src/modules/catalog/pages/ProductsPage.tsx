@@ -21,6 +21,8 @@ export const ProductsPage = () => {
   const { 
     data, 
     isLoading, 
+    isError,
+    isFetchNextPageError,
     fetchNextPage, 
     hasNextPage, 
     isFetchingNextPage 
@@ -28,13 +30,13 @@ export const ProductsPage = () => {
 
   const products = data?.pages.flatMap((page) => page.data) || [];
 
-  const [bottomRef, isIntersecting] = useIntersectionObserver({ threshold: 0.1 });
+  const [bottomRef, isIntersecting] = useIntersectionObserver({ threshold: 0.1, rootMargin: '200px' });
 
   useEffect(() => {
-    if (isIntersecting && hasNextPage && !isFetchingNextPage) {
+    if (isIntersecting && hasNextPage && !isFetchingNextPage && !isFetchNextPageError) {
       fetchNextPage();
     }
-  }, [isIntersecting, hasNextPage, isFetchingNextPage, fetchNextPage]);
+  }, [isIntersecting, hasNextPage, isFetchingNextPage, isFetchNextPageError, fetchNextPage]);
 
   return (
     <div className="space-y-6">
@@ -103,6 +105,10 @@ export const ProductsPage = () => {
               </div>
             </div>
           ))}
+        </div>
+      ) : isError && products.length === 0 ? (
+        <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-center text-sm text-red-700">
+          No se pudieron cargar los productos. Recarga la página para intentarlo de nuevo.
         </div>
       ) : products.length === 0 ? (
         <div className="bg-white border border-gray-200/60 rounded-2xl p-12 text-center flex flex-col items-center shadow-sm">
@@ -209,7 +215,13 @@ export const ProductsPage = () => {
           {isFetchingNextPage ? (
             <Loader2 className="w-6 h-6 text-[#0066CC] animate-spin" />
           ) : hasNextPage ? (
-            <div className="h-6" />
+            <button
+              type="button"
+              onClick={() => fetchNextPage()}
+              className="rounded-xl border border-gray-200 bg-white px-5 py-2 text-sm font-medium text-[#0066CC] shadow-sm hover:bg-gray-50"
+            >
+              {isFetchNextPageError ? 'Reintentar carga' : 'Cargar más productos'}
+            </button>
           ) : (
             <span className="text-[13px] text-[#86868B]">No hay más productos</span>
           )}

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type RefObject } from 'react';
+import { useCallback, useEffect, useState, type RefCallback } from 'react';
 
 interface Args {
   threshold?: number;
@@ -6,28 +6,29 @@ interface Args {
   rootMargin?: string;
 }
 
-export function useIntersectionObserver(options?: Args): [RefObject<HTMLDivElement | null>, boolean] {
+export function useIntersectionObserver(options?: Args): [RefCallback<HTMLDivElement>, boolean] {
   const [isIntersecting, setIsIntersecting] = useState(false);
-  // Using any to avoid complicated type errors with HTMLDivElement vs general Element,
-  // but typed return explicitly for easier use in React divs
-  const ref = useRef<any>(null);
+  const [element, setElement] = useState<HTMLDivElement | null>(null);
+  const threshold = options?.threshold;
+  const root = options?.root;
+  const rootMargin = options?.rootMargin;
+  const ref = useCallback<RefCallback<HTMLDivElement>>((node) => {
+    setElement(node);
+  }, []);
 
   useEffect(() => {
-    const element = ref.current;
-    if (!element) return;
+    if (!element) {
+      setIsIntersecting(false);
+      return;
+    }
 
     const observer = new IntersectionObserver(([entry]) => {
       setIsIntersecting(entry.isIntersecting);
-    }, options);
+    }, { threshold, root, rootMargin });
 
     observer.observe(element);
-
-    return () => {
-      if (element) {
-        observer.unobserve(element);
-      }
-    };
-  }, [options?.threshold, options?.root, options?.rootMargin]);
+    return () => observer.disconnect();
+  }, [element, threshold, root, rootMargin]);
 
   return [ref, isIntersecting];
 }

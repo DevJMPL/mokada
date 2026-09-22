@@ -70,6 +70,7 @@ export const InventoryProductInfo = ({ source, destination, sourceName, destinat
   const destinationQuantity = destination?.quantity ?? 0;
   const destinationMissingCost = destinationQuantity>0 && (destination?.average_cost == null || destination?.original_average_cost == null);
   const validPrice = unitPrice != null && Number.isFinite(unitPrice);
+  const salesStock = destinationName ? destination || source : source?.warehouse_role === 'SALES' ? source : undefined;
   const projectedDestinationCost = validPrice && amount>0 && !destinationMissingCost
     ? (destinationQuantity*(destination?.average_cost ?? 0) + amount*unitPrice!)/(destinationQuantity+amount) : null;
   return <div className="space-y-3 mt-4">
@@ -86,15 +87,18 @@ export const InventoryProductInfo = ({ source, destination, sourceName, destinat
       <p>Costo del origen: <span className="font-semibold text-[#1D1D1F]">{stockLoaded ? money(source?.average_cost) : '…'}</span></p>
       <p>Costo original: <span className="font-semibold text-[#1D1D1F]">{stockLoaded ? money(source?.original_average_cost) : '…'}</span></p>
       {unitPrice != null && Number.isFinite(unitPrice) && quantity != null && <p>Total interno: <span className="font-semibold text-[#1D1D1F]">{formatCurrency(unitPrice * amount)}</span></p>}
+      {destinationName && validPrice && source?.average_cost != null && <p>Margen interno por unidad: <span className="font-semibold text-[#1D1D1F]">{formatCurrency(unitPrice! - source.average_cost)}</span></p>}
       {destinationName && quantity != null && validPrice && amount>0 && <p>Costo promedio previsto del destino: <span className="font-semibold text-[#1D1D1F]">{money(projectedDestinationCost)}</span></p>}
     </div>
     {stockLoaded && quantity != null && missingCost && <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-[12px] text-amber-800">Falta el costo del producto en {sourceName || 'el origen'}. Debe configurarse antes de completar el traspaso.</div>}
+    {stockLoaded && destinationName && validPrice && source?.average_cost != null && unitPrice! <= source.average_cost && <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-[12px] text-amber-800">El precio interno debe superar el costo promedio del origen para que el traspaso tenga margen.</div>}
     {stockLoaded && quantity != null && destinationMissingCost && <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-[12px] text-amber-800">{destinationName} ya tiene existencias anteriores sin costo. Configura sus costos actuales para que la entrada del traspaso pueda calcular el nuevo promedio y las ventas posteriores.</div>}
     {stockLoaded && quantity != null && amount > available && <p className="text-[12px] text-red-600">La cantidad supera el disponible del origen ({formatQuantity(available)}).</p>}
     <div className="flex flex-wrap gap-2">
-      {source?.sale_prices.map(price => <span key={price.price_list_id} className="px-2 py-1 text-[12px] bg-[#F5F5F7] border border-gray-200/60 rounded-lg text-[#1D1D1F]">{price.name}: {formatCurrency(price.amount)}</span>)}
-      {stockLoaded && source && source.sale_prices.length === 0 && <p className="text-[12px] text-[#86868B]">Sin precios de venta configurados.</p>}
+      {salesStock?.sale_prices.map(price => <span key={price.price_list_id} className="px-2 py-1 text-[12px] bg-[#F5F5F7] border border-gray-200/60 rounded-lg text-[#1D1D1F]">{price.name}: {formatCurrency(price.amount)}</span>)}
+      {stockLoaded && destinationName && salesStock && salesStock.sale_prices.length === 0 && <p className="text-[12px] text-[#86868B]">Sin precios de venta configurados para el producto.</p>}
     </div>
+    {destinationName && projectedDestinationCost != null && salesStock?.sale_prices.length ? <div className="text-[12px] text-[#86868B]">Margen estimado de venta por unidad: {salesStock.sale_prices.map(price => <span key={price.price_list_id} className="inline-block mr-3 mt-1">{price.name} <strong className={price.amount < projectedDestinationCost ? 'text-red-600' : 'text-[#1D1D1F]'}>{formatCurrency(price.amount - projectedDestinationCost)}</strong></span>)}</div> : null}
     <div className="flex flex-wrap gap-4 text-[12px] font-medium text-[#0066CC]">
       {allowCostEdit && source?.id && <button type="button" className="hover:underline" onClick={() => setEditing(source)}>Configurar costo del origen</button>}
       {allowCostEdit && destination?.id && <button type="button" className="hover:underline" onClick={() => setEditing(destination)}>Configurar costo del destino</button>}

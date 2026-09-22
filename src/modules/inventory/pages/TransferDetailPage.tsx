@@ -22,6 +22,9 @@ export const TransferDetailPage = () => {
     if (item.unit_price == null || !Number.isFinite(Number(item.unit_price)) || Number(item.unit_price)<0) return [`${label}: falta precio interno.`];
     if ((source?.available_quantity ?? 0) < item.quantity) return [`${label}: cantidad superior al disponible del origen.`];
     if (source?.average_cost == null || source?.original_average_cost == null) return [`${label}: falta costo en ${transfer.source?.name}.`];
+    if (Number(item.unit_price) <= Number(source.average_cost)) return [`${label}: el precio interno debe superar el costo promedio del origen.`];
+    const destination = stock?.find(row => row.product_id === item.product_id && row.warehouse_id === transfer.destination_warehouse_id && row.location_id == null);
+    if (destination && Number(destination.quantity)>0 && (destination.average_cost == null || destination.original_average_cost == null)) return [`${label}: faltan costos para existencias anteriores del destino.`];
     return [];
   }) : [];
   

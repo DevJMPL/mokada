@@ -9,9 +9,10 @@ import { Link } from 'react-router-dom';
 import { RefreshCw, Save, Loader2 } from 'lucide-react';
 import { LoadingState } from '../../../components/ui/LoadingState';
 import { inventoryKeys } from '../../../utils/queryKeys';
+import { useWarehouses } from '../hooks/useInventory';
 
 interface Valuation {
-  inventory_id: string; product_id: string; code: string; name: string; warehouse_name: string; quantity: number;
+  inventory_id: string; product_id: string; warehouse_id: string; code: string; name: string; warehouse_name: string; quantity: number;
   average_cost: number | null; original_average_cost: number | null; inventory_value: number | null;
 }
 interface Margin {
@@ -47,6 +48,7 @@ export const MarginsPage = () => {
   const [originalCost, setOriginalCost] = useState('');
   const [saving, setSaving] = useState(false);
   const stock = useQuery({ queryKey: ['inventory_valuation'], queryFn: () => readAll<Valuation>('inventory_valuation', 'inventory_id') });
+  const {data: warehouses} = useWarehouses();
   const sales = useQuery({ queryKey: ['sales_margins'], queryFn: () => readAll<Margin>('sales_margins', 'item_id') });
   const prices = useQuery({ queryKey: ['margin-sale-prices'], enabled: tab === 'stock', queryFn: () => readAll<{product_id: string; price_list_name: string; amount: number}>('current_product_prices', ['product_id', 'price_list_id']) });
   const users = useQuery({ queryKey: ['margin-agents'], queryFn: async () => {
@@ -134,6 +136,7 @@ export const MarginsPage = () => {
       <p className="text-xs text-gray-500">Los pedidos anteriores a esta implementación no tienen costos históricos y no se incluyen automáticamente.</p>
     </> : <>
       <p className="text-sm text-gray-500">Para existencias anteriores, captura el costo promedio del almacén y el costo original de compra. En el principal normalmente son iguales; en el secundario, el primero incluye el precio interno.</p>
+      {!!stock.data?.filter(r => r.quantity > 0 && (r.average_cost == null || r.original_average_cost == null)).length && <p className="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-xl p-3">Hay {stock.data.filter(r => r.quantity > 0 && (r.average_cost == null || r.original_average_cost == null)).length} existencias antiguas sin costo. Captura sus costos reales para poder traspasarlas o venderlas con una ganancia confiable.</p>}
       {prices.error && <p className="text-red-600 text-sm">No se pudieron consultar los precios de venta.</p>}
       <Table data={(stock.data || []).filter(r => (!warehouse || r.warehouse_name === warehouse) && matchingProduct(r))} columns={[
         {header: 'Producto', cell: r => <div><p className="text-[13px] font-medium text-[#0066CC]">{r.code}</p><p className="text-[14px] text-[#1D1D1F] mt-0.5">{r.name}</p></div>},
@@ -143,8 +146,10 @@ export const MarginsPage = () => {
         {header: 'Costo original', className: 'text-right tabular-nums', cell: r => money(r.original_average_cost)},
         {header: 'Valor inventario', className: 'text-right tabular-nums', cell: r => money(r.inventory_value)},
         {header: 'Precios de venta', cell: r => <div className="text-xs space-y-1">
-          {prices.isLoading ? 'Cargando…' : (prices.data || []).filter(p => p.product_id === r.product_id).map(p => <p key={p.price_list_name}>{p.price_list_name}: {money(p.amount)}</p>)}
-          <Link className="text-[#0066CC] hover:underline font-medium" to={`/catalog/products/${r.product_id}`}>Configurar precios</Link>
+          {warehouses?.find(w => w.id === r.warehouse_id)?.warehouse_role === 'PURCHASE' ? <p>No aplica · se vende desde el secundario</p> : <>
+            {prices.isLoading ? 'Cargando…' : (prices.data || []).filter(p => p.product_id === r.product_id).map(p => <p key={p.price_list_name}>{p.price_list_name}: {money(p.amount)}</p>)}
+            <Link className="text-[#0066CC] hover:underline font-medium" to={`/catalog/products/${r.product_id}`}>Configurar precios</Link>
+          </>}
         </div>},
         {header: 'Acciones', cell: r => <button className="text-[#0066CC] hover:underline font-medium" onClick={() => {setEditing(r); setCost(r.average_cost?.toString() || ''); setOriginalCost(r.original_average_cost?.toString() || '');}}>Configurar costos</button>}
       ]} />

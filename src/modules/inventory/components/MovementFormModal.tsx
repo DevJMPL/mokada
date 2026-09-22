@@ -16,7 +16,7 @@ interface Props {
 }
 
 export const MovementFormModal = ({ isOpen, onClose }: Props) => {
-  const { register, handleSubmit, reset, control, watch, formState: { errors } } = useForm({shouldUnregister: true});
+  const { register, handleSubmit, reset, control, watch, setValue, formState: { errors } } = useForm({shouldUnregister: true});
   const { mutateAsync: createMovement, isPending } = useCreateMovement();
   
   const { data: warehouses } = useWarehouses();
@@ -25,6 +25,7 @@ export const MovementFormModal = ({ isOpen, onClose }: Props) => {
   const warehouseId = watch('warehouse_id');
   const productId = watch('product_id');
   const movementType = watch('movement_type');
+  const incoming = movementType !== 'ADJUSTMENT_OUT';
   const selectedStock = stock?.find(row => row.product_id === productId && row.warehouse_id === warehouseId && row.location_id == null);
 
   useEffect(() => {
@@ -39,6 +40,12 @@ export const MovementFormModal = ({ isOpen, onClose }: Props) => {
       });
     }
   }, [isOpen, reset]);
+
+  useEffect(() => {
+    if (incoming && warehouseId && warehouses && warehouses.find(w => w.id === warehouseId)?.warehouse_role !== 'PURCHASE') {
+      setValue('warehouse_id', '');
+    }
+  }, [incoming, warehouseId, warehouses, setValue]);
 
   const onSubmit = async (data: any) => {
     try {
@@ -132,7 +139,7 @@ export const MovementFormModal = ({ isOpen, onClose }: Props) => {
               <div>
                 <SearchSelect
                   label="Almacén *"
-                  options={warehouses?.filter(w => w.is_active).map((w: any) => ({
+                  options={warehouses?.filter(w => w.is_active && (!incoming || w.warehouse_role === 'PURCHASE')).map((w: any) => ({
                     value: w.id,
                     label: w.name
                   })) || []}
@@ -177,12 +184,13 @@ export const MovementFormModal = ({ isOpen, onClose }: Props) => {
           </div>
         </div>
 
-        {['PURCHASE', 'INITIAL_STOCK', 'ADJUSTMENT_IN'].includes(watch('movement_type')) && (
+        {incoming && (
           <div>
-            <label className="block text-[13px] font-medium text-[#1D1D1F] mb-1.5">Costo de compra por unidad ($) *</label>
+            <label className="block text-[13px] font-medium text-[#1D1D1F] mb-1.5">{movementType === 'PURCHASE' ? 'Costo de compra por unidad' : 'Costo de la entrada por unidad'} ($) *</label>
             <input type="number" min="0" step="0.0001" className="w-full px-3 py-2 bg-white border border-gray-200/60 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0066CC]/20 focus:border-[#0066CC] text-[14px] transition-all disabled:opacity-50"
               {...register('unit_cost', { required: 'Captura el costo', min: 0 })} />
             {errors.unit_cost && <p className="text-red-500 text-xs">{String(errors.unit_cost.message)}</p>}
+            <p className="text-[12px] text-[#86868B] mt-2">Este costo pertenece al almacén de compras. El precio interno se captura después, al traspasar al almacén de ventas.</p>
           </div>
         )}
         <div>

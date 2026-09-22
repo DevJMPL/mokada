@@ -32,3 +32,4 @@ supabase/.branches/
 # Local verification builds, temporary SQL and PDF previews
 scratch/
 
+.vercel

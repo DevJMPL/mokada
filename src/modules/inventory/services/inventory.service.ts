@@ -3,6 +3,7 @@ import type { Database } from '../../../types/database.types';
 
 export type InventoryStock = Database['public']['Views']['inventory_available']['Row'] & {
   average_cost: number | null; original_average_cost: number | null;
+  warehouse_role: 'PURCHASE' | 'SALES'; default_price_list_id: string | null;
   sale_prices: {price_list_id: string; name: string; amount: number}[];
 };
 
@@ -21,19 +22,24 @@ export const inventoryService = {
     return readPages<{id: string; code: string; name: string; image_url: string | null}>(() => supabase.from('products').select('id, code, name, image_url').eq('status', 'ACTIVE').order('id'));
   },
   async getStock() {
-    const [stock, costs, prices] = await Promise.all([
+    const [stock, costs, prices, warehouses] = await Promise.all([
       readPages<Database['public']['Views']['inventory_available']['Row']>(() => supabase.from('inventory_available').select('*').order('id')),
       readPages<{inventory_id: string; average_cost: number | null; original_average_cost: number | null}>(() => supabase.from('inventory_costs').select('*').order('inventory_id')),
-      readPages<{product_id: string; price_list_id: string; amount: number; price_lists: {name: string}}>(() => supabase.from('product_prices').select('product_id, price_list_id, amount, price_lists!inner(name, is_active)').is('valid_to', null).lte('valid_from', new Date().toISOString()).eq('price_lists.is_active', true).order('product_id').order('price_list_id'))
+      readPages<{product_id: string; price_list_id: string; amount: number; price_lists: {name: string}}>(() => supabase.from('product_prices').select('product_id, price_list_id, amount, price_lists!inner(name, is_active)').is('valid_to', null).lte('valid_from', new Date().toISOString()).eq('price_lists.is_active', true).order('product_id').order('price_list_id')),
+      readPages<{id: string; warehouse_role: 'PURCHASE' | 'SALES'; price_list_id: string | null}>(() => supabase.from('warehouses').select('id, warehouse_role, price_list_id').order('id'))
     ]);
     const costMap = new Map(costs.map(cost => [cost.inventory_id, cost]));
+    const warehouseMap = new Map(warehouses.map(warehouse => [warehouse.id, warehouse]));
     const priceMap = new Map<string, InventoryStock['sale_prices']>();
     for (const price of prices) {
       const list = priceMap.get(price.product_id) || [];
       list.push({price_list_id: price.price_list_id, name: price.price_lists.name, amount: price.amount});
       priceMap.set(price.product_id, list);
     }
-    return stock.map(row => ({...row, average_cost: costMap.get(row.id!)?.average_cost ?? null, original_average_cost: costMap.get(row.id!)?.original_average_cost ?? null, sale_prices: priceMap.get(row.product_id!) || []} satisfies InventoryStock));
+    return stock.map(row => ({...row, average_cost: costMap.get(row.id!)?.average_cost ?? null, original_average_cost: costMap.get(row.id!)?.original_average_cost ?? null,
+      warehouse_role: warehouseMap.get(row.warehouse_id!)?.warehouse_role || 'PURCHASE',
+      default_price_list_id: warehouseMap.get(row.warehouse_id!)?.price_list_id || null,
+      sale_prices: priceMap.get(row.product_id!) || []} satisfies InventoryStock));
   },
 
   async getMovements(warehouseId?: string) {

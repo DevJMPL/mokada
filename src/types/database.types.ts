@@ -1102,6 +1102,7 @@ export type Database = {
           id: string
           is_active: boolean
           name: string
+          pricing_mode: "MANUAL" | "PUBLIC_DISCOUNT"
           updated_at: string
         }
         Insert: {
@@ -1112,6 +1113,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           name: string
+          pricing_mode?: "MANUAL" | "PUBLIC_DISCOUNT"
           updated_at?: string
         }
         Update: {
@@ -1122,6 +1124,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           name?: string
+          pricing_mode?: "MANUAL" | "PUBLIC_DISCOUNT"
           updated_at?: string
         }
         Relationships: []
@@ -3038,6 +3041,7 @@ export type Database = {
           name: string
           price_list_id: string | null
           updated_at: string
+          warehouse_role: "PURCHASE" | "SALES"
         }
         Insert: {
           code: string
@@ -3048,6 +3052,7 @@ export type Database = {
           name: string
           price_list_id?: string | null
           updated_at?: string
+          warehouse_role?: "PURCHASE" | "SALES"
         }
         Update: {
           code?: string
@@ -3058,6 +3063,7 @@ export type Database = {
           name?: string
           price_list_id?: string | null
           updated_at?: string
+          warehouse_role?: "PURCHASE" | "SALES"
         }
         Relationships: [
           {

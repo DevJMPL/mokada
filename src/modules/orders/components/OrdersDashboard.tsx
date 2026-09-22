@@ -5,7 +5,7 @@ import {
 } from 'recharts';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { TrendingUp, Package, DollarSign, Clock, Users, Trophy } from 'lucide-react';
+import { TrendingUp, Package, DollarSign, Clock, Users, Trophy, BarChart2 } from 'lucide-react';
 import { statusConfig } from '../pages/OrdersPage';
 
 const COLORS = ['#0066CC', '#10B981', '#F59E0B', '#8B5CF6', '#EF4444', '#6366F1'];
@@ -90,7 +90,19 @@ export const OrdersDashboard = ({ orders, agents = [] }: { orders: any[], agents
     };
   }, [orders, agents]);
 
-  if (!orders || orders.length === 0) return null;
+  if (!orders || orders.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center p-12 bg-white border border-gray-200/60 rounded-2xl shadow-sm mt-6 mb-8">
+        <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4">
+          <BarChart2 className="w-8 h-8 text-gray-400" />
+        </div>
+        <h3 className="text-lg font-semibold text-[#1D1D1F] mb-1">Sin datos de ventas</h3>
+        <p className="text-[#86868B] text-center max-w-sm text-sm">
+          Aún no hay pedidos registrados para generar las métricas de este panel.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 mb-8">

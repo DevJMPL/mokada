@@ -277,7 +277,7 @@ export const RouteDebtsPage = () => {
             <span className="text-[11px] font-semibold uppercase tracking-wider text-[#86868B]">
               Adeudo en Ruta
             </span>
-            <div className="rounded-lg bg-blue-50 p-2 text-[#0066CC]">
+            <div className="p-2 text-[#1D1D1F]">
               <Wallet className="h-5 w-5" />
             </div>
           </div>
@@ -291,7 +291,7 @@ export const RouteDebtsPage = () => {
             <span className="text-[11px] font-semibold uppercase tracking-wider text-[#86868B]">
               Vencido en Ruta
             </span>
-            <div className="rounded-lg bg-red-50 p-2 text-red-600">
+            <div className="p-2 text-[#1D1D1F]">
               <AlertTriangle className="h-5 w-5" />
             </div>
           </div>
@@ -305,8 +305,8 @@ export const RouteDebtsPage = () => {
             <span className="text-[11px] font-semibold uppercase tracking-wider text-[#86868B]">
               Total Cobrado
             </span>
-            <div className="rounded-lg bg-emerald-50 p-2 text-emerald-600">
-              <CheckCircle2 className="h-5 w-5" />
+            <div className="p-2 text-[#1D1D1F]">
+              <CheckCircle className="h-5 w-5" />
             </div>
           </div>
           <p className="mt-3 text-2xl font-bold tracking-tight text-[#1D1D1F]">

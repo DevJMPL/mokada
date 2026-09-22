@@ -161,7 +161,7 @@ export const MyDebtsPage = () => {
             <span className="text-[11px] font-semibold uppercase tracking-wider text-[#86868B]">
               Saldo Total Pendiente
             </span>
-            <div className="rounded-lg bg-blue-50 p-2 text-[#0066CC]">
+            <div className="p-2 text-[#1D1D1F]">
               <Wallet className="h-5 w-5" />
             </div>
           </div>
@@ -175,7 +175,7 @@ export const MyDebtsPage = () => {
             <span className="text-[11px] font-semibold uppercase tracking-wider text-[#86868B]">
               Pedidos Vencidos
             </span>
-            <div className="rounded-lg bg-red-50 p-2 text-red-600">
+            <div className="p-2 text-[#1D1D1F]">
               <AlertCircle className="h-5 w-5" />
             </div>
           </div>

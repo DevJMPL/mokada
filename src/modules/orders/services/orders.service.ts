@@ -18,8 +18,6 @@ export interface CreateOrderParams {
   credit_term_days?: 8 | 15 | 21;
   warranty_return_id?: string;
   requires_invoice?: boolean;
-  fiscal_profile_id?: string;
-  invoice_payment_form?: string;
   items: {
     product_id: string;
     quantity: number;

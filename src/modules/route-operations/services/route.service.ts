@@ -34,7 +34,7 @@ export const routeService = {
   async getRoutes() {
     const { data, error } = await supabase
       .from('routes')
-      .select('*')
+      .select('*, agent:user_profiles!routes_agent_id_fkey(first_name, last_name)')
       .order('code');
     if (error) throw error;
     return data;

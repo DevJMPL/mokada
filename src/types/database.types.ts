@@ -2043,6 +2043,7 @@ export type Database = {
       }
       routes: {
         Row: {
+          agent_id: string | null
           code: string
           created_at: string
           default_weekly_budget: number
@@ -2055,6 +2056,7 @@ export type Database = {
           working_days: string[] | null
         }
         Insert: {
+          agent_id?: string | null
           code: string
           created_at?: string
           default_weekly_budget?: number
@@ -2067,6 +2069,7 @@ export type Database = {
           working_days?: string[] | null
         }
         Update: {
+          agent_id?: string | null
           code?: string
           created_at?: string
           default_weekly_budget?: number
@@ -2078,7 +2081,15 @@ export type Database = {
           updated_at?: string
           working_days?: string[] | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "routes_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       sales_item_costs: {
         Row: {

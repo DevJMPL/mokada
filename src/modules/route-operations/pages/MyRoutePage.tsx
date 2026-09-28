@@ -6,6 +6,7 @@ import { generateRouteSettlementPdf } from '../utils/generateRouteSettlementPdf'
 import { supabase } from '../../../lib/supabase/client';
 import { StatusBadge } from '../../../components/ui/StatusBadge';
 import { LoadingState } from '../../../components/ui/LoadingState';
+import { toast } from 'react-hot-toast';
 import { EmptyState } from '../../../components/ui/EmptyState';
 import { Modal } from '../../../components/ui/Modal';
 import { formatCurrency } from '../../../utils/formatters';
@@ -115,12 +116,17 @@ export const MyRoutePage = () => {
       });
 
       if (attachmentFile && expense) {
-        await uploadAttachment.mutateAsync({
-          expense: { id: expense.id, route_trip_id: trip.id },
-          file: attachmentFile,
-          attachmentType: 'RECEIPT',
-          uploadedBy: profile?.id || '',
-        });
+        try {
+          await uploadAttachment.mutateAsync({
+            expense: { id: expense.id, route_trip_id: trip.id },
+            file: attachmentFile,
+            attachmentType: 'RECEIPT',
+            uploadedBy: profile?.id || '',
+          });
+        } catch (uploadErr) {
+          toast.error('El gasto se guardó, pero hubo un error al subir la evidencia.');
+          console.error('Error uploading attachment', uploadErr);
+        }
       }
 
       setExpenseModal(false);
@@ -136,7 +142,9 @@ export const MyRoutePage = () => {
         invoice_available: false,
       });
       setAttachmentFile(null);
+      toast.success('Gasto registrado correctamente');
     } catch (err) {
+      toast.error('No se pudo guardar el gasto. Intenta de nuevo.');
       console.error('Error saving expense', err);
     }
   };

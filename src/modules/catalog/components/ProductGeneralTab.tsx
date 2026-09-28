@@ -1,4 +1,5 @@
 import { useFormContext } from 'react-hook-form';
+import { SearchSelect } from '../../../components/ui/SearchSelect';
 
 interface Props {
   brands: any[];
@@ -7,7 +8,11 @@ interface Props {
 }
 
 export const ProductGeneralTab = ({ brands, categories, units }: Props) => {
-  const { register, formState: { errors } } = useFormContext();
+  const { register, watch, setValue, formState: { errors } } = useFormContext();
+
+  const brandOptions = brands.map(b => ({ value: b.id, label: b.name }));
+  const categoryOptions = categories.map(c => ({ value: c.id, label: c.name }));
+  const unitOptions = units.map(u => ({ value: u.id, label: `${u.name} (${u.code})` }));
 
   return (
     <div className="space-y-6">
@@ -49,46 +54,34 @@ export const ProductGeneralTab = ({ brands, categories, units }: Props) => {
         </div>
 
         {/* Brand */}
-        <div>
-          <label className="block text-[13px] font-medium text-[#1D1D1F] mb-1.5">Marca</label>
-          <select 
-            {...register('brand_id')}
-            className="w-full px-3 py-2 bg-white border border-gray-200/60 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0066CC]/20 focus:border-[#0066CC] text-[14px] transition-all text-[#1D1D1F]"
-          >
-            <option value="">Seleccione una marca</option>
-            {brands.map(b => (
-              <option key={b.id} value={b.id}>{b.name}</option>
-            ))}
-          </select>
-        </div>
+        <SearchSelect
+          label="Marca"
+          options={brandOptions}
+          value={watch('brand_id')}
+          onChange={v => setValue('brand_id', v, { shouldDirty: true, shouldValidate: true })}
+          onClear={() => setValue('brand_id', null, { shouldDirty: true })}
+          placeholder="Seleccione una marca"
+        />
 
         {/* Category */}
-        <div>
-          <label className="block text-[13px] font-medium text-[#1D1D1F] mb-1.5">Categoría</label>
-          <select 
-            {...register('category_id')}
-            className="w-full px-3 py-2 bg-white border border-gray-200/60 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0066CC]/20 focus:border-[#0066CC] text-[14px] transition-all text-[#1D1D1F]"
-          >
-            <option value="">Seleccione una categoría</option>
-            {categories.map(c => (
-              <option key={c.id} value={c.id}>{c.name}</option>
-            ))}
-          </select>
-        </div>
+        <SearchSelect
+          label="Categoría"
+          options={categoryOptions}
+          value={watch('category_id')}
+          onChange={v => setValue('category_id', v, { shouldDirty: true, shouldValidate: true })}
+          onClear={() => setValue('category_id', null, { shouldDirty: true })}
+          placeholder="Seleccione una categoría"
+        />
 
         {/* UOM */}
-        <div>
-          <label className="block text-[13px] font-medium text-[#1D1D1F] mb-1.5">Unidad de Medida</label>
-          <select 
-            {...register('unit_of_measure_id')}
-            className="w-full px-3 py-2 bg-white border border-gray-200/60 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0066CC]/20 focus:border-[#0066CC] text-[14px] transition-all text-[#1D1D1F]"
-          >
-            <option value="">Seleccione UOM</option>
-            {units.map(u => (
-              <option key={u.id} value={u.id}>{u.name} ({u.code})</option>
-            ))}
-          </select>
-        </div>
+        <SearchSelect
+          label="Unidad de Medida"
+          options={unitOptions}
+          value={watch('unit_of_measure_id')}
+          onChange={v => setValue('unit_of_measure_id', v, { shouldDirty: true, shouldValidate: true })}
+          onClear={() => setValue('unit_of_measure_id', null, { shouldDirty: true })}
+          placeholder="Seleccione UOM"
+        />
 
         {/* Status */}
         <div>

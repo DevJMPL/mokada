@@ -16,7 +16,8 @@ import {
   Cell,
   Legend
 } from 'recharts';
-import { Package, HeartPulse, Boxes } from 'lucide-react';
+import { HeartPulse, Boxes, Users, Banknote, Award } from 'lucide-react';
+import { formatCurrency } from '../../../utils/formatters';
 
 export const DashboardPage = () => {
   const { isAdmin } = useAuth();
@@ -66,23 +67,13 @@ export const DashboardPage = () => {
 
   return (
     <div className="space-y-6 pb-12">
-      <div>
-        <h2 className="text-[28px] font-bold tracking-tight text-[#1D1D1F]">Dashboard</h2>
-        <p className="text-[15px] text-[#86868B]">Resumen analítico del sistema</p>
-      </div>
-
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
         {/* Gráfico 1: Salud del Inventario */}
         <div className="bg-white border border-gray-200/60 rounded-[24px] p-6 shadow-sm flex flex-col">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="p-2.5 bg-rose-50 rounded-xl">
-              <HeartPulse className="w-5 h-5 text-rose-500" />
-            </div>
-            <div>
-              <h3 className="text-[16px] font-semibold text-[#1D1D1F]">Salud del Inventario</h3>
-              <p className="text-[13px] text-[#86868B]">Distribución de productos según stock</p>
-            </div>
+          <div className="flex items-center gap-2 mb-6">
+            <HeartPulse className="w-4 h-4 text-[#86868B]" />
+            <h3 className="text-[14px] font-semibold text-[#1D1D1F]">Salud del Inventario</h3>
           </div>
           
           <div className="flex-1 min-h-[300px]">
@@ -116,14 +107,9 @@ export const DashboardPage = () => {
 
         {/* Gráfico 2: Composición del Catálogo */}
         <div className="bg-white border border-gray-200/60 rounded-[24px] p-6 shadow-sm flex flex-col">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="p-2.5 bg-[#0066CC]/10 rounded-xl">
-              <Boxes className="w-5 h-5 text-[#0066CC]" />
-            </div>
-            <div>
-              <h3 className="text-[16px] font-semibold text-[#1D1D1F]">Composición del Sistema</h3>
-              <p className="text-[13px] text-[#86868B]">Métricas generales del catálogo</p>
-            </div>
+          <div className="flex items-center gap-2 mb-6">
+            <Boxes className="w-4 h-4 text-[#86868B]" />
+            <h3 className="text-[14px] font-semibold text-[#1D1D1F]">Composición del Catálogo</h3>
           </div>
 
           <div className="flex-1 min-h-[300px]">
@@ -159,6 +145,92 @@ export const DashboardPage = () => {
                 />
               </BarChart>
             </ResponsiveContainer>
+          </div>
+        </div>
+
+      </div>
+
+      {/* Top Metrics Row */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        {/* Top 5 Clientes */}
+        <div className="bg-white border border-gray-200/60 rounded-[24px] p-6 shadow-sm">
+          <div className="flex items-center gap-2 mb-6">
+            <Users className="w-4 h-4 text-[#86868B]" />
+            <h3 className="text-[14px] font-semibold text-[#1D1D1F]">Top Clientes (Compras)</h3>
+          </div>
+          <div className="space-y-4">
+            {stats?.topCustomers?.length ? (
+              stats.topCustomers.map((c: any, idx: number) => (
+                <div key={c.id} className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-[#0066CC] font-bold text-xs">
+                      {idx + 1}
+                    </div>
+                    <p className="text-[13px] font-medium text-[#1D1D1F] line-clamp-1">{c.name}</p>
+                  </div>
+                  <span className="text-[13px] font-semibold text-[#86868B]">
+                    {formatCurrency(c.total)}
+                  </span>
+                </div>
+              ))
+            ) : (
+              <p className="text-[13px] text-[#86868B]">No hay datos suficientes.</p>
+            )}
+          </div>
+        </div>
+
+        {/* Top 5 Agentes (Pedidos) */}
+        <div className="bg-white border border-gray-200/60 rounded-[24px] p-6 shadow-sm">
+          <div className="flex items-center gap-2 mb-6">
+            <Award className="w-4 h-4 text-[#86868B]" />
+            <h3 className="text-[14px] font-semibold text-[#1D1D1F]">Top Agentes (Pedidos)</h3>
+          </div>
+          <div className="space-y-4">
+            {stats?.topAgentsOrders?.length ? (
+              stats.topAgentsOrders.map((a: any, idx: number) => (
+                <div key={a.id} className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600 font-bold text-xs">
+                      {idx + 1}
+                    </div>
+                    <p className="text-[13px] font-medium text-[#1D1D1F] line-clamp-1">{a.name}</p>
+                  </div>
+                  <span className="text-[13px] font-semibold text-[#86868B]">
+                    {a.count} ped.
+                  </span>
+                </div>
+              ))
+            ) : (
+              <p className="text-[13px] text-[#86868B]">No hay datos suficientes.</p>
+            )}
+          </div>
+        </div>
+
+        {/* Top 5 Agentes (Cobranza Efectivo) */}
+        <div className="bg-white border border-gray-200/60 rounded-[24px] p-6 shadow-sm">
+          <div className="flex items-center gap-2 mb-6">
+            <Banknote className="w-4 h-4 text-[#86868B]" />
+            <h3 className="text-[14px] font-semibold text-[#1D1D1F]">Top Agentes (Efectivo Recolectado)</h3>
+          </div>
+          <div className="space-y-4">
+            {stats?.topAgentsCollections?.length ? (
+              stats.topAgentsCollections.map((a: any, idx: number) => (
+                <div key={a.id} className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-purple-50 flex items-center justify-center text-purple-600 font-bold text-xs">
+                      {idx + 1}
+                    </div>
+                    <p className="text-[13px] font-medium text-[#1D1D1F] line-clamp-1">{a.name}</p>
+                  </div>
+                  <span className="text-[13px] font-semibold text-[#86868B]">
+                    {formatCurrency(a.total)}
+                  </span>
+                </div>
+              ))
+            ) : (
+              <p className="text-[13px] text-[#86868B]">No hay datos suficientes.</p>
+            )}
           </div>
         </div>
 

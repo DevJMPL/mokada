@@ -1,10 +1,40 @@
 import { supabase } from '../../../lib/supabase/client';
+import type { Database } from '../../../types/database.types';
+
+type RouteTripStatus = Database['public']['Enums']['route_trip_status_type'];
+
+const getCustomerBranchStops = async (routeId: string) => {
+  const { data, error } = await (supabase as any)
+    .from('customer_branches')
+    .select('id, name, municipality, state, phone_primary, latitude, longitude, image_path, route_id, customers(name)')
+    .eq('route_id', routeId)
+    .eq('is_active', true)
+    .order('name');
+
+  if (error) throw error;
+
+  return (data || []).map((branch: any, index: number) => ({
+    id: `customer-branch-${branch.id}`,
+    route_id: routeId,
+    branch_id: branch.id,
+    sequence: index + 1,
+    estimated_arrival_time: null,
+    estimated_duration_minutes: null,
+    notes: null,
+    customer_branches: branch,
+    client_branches: {
+      name: branch.name,
+      city: branch.municipality,
+      state: branch.state,
+    },
+  }));
+};
 
 export const routeService = {
   async getRoutes() {
     const { data, error } = await supabase
       .from('routes')
-      .select('*')
+      .select('*, agent:user_profiles!routes_agent_id_fkey(first_name, last_name)')
       .order('code');
     if (error) throw error;
     return data;
@@ -32,11 +62,13 @@ export const routeService = {
       .order('sequence');
     if (stopsError) throw stopsError;
 
-    return { ...route, states, stops };
+    const customerBranchStops = await getCustomerBranchStops(id);
+
+    return { ...route, states, stops: [...(stops || []), ...customerBranchStops] };
   },
 
   async saveRoute(payload: any) {
-    const { id, states, stops, ...dataToSave } = payload;
+    const { id, states: _states, stops: _stops, ...dataToSave } = payload;
     let request;
     if (id) {
       request = supabase.from('routes').update({ ...dataToSave, updated_at: new Date().toISOString() }).eq('id', id);
@@ -61,7 +93,7 @@ export const routeService = {
       .order('week_start_date', { ascending: false });
     
     if (filters?.status) {
-      query = query.eq('status', filters.status);
+      query = query.eq('status', filters.status as RouteTripStatus);
     }
     if (filters?.week) {
       query = query.lte('week_start_date', filters.week).gte('week_end_date', filters.week);
@@ -75,7 +107,7 @@ export const routeService = {
   async getTrip(id: string) {
     const { data: trip, error: tripError } = await supabase
       .from('route_trips')
-      .select('*, routes(code, name, description), agent:user_profiles!route_trips_agent_id_fkey(id, first_name, last_name, email), vehicle:fleet_vehicles!route_trips_vehicle_id_fkey(internal_code, plate_number, brand, model)')
+      .select('*, routes(code, name, description), agent:user_profiles!route_trips_agent_id_fkey(id, auth_user_id, first_name, last_name, email), vehicle:fleet_vehicles!route_trips_vehicle_id_fkey(internal_code, plate_number, brand, model)')
       .eq('id', id)
       .single();
     if (tripError) throw tripError;
@@ -88,7 +120,9 @@ export const routeService = {
       .order('sequence');
     if (stopsError) throw stopsError;
 
-    return { ...trip, stops };
+    const customerBranchStops = await getCustomerBranchStops(trip.route_id);
+
+    return { ...trip, stops: [...(stops || []), ...customerBranchStops] };
   },
 
   async saveTrip(payload: any) {
@@ -105,7 +139,7 @@ export const routeService = {
   },
 
   async updateTripStatus(id: string, status: string) {
-    const updates: any = { status, updated_at: new Date().toISOString() };
+    const updates: any = { status: status as RouteTripStatus, updated_at: new Date().toISOString() };
     if (status === 'IN_PROGRESS') updates.started_at = new Date().toISOString();
     if (status === 'COMPLETED') updates.completed_at = new Date().toISOString();
     
@@ -120,29 +154,21 @@ export const routeService = {
   },
 
   async getMyCurrentTrip(agentProfileId: string) {
+    const today = new Date();
+    const localDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
     const { data: active, error: activeErr } = await supabase
       .from('route_trips')
       .select('*, routes(code, name, description), vehicle:fleet_vehicles!route_trips_vehicle_id_fkey(internal_code, plate_number, brand, model)')
       .eq('agent_id', agentProfileId)
-      .in('status', ['PLANNED', 'IN_PROGRESS'])
-      .order('week_start_date', { ascending: true })
+      .lte('week_start_date', localDate)
+      .gte('week_end_date', localDate)
+      .in('status', ['PLANNED', 'ASSIGNED', 'IN_PROGRESS', 'COMPLETED', 'UNDER_REVIEW', 'SETTLED'])
+      .order('week_start_date', { ascending: false })
       .limit(1)
       .maybeSingle();
       
     if (activeErr) throw activeErr;
-    if (active) return active;
-
-    const { data: past, error: pastErr } = await supabase
-      .from('route_trips')
-      .select('*, routes(code, name, description), vehicle:fleet_vehicles!route_trips_vehicle_id_fkey(internal_code, plate_number, brand, model)')
-      .eq('agent_id', agentProfileId)
-      .in('status', ['COMPLETED', 'UNDER_REVIEW', 'SETTLED'])
-      .order('week_start_date', { ascending: false })
-      .limit(1)
-      .maybeSingle();
-
-    if (pastErr) throw pastErr;
-    return past;
+    return active;
   },
 
   // Agents for assignment

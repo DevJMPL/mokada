@@ -1,5 +1,9 @@
 import { supabase } from '../../../lib/supabase/client';
 import { storageService } from '../../../lib/supabase/storage';
+import type { Database } from '../../../types/database.types';
+
+type ExpenseAttachmentType = Database['public']['Enums']['expense_attachment_type'];
+type TravelExpenseStatus = Database['public']['Enums']['travel_expense_status_type'];
 
 export const expenseService = {
   async getCategories() {
@@ -38,7 +42,7 @@ export const expenseService = {
   async updateExpenseStatus(id: string, status: string) {
     const { data, error } = await supabase
       .from('travel_expenses')
-      .update({ status, updated_at: new Date().toISOString() })
+      .update({ status: status as TravelExpenseStatus, updated_at: new Date().toISOString() })
       .eq('id', id)
       .select()
       .single();
@@ -67,7 +71,7 @@ export const expenseService = {
         file_name: file.name,
         mime_type: file.type,
         file_size: file.size,
-        attachment_type: attachmentType,
+        attachment_type: attachmentType as ExpenseAttachmentType,
         uploaded_by: uploadedBy,
       }])
       .select()
@@ -84,7 +88,9 @@ export const expenseService = {
   async getFinancialSummary(filters?: any) {
     let query = supabase.from('route_trip_financial_summary').select('*');
 
-    if (filters?.status) {
+    if (filters?.statuses && Array.isArray(filters.statuses)) {
+      query = query.in('route_trip_status', filters.statuses);
+    } else if (filters?.status) {
       query = query.eq('route_trip_status', filters.status);
     }
 
@@ -154,7 +160,7 @@ export const expenseService = {
     const { count: pendingReview } = await supabase
       .from('route_trips')
       .select('*', { count: 'exact', head: true })
-      .eq('status', 'UNDER_REVIEW');
+      .in('status', ['COMPLETED', 'UNDER_REVIEW']);
 
     // Pending settlements
     const { count: pendingSettlements } = await supabase

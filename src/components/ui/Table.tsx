@@ -2,6 +2,7 @@ import { LoadingState } from './LoadingState';
 import { EmptyState } from './EmptyState';
 
 export interface Column<T> {
+  id?: string;
   header: string;
   accessorKey?: keyof T;
   cell?: (item: T) => React.ReactNode;
@@ -39,7 +40,7 @@ export function Table<T>({
         <thead className="bg-white border-b border-gray-200/60 text-[#86868B] font-semibold">
           <tr>
             {columns.map((col, idx) => (
-              <th key={idx} className={`px-5 py-3.5 whitespace-nowrap ${col.className || ''}`}>
+              <th key={col.id || String(col.accessorKey || idx)} className={`px-5 py-3.5 whitespace-nowrap ${col.className || ''}`}>
                 {col.header}
               </th>
             ))}
@@ -49,7 +50,7 @@ export function Table<T>({
           {data.map((row, rowIndex) => (
             <tr key={rowIndex} className="hover:bg-[#F5F5F7]/50 transition-colors">
               {columns.map((col, colIndex) => (
-                <td key={colIndex} className={`px-5 py-3.5 ${col.className || ''}`}>
+                <td key={col.id || String(col.accessorKey || colIndex)} className={`px-5 py-3.5 ${col.className || ''}`}>
                   {col.cell ? col.cell(row) : col.accessorKey ? (row[col.accessorKey] as React.ReactNode) : null}
                 </td>
               ))}

@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Building2, Pencil, Phone, Plus, ReceiptText, Search, ToggleLeft, ToggleRight, Users } from 'lucide-react';
+import { Building2, Pencil, Phone, Plus, ReceiptText, Route, Search, ToggleLeft, ToggleRight, Users } from 'lucide-react';
 import { AlertModal } from '../../../components/ui/AlertModal';
 import { ConfirmModal } from '../../../components/ui/ConfirmModal';
 import { EmptyState } from '../../../components/ui/EmptyState';
@@ -8,12 +8,14 @@ import { ErrorState } from '../../../components/ui/ErrorState';
 import { LoadingState } from '../../../components/ui/LoadingState';
 import { StatusBadge } from '../../../components/ui/StatusBadge';
 import { IconButton } from '../../../components/ui/IconButton';
-import { useCustomers, useSaveCustomer } from '../hooks/useCustomers';
+import { useCustomers, useCustomerRoutes, useSaveCustomer } from '../hooks/useCustomers';
 import type { CustomerSummary } from '../services/customers.service';
+import { useAuth } from '../../auth/context/useAuth';
 
 export const CustomersPage = () => {
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
+  const [selectedRouteId, setSelectedRouteId] = useState<string>('');
   const [customerToToggle, setCustomerToToggle] = useState<CustomerSummary | null>(null);
   const [alertModal, setAlertModal] = useState<{ isOpen: boolean; title: string; message: string; type: 'error' | 'success' | 'info' }>({
     isOpen: false,
@@ -22,7 +24,17 @@ export const CustomersPage = () => {
     type: 'error',
   });
   const { data: customers = [], isLoading, isError, error, refetch } = useCustomers({ search });
+  const { data: routeOptions = [] } = useCustomerRoutes();
   const saveCustomer = useSaveCustomer();
+  const { isAdmin } = useAuth();
+
+  useEffect(() => {
+    if (!isAdmin && routeOptions.length > 0 && !selectedRouteId) {
+      setSelectedRouteId(routeOptions[0].id);
+    }
+  }, [isAdmin, routeOptions, selectedRouteId]);
+
+  const filteredCustomers = customers.filter((customer) => !selectedRouteId || customer.main_branch_route_id === selectedRouteId);
 
   const handleToggleCustomer = (customer: CustomerSummary) => {
     setAlertModal((current) => ({ ...current, isOpen: false }));
@@ -78,17 +90,35 @@ export const CustomersPage = () => {
         </button>
       </div>
 
-      <label className="flex h-11 items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 shadow-sm focus-within:border-[#0066CC] focus-within:ring-2 focus-within:ring-[#0066CC]/15">
-        <Search className="h-4 w-4 text-[#86868B]" />
-        <input
-          value={search}
-          onChange={(event) => setSearch(event.target.value)}
-          className="min-w-0 flex-1 bg-transparent text-sm outline-none"
-          placeholder="Buscar por nombre, correo o teléfono"
-        />
-      </label>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <label className="flex h-11 flex-1 items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 shadow-sm focus-within:border-[#0066CC] focus-within:ring-2 focus-within:ring-[#0066CC]/15">
+          <Search className="h-4 w-4 text-[#86868B]" />
+          <input
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            className="min-w-0 flex-1 bg-transparent text-sm outline-none"
+            placeholder="Buscar por nombre, correo o teléfono"
+          />
+        </label>
+        
+        <label className="flex h-11 shrink-0 items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 shadow-sm focus-within:border-[#0066CC] focus-within:ring-2 focus-within:ring-[#0066CC]/15 sm:w-64">
+          <Route className="h-4 w-4 text-[#86868B]" />
+          <select
+            value={selectedRouteId}
+            onChange={(event) => setSelectedRouteId(event.target.value)}
+            className="min-w-0 flex-1 bg-transparent text-sm outline-none"
+          >
+            {isAdmin && <option value="">Todas las rutas</option>}
+            {routeOptions.map((route) => (
+              <option key={route.id} value={route.id}>
+                {route.name}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
 
-      {!customers.length ? (
+      {!filteredCustomers.length ? (
         <EmptyState
           title="No hay clientes"
           description="Crea tu primer cliente para generar su usuario automáticamente."
@@ -119,7 +149,7 @@ export const CustomersPage = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {customers.map((customer) => (
+                {filteredCustomers.map((customer) => (
                   <tr
                     key={customer.id}
                     className="cursor-pointer transition-colors hover:bg-[#F5F5F7]/50"
@@ -165,7 +195,7 @@ export const CustomersPage = () => {
           </div>
 
           <div className="grid gap-3 lg:hidden">
-            {customers.map((customer) => (
+            {filteredCustomers.map((customer) => (
               <CustomerCard
                 key={customer.id}
                 customer={customer}

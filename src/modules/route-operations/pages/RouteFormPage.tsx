@@ -2,7 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Building2, ExternalLink, Eye, MapPin, Save, User } from 'lucide-react';
 import { useCustomerBranchOptions } from '../../customers/hooks/useCustomers';
-import { useRoute, useSaveRoute } from '../hooks/useRouteOperations';
+import { useAgents, useRoute, useSaveRoute } from '../hooks/useRouteOperations';
 import { LoadingState } from '../../../components/ui/LoadingState';
 import { AlertModal } from '../../../components/ui/AlertModal';
 import { Modal } from '../../../components/ui/Modal';
@@ -25,6 +25,7 @@ const emptyForm = {
   working_days: ['L', 'M', 'X', 'J', 'V'] as string[],
   default_weekly_budget: 0,
   is_active: true,
+  agent_id: '',
 };
 
 const getRouteMapUrl = (branches: CustomerBranchOption[]) => {
@@ -62,6 +63,7 @@ export const RouteFormPage = () => {
   const isEditing = Boolean(id);
   const { data: route, isLoading: isRouteLoading } = useRoute(id || null);
   const { data: branchOptions = [] } = useCustomerBranchOptions();
+  const { data: agents = [] } = useAgents();
   const saveRoute = useSaveRoute();
   const [form, setForm] = useState(emptyForm);
   const [selectedBranch, setSelectedBranch] = useState<CustomerBranchOption | null>(null);
@@ -82,6 +84,7 @@ export const RouteFormPage = () => {
       working_days: route.working_days || ['L', 'M', 'X', 'J', 'V'],
       default_weekly_budget: route.default_weekly_budget || 0,
       is_active: route.is_active ?? true,
+      agent_id: route.agent_id || '',
     });
   }, [route]);
 
@@ -108,7 +111,8 @@ export const RouteFormPage = () => {
     setAlertModal((current) => ({ ...current, isOpen: false }));
 
     try {
-      const savedRoute = await saveRoute.mutateAsync({ id, ...form });
+      const payloadToSave = { ...form, agent_id: form.agent_id || null };
+      const savedRoute = await saveRoute.mutateAsync({ id, ...payloadToSave });
 
       if (!id) {
         navigate(`/route-operations/routes/${savedRoute.id}`, { replace: true });
@@ -167,6 +171,21 @@ export const RouteFormPage = () => {
         <div className="grid gap-4 sm:grid-cols-2">
           <TextInput label="Código *" value={form.code} maxLength={30} onChange={(value) => setForm((current) => ({ ...current, code: value }))} />
           <TextInput label="Nombre *" value={form.name} maxLength={90} onChange={(value) => setForm((current) => ({ ...current, name: value }))} />
+          <label className="block min-w-0 sm:col-span-2">
+            <span className="mb-1.5 block text-[13px] font-medium text-[#1D1D1F]">Vendedor / Agente</span>
+            <select
+              value={form.agent_id}
+              onChange={(event) => setForm((current) => ({ ...current, agent_id: event.target.value }))}
+              className="h-10 w-full min-w-0 rounded-lg border border-gray-200 bg-white px-3 text-[14px] outline-none focus:border-[#0066CC] focus:ring-1 focus:ring-[#0066CC]"
+            >
+              <option value="">Sin vendedor asignado (Global)</option>
+              {agents.map((agent) => (
+                <option key={agent.id} value={agent.id}>
+                  {agent.first_name} {agent.last_name || ''}
+                </option>
+              ))}
+            </select>
+          </label>
           <label className="block min-w-0 sm:col-span-2">
             <span className="mb-1.5 block text-[13px] font-medium text-[#1D1D1F]">Descripción</span>
             <textarea

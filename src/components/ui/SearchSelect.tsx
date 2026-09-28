@@ -9,7 +9,7 @@ export interface SearchSelectOption {
 }
 
 interface SearchSelectProps {
-  label: string;
+  label?: string;
   options: SearchSelectOption[];
   value?: string | null;
   placeholder?: string;
@@ -67,7 +67,7 @@ export const SearchSelect = ({
         }
       }}
     >
-      <span className="mb-1.5 block text-[13px] font-medium text-[#1D1D1F]">{label}</span>
+      {label && <span className="mb-1.5 block text-[13px] font-medium text-[#1D1D1F]">{label}</span>}
       <button
         type="button"
         disabled={disabled}

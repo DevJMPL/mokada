@@ -9,6 +9,7 @@ import { useCartStore } from '../store/useCartStore';
 import { CartDrawer } from '../components/CartDrawer';
 import { useDebounce } from '../../../hooks/useDebounce';
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
+import { SearchSelect } from '../../../components/ui/SearchSelect';
 
 export const ProductsPage = () => {
   const navigate = useNavigate();
@@ -78,33 +79,31 @@ export const ProductsPage = () => {
             />
           </div>
           
-          <select
-            value={selectedBrand}
-            onChange={(e) => {
-              setSelectedBrand(e.target.value);
-              if (e.target.value) setSearch('');
-            }}
-            className="hidden sm:block w-36 px-3 py-2 bg-white border border-gray-200/60 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0066CC]/20 focus:border-[#0066CC] text-[13px] text-[#1D1D1F] transition-all shadow-sm"
-          >
-            <option value="">Todas las marcas</option>
-            {brands.map((b: any) => (
-              <option key={b.id} value={b.name}>{b.name}</option>
-            ))}
-          </select>
+          <div className="hidden sm:block w-48">
+            <SearchSelect
+              options={brands.map((b: any) => ({ value: b.name, label: b.name }))}
+              value={selectedBrand}
+              onChange={(value) => {
+                setSelectedBrand(value);
+                if (value) setSearch('');
+              }}
+              onClear={() => setSelectedBrand('')}
+              placeholder="Todas las marcas"
+            />
+          </div>
 
-          <select
-            value={selectedCategory}
-            onChange={(e) => {
-              setSelectedCategory(e.target.value);
-              if (e.target.value) setSearch('');
-            }}
-            className="hidden sm:block w-36 px-3 py-2 bg-white border border-gray-200/60 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0066CC]/20 focus:border-[#0066CC] text-[13px] text-[#1D1D1F] transition-all shadow-sm"
-          >
-            <option value="">Todas las categorías</option>
-            {categories.map((c: any) => (
-              <option key={c.id} value={c.name}>{c.name}</option>
-            ))}
-          </select>
+          <div className="hidden sm:block w-48">
+            <SearchSelect
+              options={categories.map((c: any) => ({ value: c.name, label: c.name }))}
+              value={selectedCategory}
+              onChange={(value) => {
+                setSelectedCategory(value);
+                if (value) setSearch('');
+              }}
+              onClear={() => setSelectedCategory('')}
+              placeholder="Todas las categorías"
+            />
+          </div>
 
           {isAdmin && (
             <button 

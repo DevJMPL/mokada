@@ -12,6 +12,10 @@ export const RoutesPage = () => {
     { header: 'Código', accessorKey: 'code', className: 'font-medium text-slate-900' },
     { header: 'Nombre', accessorKey: 'name' },
     {
+      header: 'Vendedor',
+      cell: (item) => item.agent ? `${item.agent.first_name} ${item.agent.last_name || ''}`.trim() : <span className="text-gray-400 text-[12px] italic">Sin asignar</span>,
+    },
+    {
       header: 'Días laborales',
       cell: (item) => (
         <div className="flex gap-1">

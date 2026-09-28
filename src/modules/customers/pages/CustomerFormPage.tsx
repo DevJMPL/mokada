@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from 'react';
+import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import {
   ArrowLeft,
@@ -29,6 +29,7 @@ import mokadaLogo from '../../../assets/logo.svg';
 import { createBrandedQrDataUrl } from '../../../utils/qr';
 import { cfdiUseOptions, fiscalRegimeOptions } from '../../../utils/fiscalCatalogs';
 import { CustomerBranchFormModal } from '../components/CustomerBranchFormModal';
+import { SearchSelect } from '../../../components/ui/SearchSelect';
 import {
   useCustomer,
   useCustomerBranches,
@@ -870,42 +871,22 @@ const FiscalFormModal = ({
             onChange={(value) => setForm((current) => ({ ...current, legal_name: value }))}
             className="sm:col-span-2"
           />
-          <label className="block min-w-0">
-            <span className="mb-1.5 block text-[13px] font-medium text-[#1D1D1F]">Régimen fiscal</span>
-            <select
-              value={form.tax_regime}
-              onChange={(event) => setForm((current) => ({ ...current, tax_regime: event.target.value }))}
-              required
-              className="h-10 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm outline-none focus:border-[#0066CC] focus:ring-2 focus:ring-[#0066CC]/15"
-            >
-              <option value="" disabled>
-                Selecciona un régimen
-              </option>
-              {availableRegimes.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="block min-w-0">
-            <span className="mb-1.5 block text-[13px] font-medium text-[#1D1D1F]">Uso del CFDI</span>
-            <select
-              value={form.cfdi_use}
-              onChange={(event) => setForm((current) => ({ ...current, cfdi_use: event.target.value }))}
-              required
-              className="h-10 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm outline-none focus:border-[#0066CC] focus:ring-2 focus:ring-[#0066CC]/15"
-            >
-              <option value="" disabled>
-                Selecciona un uso
-              </option>
-              {availableCfdiUses.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </label>
+          <SearchSelect
+            label="Régimen fiscal"
+            options={availableRegimes}
+            value={form.tax_regime}
+            onChange={(v) => setForm((current) => ({ ...current, tax_regime: v }))}
+            onClear={() => setForm((current) => ({ ...current, tax_regime: '' }))}
+            placeholder="Selecciona un régimen"
+          />
+          <SearchSelect
+            label="Uso del CFDI"
+            options={availableCfdiUses}
+            value={form.cfdi_use}
+            onChange={(v) => setForm((current) => ({ ...current, cfdi_use: v }))}
+            onClear={() => setForm((current) => ({ ...current, cfdi_use: '' }))}
+            placeholder="Selecciona un uso"
+          />
           <TextInput
             label="Correo de facturación"
             type="email"

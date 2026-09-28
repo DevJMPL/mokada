@@ -17,12 +17,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       return;
     }
 
-    const nextProfile = await authService.getProfileByAuthUserId(nextSession.user.id).catch(async () => {
-      await authService.signOut();
-      return null;
-    });
+    let nextProfile = null;
+    try {
+      nextProfile = await authService.getProfileByAuthUserId(nextSession.user.id);
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
+      // Do NOT sign out on network/database errors. Keep current session and profile state.
+      return;
+    }
 
-    if (!nextProfile?.is_active) {
+    if (!nextProfile) {
+      // User has no profile in the database.
+      setProfile(null);
+      await authService.signOut();
+      return;
+    }
+
+    if (!nextProfile.is_active) {
+      // User is deactivated.
       setProfile(null);
       await authService.signOut();
       return;

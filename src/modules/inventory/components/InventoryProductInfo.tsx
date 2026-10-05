@@ -71,8 +71,8 @@ export const InventoryProductInfo = ({ source, destination, sourceName, destinat
   const destinationMissingCost = destinationQuantity>0 && (destination?.average_cost == null || destination?.original_average_cost == null);
   const validPrice = unitPrice != null && Number.isFinite(unitPrice);
   const salesStock = destinationName ? destination || source : source?.warehouse_role === 'SALES' ? source : undefined;
-  const projectedDestinationCost = validPrice && amount>0 && !destinationMissingCost
-    ? (destinationQuantity*(destination?.average_cost ?? 0) + amount*unitPrice!)/(destinationQuantity+amount) : null;
+  const projectedDestinationCost = validPrice && amount>0
+    ? (destinationQuantity*(destination?.average_cost ?? unitPrice!) + amount*unitPrice!)/(destinationQuantity+amount) : null;
   return <div className="space-y-3 mt-4">
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
       {[{stock: source, name: sourceName || 'Origen', isSource: true}, ...(destinationName ? [{stock: destination, name: destinationName, isSource: false}] : [])].map(({stock, name, isSource}) => <div key={isSource ? 'source' : 'destination'} className="bg-gray-50 border border-gray-200/60 rounded-xl p-3">
@@ -91,8 +91,8 @@ export const InventoryProductInfo = ({ source, destination, sourceName, destinat
       {destinationName && quantity != null && validPrice && amount>0 && <p>Costo promedio previsto del destino: <span className="font-semibold text-[#1D1D1F]">{money(projectedDestinationCost)}</span></p>}
     </div>
     {stockLoaded && quantity != null && missingCost && <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-[12px] text-amber-800">Falta el costo del producto en {sourceName || 'el origen'}. Debe configurarse antes de completar el traspaso.</div>}
-    {stockLoaded && destinationName && validPrice && source?.average_cost != null && unitPrice! <= source.average_cost && <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-[12px] text-amber-800">El precio interno debe superar el costo promedio del origen para que el traspaso tenga margen.</div>}
-    {stockLoaded && quantity != null && destinationMissingCost && <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-[12px] text-amber-800">{destinationName} ya tiene existencias anteriores sin costo. Configura sus costos actuales para que la entrada del traspaso pueda calcular el nuevo promedio y las ventas posteriores.</div>}
+    {stockLoaded && destinationName && validPrice && source?.average_cost != null && unitPrice === source.average_cost && <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl text-[12px] text-blue-800">El traspaso usa el costo promedio del origen. El margen interno del almacén principal es $0.00.</div>}
+    {stockLoaded && quantity != null && destinationMissingCost && <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl text-[12px] text-blue-800">{destinationName} tiene existencias anteriores sin costo. Al completar el traspaso se inicializarán con el costo del origen.</div>}
     {stockLoaded && quantity != null && amount > available && <p className="text-[12px] text-red-600">La cantidad supera el disponible del origen ({formatQuantity(available)}).</p>}
     <div className="flex flex-wrap gap-2">
       {salesStock?.sale_prices.map(price => <span key={price.price_list_id} className="px-2 py-1 text-[12px] bg-[#F5F5F7] border border-gray-200/60 rounded-lg text-[#1D1D1F]">{price.name}: {formatCurrency(price.amount)}</span>)}

@@ -144,6 +144,7 @@ export const router = createBrowserRouter([
               { index: true, element: <OrdersPage /> },
               { path: 'checkout', element: <CheckoutPage /> },
               { path: 'warranties', element: <AdminRoute><WarrantyOrdersPage /></AdminRoute> },
+              { path: 'paid', element: <OrdersPage initialPaymentFilter="PAID" /> },
               { path: ':id', element: <OrderDetailsAdminPage /> },
             ]
           },

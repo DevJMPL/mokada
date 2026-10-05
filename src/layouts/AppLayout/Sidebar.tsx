@@ -126,6 +126,7 @@ export const Sidebar = ({ isOpen, isDesktopOpen, onClose, onDesktopToggle }: Sid
         label: 'Ventas',
         items: [
           { path: '/orders', label: isAdmin ? 'Pedidos' : 'Mis Pedidos', icon: ShoppingCart },
+          ...(!isAdmin ? [{ path: '/orders/paid', label: 'Pedidos pagados', icon: ClipboardCheck }] : []),
           ...(isAdmin ? [{ path: '/orders/warranties', label: 'Pedidos en garantía', icon: ShieldCheck }] : []),
         ],
       });

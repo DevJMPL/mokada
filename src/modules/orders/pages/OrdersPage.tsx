@@ -15,14 +15,14 @@ export const statusConfig = {
   CANCELLED: { label: 'Cancelado', color: 'bg-red-100 text-red-800', icon: XCircle },
 };
 
-export const OrdersPage = () => {
+export const OrdersPage = ({ initialPaymentFilter = 'ALL' }: { initialPaymentFilter?: 'ALL' | 'UNPAID' | 'PAID' }) => {
   const navigate = useNavigate();
   const { isAdmin, profile } = useAuth();
   const [orders, setOrders] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
-  const [paymentFilter, setPaymentFilter] = useState<'ALL' | 'UNPAID' | 'PAID'>('ALL');
+  const [paymentFilter, setPaymentFilter] = useState<'ALL' | 'UNPAID' | 'PAID'>(initialPaymentFilter);
   const isAgent = profile?.user_type === 'AGENT';
 
   const getPaymentSummary = (order: any) => {
@@ -79,7 +79,7 @@ export const OrdersPage = () => {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-[28px] font-bold tracking-tight text-[#1D1D1F]">{isAgent ? 'Mis pedidos' : 'Ventas / Pedidos'}</h2>
+          <h2 className="text-[28px] font-bold tracking-tight text-[#1D1D1F]">{isAgent ? (initialPaymentFilter === 'PAID' ? 'Pedidos pagados' : 'Mis pedidos') : 'Ventas / Pedidos'}</h2>
           <p className="text-[15px] text-[#86868B] mt-1">{isAgent ? 'Pedidos y pagos de mis clientes' : 'Gestión de pedidos de clientes'}</p>
         </div>
         

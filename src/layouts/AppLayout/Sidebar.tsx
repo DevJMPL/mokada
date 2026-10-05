@@ -125,7 +125,7 @@ export const Sidebar = ({ isOpen, isDesktopOpen, onClose, onDesktopToggle }: Sid
       sections.push({
         label: 'Ventas',
         items: [
-          { path: '/orders', label: 'Pedidos', icon: ShoppingCart },
+          { path: '/orders', label: isAdmin ? 'Pedidos' : 'Mis Pedidos', icon: ShoppingCart },
           ...(isAdmin ? [{ path: '/orders/warranties', label: 'Pedidos en garantía', icon: ShieldCheck }] : []),
         ],
       });

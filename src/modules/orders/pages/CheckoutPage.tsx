@@ -374,14 +374,10 @@ export const CheckoutPage = () => {
                 <span>Subtotal ({items.length} prod.)</span>
                 <span>{new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(orderTotal)}</span>
               </div>
-              <div className="flex justify-between items-center text-[14px] text-gray-600">
-                <span>Costo de Envío</span>
-                <span className="text-[#86868B] italic">Por definir</span>
-              </div>
             </div>
 
             <div className="flex justify-between items-center py-4 text-lg font-bold text-[#1D1D1F]">
-              <span>Total Estimado</span>
+              <span>Total</span>
               <span>{new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(orderTotal)}</span>
             </div>
 

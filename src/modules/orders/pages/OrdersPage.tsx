@@ -22,6 +22,14 @@ export const OrdersPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
+  const [paymentFilter, setPaymentFilter] = useState<'ALL' | 'UNPAID' | 'PAID'>('ALL');
+  const isAgent = profile?.user_type === 'AGENT';
+
+  const getPaymentSummary = (order: any) => {
+    const total = Number(order.total_amount || 0);
+    const paid = Number(order.amount_paid || 0);
+    return { total, paid, remaining: Math.max(total - paid, 0), isPaid: total - paid <= 0.01 };
+  };
 
   useEffect(() => {
     fetchOrders(true);
@@ -56,15 +64,23 @@ export const OrdersPage = () => {
       order.id.toLowerCase().includes(search.toLowerCase()) || 
       order.customers?.name?.toLowerCase().includes(search.toLowerCase());
     const matchesStatus = statusFilter === 'ALL' || order.status === statusFilter;
-    return matchesSearch && matchesStatus;
+    const { isPaid } = getPaymentSummary(order);
+    const matchesPayment = paymentFilter === 'ALL' || (paymentFilter === 'PAID' ? isPaid : !isPaid);
+    return matchesSearch && matchesStatus && matchesPayment;
   });
+
+  const paymentCounts = orders.reduce((counts, order) => {
+    if (getPaymentSummary(order).isPaid) counts.paid += 1;
+    else counts.unpaid += 1;
+    return counts;
+  }, { paid: 0, unpaid: 0 });
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-[28px] font-bold tracking-tight text-[#1D1D1F]">Ventas / Pedidos</h2>
-          <p className="text-[15px] text-[#86868B] mt-1">Gestión de pedidos de clientes</p>
+          <h2 className="text-[28px] font-bold tracking-tight text-[#1D1D1F]">{isAgent ? 'Mis pedidos' : 'Ventas / Pedidos'}</h2>
+          <p className="text-[15px] text-[#86868B] mt-1">{isAgent ? 'Pedidos y pagos de mis clientes' : 'Gestión de pedidos de clientes'}</p>
         </div>
         
         <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
@@ -96,6 +112,27 @@ export const OrdersPage = () => {
         </div>
       </div>
 
+      {isAgent && (
+        <div className="flex w-full gap-1 overflow-x-auto rounded-xl border border-gray-200/60 bg-white p-1 shadow-sm sm:w-fit">
+          {[
+            { value: 'ALL', label: 'Todos', count: orders.length },
+            { value: 'UNPAID', label: 'Pendientes de pago', count: paymentCounts.unpaid },
+            { value: 'PAID', label: 'Pagados', count: paymentCounts.paid },
+          ].map((tab) => (
+            <button
+              key={tab.value}
+              type="button"
+              onClick={() => setPaymentFilter(tab.value as 'ALL' | 'UNPAID' | 'PAID')}
+              className={`shrink-0 rounded-lg px-3 py-2 text-[13px] font-medium transition-colors ${
+                paymentFilter === tab.value ? 'bg-[#0066CC] text-white shadow-sm' : 'text-[#86868B] hover:bg-gray-50 hover:text-[#1D1D1F]'
+              }`}
+            >
+              {tab.label} ({tab.count})
+            </button>
+          ))}
+        </div>
+      )}
+
       <div className="bg-white border border-gray-200/60 rounded-2xl shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -106,19 +143,20 @@ export const OrdersPage = () => {
                 <th className="px-6 py-4 text-left text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Cliente</th>
                 <th className="px-6 py-4 text-left text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Artículos</th>
                 <th className="px-6 py-4 text-left text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Total</th>
+                {isAgent && <th className="px-6 py-4 text-left text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Pago</th>}
                 <th className="px-6 py-4 text-left text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Estado</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
               {isLoading ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center">
+                  <td colSpan={isAgent ? 7 : 6} className="px-6 py-12 text-center">
                     <Loader2 className="w-8 h-8 animate-spin text-[#0066CC] mx-auto" />
                   </td>
                 </tr>
               ) : filteredOrders.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center">
+                  <td colSpan={isAgent ? 7 : 6} className="px-6 py-12 text-center">
                     <ShoppingCart className="w-12 h-12 text-gray-300 mx-auto mb-3" />
                     <p className="text-[14px] text-gray-500">No se encontraron pedidos</p>
                   </td>
@@ -127,6 +165,7 @@ export const OrdersPage = () => {
                 filteredOrders.map((order) => {
                   const config = statusConfig[order.status as keyof typeof statusConfig] || statusConfig.PENDING;
                   const StatusIcon = config.icon;
+                  const payment = getPaymentSummary(order);
 
                   return (
                     <tr 
@@ -162,9 +201,16 @@ export const OrdersPage = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className="text-[14px] font-bold text-[#1D1D1F]">
-                          {new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(order.total_amount)}
+                          {new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(payment.total)}
                         </span>
                       </td>
+                      {isAgent && (
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold ${payment.isPaid ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'}`}>
+                            {payment.isPaid ? 'Pagado' : `Pendiente ${new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(payment.remaining)}`}
+                          </span>
+                        </td>
+                      )}
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold uppercase tracking-wider ${config.color}`}>
                           <StatusIcon className="w-3 h-3" />

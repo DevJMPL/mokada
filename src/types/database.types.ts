@@ -2450,7 +2450,7 @@ export type Database = {
           price_list_id: string | null
           requires_invoice: boolean
           shipping_address: string | null
-          shipping_cost: number | null
+          shipping_cost: number
           status: Database["public"]["Enums"]["sales_order_status"]
           total_amount: number
           updated_at: string
@@ -2480,7 +2480,7 @@ export type Database = {
           price_list_id?: string | null
           requires_invoice?: boolean
           shipping_address?: string | null
-          shipping_cost?: number | null
+          shipping_cost?: number
           status?: Database["public"]["Enums"]["sales_order_status"]
           total_amount: number
           updated_at?: string
@@ -2510,7 +2510,7 @@ export type Database = {
           price_list_id?: string | null
           requires_invoice?: boolean
           shipping_address?: string | null
-          shipping_cost?: number | null
+          shipping_cost?: number
           status?: Database["public"]["Enums"]["sales_order_status"]
           total_amount?: number
           updated_at?: string
@@ -3593,7 +3593,7 @@ export type Database = {
           price_list_id: string | null
           requires_invoice: boolean
           shipping_address: string | null
-          shipping_cost: number | null
+          shipping_cost: number
           status: Database["public"]["Enums"]["sales_order_status"]
           total_amount: number
           updated_at: string
@@ -3684,7 +3684,7 @@ export type Database = {
           price_list_id: string | null
           requires_invoice: boolean
           shipping_address: string | null
-          shipping_cost: number | null
+          shipping_cost: number
           status: Database["public"]["Enums"]["sales_order_status"]
           total_amount: number
           updated_at: string

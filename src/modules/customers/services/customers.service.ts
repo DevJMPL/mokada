@@ -261,8 +261,8 @@ const normalizeCustomerPayload = (payload: CustomerFormValues) => {
     requires_invoice: payload.requires_invoice,
     is_active: payload.is_active,
   };
-  if (payload.password !== undefined) {
-    normalized.password = payload.password;
+  if (payload.password?.trim()) {
+    normalized.password = payload.password.trim();
   }
   return normalized;
 };
@@ -273,13 +273,8 @@ const validateCustomerPayload = (payload: CustomerFormValues) => {
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(payload.email.trim())) {
     throw new Error('Escribe un correo válido para el cliente.');
   }
-  if (payload.password !== undefined) {
-    if (!payload.password.trim()) {
-      throw new Error('La contraseña es obligatoria.');
-    }
-    if (payload.password.length < 6) {
-      throw new Error('La contraseña debe tener al menos 6 caracteres.');
-    }
+  if (payload.password?.trim() && payload.password.trim().length < 8) {
+    throw new Error('La contraseña debe tener al menos 8 caracteres.');
   }
 };
 

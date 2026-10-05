@@ -55,13 +55,6 @@ const normalizeCustomer = (payload: CustomerPayload) => {
   };
 };
 
-const makeTemporaryPassword = () => {
-  const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!#$%';
-  const bytes = new Uint8Array(18);
-  crypto.getRandomValues(bytes);
-  return Array.from(bytes, (byte) => alphabet[byte % alphabet.length]).join('');
-};
-
 const findUserByEmail = async (adminClient: ReturnType<typeof createClient>, email: string) => {
   let page = 1;
   const perPage = 1000;
@@ -83,6 +76,8 @@ const customerMetadata = (name: string) => ({
   user_type: 'CUSTOMER',
   agent_functions: [],
 });
+
+const defaultCustomerPassword = '12345678';
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -153,7 +148,8 @@ Deno.serve(async (req) => {
   try {
     if (body.action === 'create') {
       const normalized = normalizeCustomer(body.payload);
-      const password = trimOrNull(body.payload.password) || makeTemporaryPassword();
+      const password = trimOrNull(body.payload.password) || defaultCustomerPassword;
+      if (password.length < 8) throw new Error('La contraseña debe tener al menos 8 caracteres.');
       const metadata = customerMetadata(normalized.name);
 
       let authUserId: string | undefined;
@@ -255,9 +251,12 @@ Deno.serve(async (req) => {
       if (existingError) throw existingError;
 
       const metadata = customerMetadata(normalized.name);
+      const password = trimOrNull(body.payload.password);
+      if (password && password.length < 8) throw new Error('La contraseña debe tener al menos 8 caracteres.');
       const { error: authUpdateError } = await adminClient.auth.admin.updateUserById(existingCustomer.auth_user_id, {
         email: normalized.email,
         user_metadata: metadata,
+        ...(password ? { password } : {}),
       });
 
       if (authUpdateError) throw authUpdateError;

@@ -87,7 +87,7 @@ const emptyCustomerForm: CustomerFormValues = {
   phone: '',
   requires_invoice: false,
   is_active: true,
-  password: '',
+  password: '12345678',
 };
 
 export const CustomerFormPage = () => {
@@ -158,6 +158,7 @@ export const CustomerFormPage = () => {
     setAlertModal((current) => ({ ...current, isOpen: false }));
 
     try {
+      const passwordChanged = Boolean(id && form.password?.trim());
       const result = await saveCustomer.mutateAsync({ id, payload: form });
 
       if (!id) {
@@ -175,11 +176,14 @@ export const CustomerFormPage = () => {
         return;
       }
 
-      setSavedMessage('Cliente actualizado.');
+      setForm((current) => ({ ...current, password: '' }));
+      setSavedMessage(passwordChanged ? 'Cliente y contraseña actualizados.' : 'Cliente actualizado.');
       setAlertModal({
         isOpen: true,
         title: 'Cliente actualizado',
-        message: 'Los cambios del cliente se guardaron correctamente.',
+        message: passwordChanged
+          ? 'Los datos y la contraseña de acceso del cliente se actualizaron correctamente.'
+          : 'Los cambios del cliente se guardaron correctamente.',
         type: 'success',
       });
     } catch (error) {
@@ -381,20 +385,19 @@ export const CustomerFormPage = () => {
               type="email"
               value={form.email}
               maxLength={160}
-              disabled={isEditing}
               onChange={(value) => setForm((current) => ({ ...current, email: value }))}
               className="sm:col-span-2"
             />
-            {!isEditing && (
-              <TextInput
-                label="Contraseña *"
-                type="password"
-                value={form.password || ''}
-                maxLength={64}
-                onChange={(value) => setForm((current) => ({ ...current, password: value }))}
-                className="sm:col-span-2"
-              />
-            )}
+            <TextInput
+              label={isEditing ? 'Nueva contraseña de acceso' : 'Contraseña *'}
+              type="password"
+              value={form.password || ''}
+              required={!isEditing}
+              maxLength={64}
+              onChange={(value) => setForm((current) => ({ ...current, password: value }))}
+              className="sm:col-span-2"
+            />
+            {isEditing && <p className="-mt-2 text-xs text-[#86868B] sm:col-span-2">Déjala vacía para conservar la contraseña actual.</p>}
           </div>
 
           <div className="mt-5 grid gap-2 sm:grid-cols-2">

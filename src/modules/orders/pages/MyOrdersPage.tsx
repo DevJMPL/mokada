@@ -297,18 +297,9 @@ export const MyOrdersPage = () => {
                     <span>Subtotal</span>
                     <span>{new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(selectedOrder.total_amount)}</span>
                   </div>
-                  <div className="flex justify-between text-[14px] text-gray-600">
-                    <span>Costo de envío</span>
-                    <span>
-                      {selectedOrder.shipping_cost > 0
-                        ? new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(selectedOrder.shipping_cost)
-                        : (selectedOrder.status === 'PENDING' ? 'Por definir' : 'Gratis')
-                      }
-                    </span>
-                  </div>
                   <div className="flex justify-between text-[16px] font-bold text-[#1D1D1F] pt-2 border-t border-gray-100">
                     <span>Total General</span>
-                    <span>{new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(selectedOrder.total_amount + Number(selectedOrder.shipping_cost))}</span>
+                    <span>{new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(selectedOrder.total_amount)}</span>
                   </div>
                 </div>
 
@@ -327,14 +318,14 @@ export const MyOrdersPage = () => {
                     <div className="w-full bg-gray-200 rounded-full h-2 mb-2 overflow-hidden">
                       <div
                         className="bg-[#0066CC] h-2 rounded-full transition-all duration-500"
-                        style={{ width: `${Math.min(((selectedOrder.amount_paid || 0) / (selectedOrder.total_amount + Number(selectedOrder.shipping_cost))) * 100, 100)}%` }}
+                        style={{ width: `${selectedOrder.total_amount > 0 ? Math.min(((selectedOrder.amount_paid || 0) / selectedOrder.total_amount) * 100, 100) : 100}%` }}
                       />
                     </div>
                     <div className="flex justify-between text-[13px] mt-2 border-t border-gray-200/60 pt-2">
                       <span className="text-gray-600 font-medium">Saldo Pendiente</span>
                       <span className="font-bold text-[#1D1D1F]">
                         {new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(
-                          Math.max((selectedOrder.total_amount + Number(selectedOrder.shipping_cost)) - (selectedOrder.amount_paid || 0), 0)
+                          Math.max(selectedOrder.total_amount - (selectedOrder.amount_paid || 0), 0)
                         )}
                       </span>
                     </div>
@@ -366,7 +357,7 @@ export const MyOrdersPage = () => {
                     </div>
                   )}
 
-                  {((selectedOrder.total_amount + Number(selectedOrder.shipping_cost)) - (selectedOrder.amount_paid || 0)) > 0 && (
+                  {(selectedOrder.total_amount - (selectedOrder.amount_paid || 0)) > 0 && (
                     <button
                       onClick={() => setIsPaymentModalOpen(true)}
                       className="w-full py-2.5 px-4 border border-[#0066CC] text-[#0066CC] font-medium text-[14px] rounded-xl hover:bg-[#0066CC]/5 transition-colors"
@@ -390,7 +381,7 @@ export const MyOrdersPage = () => {
           isOpen={isPaymentModalOpen}
           onClose={() => setIsPaymentModalOpen(false)}
           orderId={selectedOrder.id}
-          totalAmount={selectedOrder.total_amount + Number(selectedOrder.shipping_cost)}
+          totalAmount={selectedOrder.total_amount}
           amountPaid={selectedOrder.amount_paid || 0}
           onSubmit={handlePaymentSubmit}
         />

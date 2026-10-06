@@ -1,84 +1,107 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { Check, ChevronDown, Search, X } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Check, ChevronDown, Search, X, Loader2 } from 'lucide-react';
 
-export interface SearchSelectOption {
+export interface AsyncSelectOption {
   value: string;
   label: string;
   description?: string;
-  keywords?: string;
 }
 
-interface SearchSelectProps {
+interface AsyncSelectProps {
   label?: string;
-  options: SearchSelectOption[];
   value?: string | null;
   placeholder?: string;
   emptyMessage?: string;
   disabled?: boolean;
   required?: boolean;
-  onChange: (value: string) => void;
+  defaultOption?: AsyncSelectOption | null;
+  loadOptions: (query: string) => Promise<AsyncSelectOption[]>;
+  onChange: (value: string | null, option: AsyncSelectOption | null) => void;
   onClear?: () => void;
 }
 
-export const SearchSelect = ({
+export const AsyncSelect = ({
   label,
-  options,
   value,
   placeholder = 'Buscar...',
   emptyMessage = 'Sin resultados',
   disabled = false,
   required = false,
+  defaultOption,
+  loadOptions,
   onChange,
   onClear,
-}: SearchSelectProps) => {
+}: AsyncSelectProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');
+  const [options, setOptions] = useState<AsyncSelectOption[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [selectedOption, setSelectedOption] = useState<AsyncSelectOption | null>(defaultOption || null);
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const selectedOption = options.find((option) => option.value === value) || null;
 
-  const filteredOptions = useMemo(() => {
-    const normalizedQuery = query.trim().toLowerCase();
-    if (!normalizedQuery) return options.slice(0, 30);
-
-    return options
-      .filter((option) =>
-        [option.label, option.description, option.keywords]
-          .filter(Boolean)
-          .join(' ')
-          .toLowerCase()
-          .includes(normalizedQuery),
-      )
-      .slice(0, 30);
-  }, [options, query]);
-
+  // Initial load when opened
   useEffect(() => {
-    if (!isOpen) return;
-
-    const closeWhenOutside = (event: Event) => {
-      if (!wrapperRef.current?.contains(event.target as Node | null)) setIsOpen(false);
-    };
-    const closeWithEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setIsOpen(false);
-    };
-
-    document.addEventListener('pointerdown', closeWhenOutside);
-    document.addEventListener('focusin', closeWhenOutside);
-    document.addEventListener('keydown', closeWithEscape);
-    return () => {
-      document.removeEventListener('pointerdown', closeWhenOutside);
-      document.removeEventListener('focusin', closeWhenOutside);
-      document.removeEventListener('keydown', closeWithEscape);
-    };
+    if (isOpen) {
+      handleSearch('');
+    }
   }, [isOpen]);
 
-  const selectOption = (option: SearchSelectOption) => {
-    onChange(option.value);
+  // Update selected option if value changes externally (e.g. form reset)
+  useEffect(() => {
+    if (defaultOption && defaultOption.value === value) {
+      setSelectedOption(defaultOption);
+    } else if (!value) {
+      setSelectedOption(null);
+    }
+  }, [value, defaultOption]);
+
+  const handleSearch = async (searchQuery: string) => {
+    setIsLoading(true);
+    try {
+      const results = await loadOptions(searchQuery);
+      setOptions(results);
+    } catch (error) {
+      console.error('Error loading options:', error);
+      setOptions([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (isOpen) {
+        handleSearch(query);
+      }
+    }, 300); // Debounce
+    return () => clearTimeout(timeoutId);
+  }, [query, isOpen]);
+
+  const selectOption = (option: AsyncSelectOption) => {
+    setSelectedOption(option);
+    onChange(option.value, option);
     setQuery('');
     setIsOpen(false);
   };
 
+  const handleClear = (event: React.MouseEvent | React.KeyboardEvent) => {
+    event.stopPropagation();
+    if (onClear) onClear();
+    onChange(null, null);
+    setSelectedOption(null);
+    setQuery('');
+  };
+
   return (
-    <div ref={wrapperRef} className="relative min-w-0">
+    <div
+      ref={wrapperRef}
+      className="relative min-w-0"
+      onBlur={(event) => {
+        if (!wrapperRef.current?.contains(event.relatedTarget as Node | null)) {
+          setIsOpen(false);
+        }
+      }}
+    >
       {label && <span className="mb-1.5 block text-[13px] font-medium text-[#1D1D1F]">{label}</span>}
       <button
         type="button"
@@ -89,20 +112,15 @@ export const SearchSelect = ({
         <span className={`min-w-0 flex-1 truncate ${selectedOption ? 'text-[#1D1D1F]' : 'text-[#86868B]'}`}>
           {selectedOption ? selectedOption.label : placeholder}
         </span>
-        {selectedOption && onClear && !required ? (
+        {selectedOption && !required && !disabled ? (
           <span
             role="button"
             tabIndex={0}
-            onClick={(event) => {
-              event.stopPropagation();
-              onClear();
-              setQuery('');
-            }}
+            onClick={handleClear}
             onKeyDown={(event) => {
               if (event.key === 'Enter' || event.key === ' ') {
                 event.preventDefault();
-                onClear();
-                setQuery('');
+                handleClear(event);
               }
             }}
             className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-[#86868B] transition-colors hover:bg-gray-100 hover:text-[#1D1D1F]"
@@ -125,12 +143,13 @@ export const SearchSelect = ({
               placeholder={placeholder}
               className="min-w-0 flex-1 bg-transparent text-sm outline-none"
             />
+            {isLoading && <Loader2 className="h-4 w-4 shrink-0 text-[#0066CC] animate-spin" />}
           </label>
           <div className="max-h-64 overflow-y-auto py-1">
-            {!filteredOptions.length ? (
+            {!isLoading && options.length === 0 ? (
               <div className="px-3 py-4 text-center text-[13px] text-[#86868B]">{emptyMessage}</div>
             ) : (
-              filteredOptions.map((option) => {
+              options.map((option) => {
                 const isSelected = option.value === value;
 
                 return (

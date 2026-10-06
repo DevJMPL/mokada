@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useForm, FormProvider } from 'react-hook-form';
 import { ArrowLeft, Save } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import { useProductFull, useSaveProductFull, useBrands, useCategories, useUploadProductImage } from '../hooks/useCatalog';
+import { useProductFull, useSaveProductFull, useUploadProductImage } from '../hooks/useCatalog';
 import { useUnits, usePriceLists } from '../../configuration/hooks/useConfig';
 import { useWarehouses } from '../../inventory/hooks/useInventory';
 import { ProductGeneralTab } from '../components/ProductGeneralTab';
@@ -31,8 +31,7 @@ export const ProductFormPage = () => {
   }, [isAdmin, navigate]);
 
   // Loaders for lookups
-  const { data: brands } = useBrands();
-  const { data: categories } = useCategories();
+
   const { data: units } = useUnits();
   const { data: priceLists } = usePriceLists();
   const { data: warehouses } = useWarehouses();
@@ -268,9 +267,9 @@ export const ProductFormPage = () => {
             <div className="pb-8">
               {activeTab === 'general' && (
                 <ProductGeneralTab 
-                  brands={brands || []} 
-                  categories={categories || []} 
                   units={units || []} 
+                  initialBrand={fullProduct?.product?.brand ? { value: fullProduct.product.brand_id, label: fullProduct.product.brand.name } : undefined}
+                  initialCategory={fullProduct?.product?.category ? { value: fullProduct.product.category_id, label: fullProduct.product.category.name } : undefined}
                 />
               )}
               {activeTab === 'prices' && (

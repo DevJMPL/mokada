@@ -48,6 +48,7 @@ import { OrderDetailsAdminPage } from '../../modules/orders/pages/OrderDetailsAd
 import { MarginsPage } from '../../modules/inventory/pages/MarginsPage';
 import { AdminDebtsPage } from '../../modules/admin/debts/pages/AdminDebtsPage';
 import { RouteDebtsPage } from '../../modules/route-operations/pages/RouteDebtsPage';
+import { RouteRolesPage } from '../../modules/route-operations/pages/RouteRolesPage';
 
 export const router = createBrowserRouter([
   {
@@ -123,6 +124,7 @@ export const router = createBrowserRouter([
               { path: 'trips/:id', element: <TripDetailPage /> },
               { path: 'settlements', element: <SettlementsPage /> },
               { path: 'debts', element: <RouteDebtsPage /> },
+              { path: 'roles', element: <RouteRolesPage /> },
             ]
           },
           {
@@ -144,6 +146,7 @@ export const router = createBrowserRouter([
               { index: true, element: <OrdersPage /> },
               { path: 'checkout', element: <CheckoutPage /> },
               { path: 'warranties', element: <AdminRoute><WarrantyOrdersPage /></AdminRoute> },
+              { path: 'paid', element: <OrdersPage initialPaymentFilter="PAID" /> },
               { path: ':id', element: <OrderDetailsAdminPage /> },
             ]
           },

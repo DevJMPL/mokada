@@ -156,6 +156,13 @@ export const routeService = {
   async getMyCurrentTrip(agentProfileId: string) {
     const today = new Date();
     const localDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+    // Ensure the trip for this week is generated if it doesn't exist
+    await supabase.rpc('get_or_create_current_trip', {
+      p_agent_id: agentProfileId,
+      p_local_date: localDate
+    });
+
     const { data: active, error: activeErr } = await supabase
       .from('route_trips')
       .select('*, routes(code, name, description), vehicle:fleet_vehicles!route_trips_vehicle_id_fkey(internal_code, plate_number, brand, model)')

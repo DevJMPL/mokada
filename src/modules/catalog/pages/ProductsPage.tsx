@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useInfiniteProducts, useBrands, useCategories } from '../hooks/useCatalog';
+import { useInfiniteProducts } from '../hooks/useCatalog';
 import { catalogService } from '../services/catalog.service';
 import { StatusBadge } from '../../../components/ui/StatusBadge';
 import { Search, Plus, PackageSearch, ShoppingCart, Loader2 } from 'lucide-react';
@@ -9,7 +9,7 @@ import { useCartStore } from '../store/useCartStore';
 import { CartDrawer } from '../components/CartDrawer';
 import { useDebounce } from '../../../hooks/useDebounce';
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
-import { SearchSelect } from '../../../components/ui/SearchSelect';
+import { AsyncSelect } from '../../../components/ui/AsyncSelect';
 
 export const ProductsPage = () => {
   const navigate = useNavigate();
@@ -21,11 +21,7 @@ export const ProductsPage = () => {
   const [selectedBrand, setSelectedBrand] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
 
-  const { data: brandsData } = useBrands();
-  const { data: categoriesData } = useCategories();
 
-  const brands = brandsData || [];
-  const categories = categoriesData || [];
 
   const { 
 
@@ -61,7 +57,7 @@ export const ProductsPage = () => {
           <p className="text-[15px] text-[#86868B] mt-1">Catálogo general de refacciones</p>
         </div>
         
-        <div className="flex items-center gap-3 w-full sm:w-auto">
+        <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
           <div className="relative w-full sm:w-72">
             <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <input 
@@ -79,12 +75,16 @@ export const ProductsPage = () => {
             />
           </div>
           
-          <div className="hidden sm:block w-48">
-            <SearchSelect
-              options={brands.map((b: any) => ({ value: b.name, label: b.name }))}
+          <div className="w-[calc(50%-0.375rem)] min-w-0 sm:w-48">
+            <AsyncSelect
+              loadOptions={async (query) => {
+                const data = await catalogService.searchBrands(query);
+                return data.map(b => ({ value: b.name, label: b.name }));
+              }}
               value={selectedBrand}
+              defaultOption={selectedBrand ? { value: selectedBrand, label: selectedBrand } : undefined}
               onChange={(value) => {
-                setSelectedBrand(value);
+                setSelectedBrand(value || '');
                 if (value) setSearch('');
               }}
               onClear={() => setSelectedBrand('')}
@@ -92,12 +92,16 @@ export const ProductsPage = () => {
             />
           </div>
 
-          <div className="hidden sm:block w-48">
-            <SearchSelect
-              options={categories.map((c: any) => ({ value: c.name, label: c.name }))}
+          <div className="w-[calc(50%-0.375rem)] min-w-0 sm:w-48">
+            <AsyncSelect
+              loadOptions={async (query) => {
+                const data = await catalogService.searchCategories(query);
+                return data.map(c => ({ value: c.name, label: c.name }));
+              }}
               value={selectedCategory}
+              defaultOption={selectedCategory ? { value: selectedCategory, label: selectedCategory } : undefined}
               onChange={(value) => {
-                setSelectedCategory(value);
+                setSelectedCategory(value || '');
                 if (value) setSearch('');
               }}
               onClear={() => setSelectedCategory('')}
@@ -108,7 +112,7 @@ export const ProductsPage = () => {
           {isAdmin && (
             <button 
               onClick={() => navigate('/catalog/products/new')}
-              className="flex items-center justify-center gap-2 bg-[#0066CC] hover:bg-[#005bb5] text-white px-4 py-2 rounded-xl text-[14px] font-medium transition-colors whitespace-nowrap shadow-sm"
+              className="flex flex-1 sm:flex-none items-center justify-center gap-2 bg-[#0066CC] hover:bg-[#005bb5] text-white px-4 py-2 rounded-xl text-[14px] font-medium transition-colors whitespace-nowrap shadow-sm"
             >
               <Plus className="w-4 h-4" />
               Nuevo producto

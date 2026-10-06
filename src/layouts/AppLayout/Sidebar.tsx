@@ -109,6 +109,7 @@ export const Sidebar = ({ isOpen, isDesktopOpen, onClose, onDesktopToggle }: Sid
           { path: '/fleet/vehicles', label: 'Flotilla', icon: Truck },
           { path: '/fleet/expenses', label: 'Gastos Vehiculares', icon: Receipt },
           { path: '/route-operations/routes', label: 'Rutas', icon: Route },
+          { path: '/route-operations/roles', label: 'Roles de Rutas', icon: ClipboardCheck },
           { path: '/route-operations/trips', label: 'Viajes Semanales', icon: MapPin },
           { path: '/route-operations/settlements', label: 'Conciliacion', icon: ClipboardCheck },
         ],
@@ -125,7 +126,8 @@ export const Sidebar = ({ isOpen, isDesktopOpen, onClose, onDesktopToggle }: Sid
       sections.push({
         label: 'Ventas',
         items: [
-          { path: '/orders', label: 'Pedidos', icon: ShoppingCart },
+          { path: '/orders', label: isAdmin ? 'Pedidos' : 'Mis Pedidos', icon: ShoppingCart },
+          ...(!isAdmin ? [{ path: '/orders/paid', label: 'Pedidos pagados', icon: ClipboardCheck }] : []),
           ...(isAdmin ? [{ path: '/orders/warranties', label: 'Pedidos en garantía', icon: ShieldCheck }] : []),
         ],
       });

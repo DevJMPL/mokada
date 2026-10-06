@@ -31,7 +31,6 @@ export const OrderDetailsAdminPage = () => {
   const { data: warehouses } = useWarehouses();
   const [warehouseId, setWarehouseId] = useState('');
   const [status, setStatus] = useState('');
-  const [shippingCost, setShippingCost] = useState('');
   const [estimatedDate, setEstimatedDate] = useState('');
   const [adminComments, setAdminComments] = useState('');
 
@@ -92,7 +91,6 @@ export const OrderDetailsAdminPage = () => {
       setDeliveryReceipt(receipt);
       setStatus(data.status);
       setWarehouseId((data as {warehouse_id?: string}).warehouse_id || '');
-      setShippingCost(data.shipping_cost?.toString() || '0');
       setEstimatedDate(data.estimated_delivery_date || '');
       setAdminComments(data.admin_comments || '');
     } catch (error) {
@@ -109,7 +107,6 @@ export const OrderDetailsAdminPage = () => {
       const updates = {
         warehouse_id: warehouseId || null,
         status,
-        shipping_cost: Number(shippingCost) || 0,
         estimated_delivery_date: estimatedDate || null,
         admin_comments: adminComments
       };
@@ -284,9 +281,9 @@ export const OrderDetailsAdminPage = () => {
       agentName: currentUserProfile?.name || 'Agente Mokada',
       paymentMethod: 'Efectivo',
       amountPaidNow: payment.amount,
-      totalOrderAmount: order.total_amount + (order.shipping_cost || 0),
+      totalOrderAmount: order.total_amount,
       totalPreviouslyPaid: order.amount_paid - payment.amount, // roughly correct for display
-      remainingBalance: Math.max((order.total_amount + (order.shipping_cost || 0)) - order.amount_paid, 0),
+      remainingBalance: Math.max(order.total_amount - order.amount_paid, 0),
       date: format(new Date(payment.created_at), "dd/MM/yyyy HH:mm"),
       items: order.sales_order_items.map((item: any) => ({
         name: item.products?.name,
@@ -421,7 +418,7 @@ export const OrderDetailsAdminPage = () => {
         <div className="bg-white border border-gray-200/60 rounded-2xl p-4 sm:p-6 shadow-sm">
           <h3 className="font-semibold text-[#1D1D1F] mb-5">Gestión del Pedido</h3>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <div className="flex flex-col">
               <label className="block text-[13px] font-medium text-[#1D1D1F] mb-1.5">Almacén de salida</label>
               <select value={warehouseId} disabled={!!order.inventory_posted_at || order.status === 'CANCELLED'} onChange={e => setWarehouseId(e.target.value)} className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0066CC]/20 focus:border-[#0066CC] transition-all disabled:opacity-50 text-[14px] text-[#1D1D1F]">
@@ -445,24 +442,6 @@ export const OrderDetailsAdminPage = () => {
                   <option key={key} value={key}>{value.label}</option>
                 ))}
               </select>
-            </div>
-
-            <div className="flex flex-col">
-              <label className="block text-[13px] font-medium text-gray-700 mb-1.5">
-                Costo de Envío
-              </label>
-              <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">$</span>
-                <input
-                  type="number"
-                  value={shippingCost}
-                  onChange={(e) => setShippingCost(e.target.value)}
-                  disabled={isShippedOrDelivered}
-                  className="w-full pl-8 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0066CC]/20 focus:border-[#0066CC] disabled:opacity-70 transition-all text-sm"
-                  min="0"
-                  step="0.01"
-                />
-              </div>
             </div>
 
             <div className="flex flex-col">
@@ -603,13 +582,9 @@ export const OrderDetailsAdminPage = () => {
                 <span>Subtotal</span>
                 <span>{new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(order.total_amount)}</span>
               </div>
-              <div className="flex justify-between text-sm text-gray-600">
-                <span>Costo de envío</span>
-                <span>{new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(Number(shippingCost) || 0)}</span>
-              </div>
               <div className="flex justify-between text-lg font-bold text-[#1D1D1F] pt-2 border-t border-gray-100">
                 <span>Total General</span>
-                <span>{new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(order.total_amount + (Number(shippingCost) || 0))}</span>
+                <span>{new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(order.total_amount)}</span>
               </div>
             </div>
           </div>
@@ -618,7 +593,7 @@ export const OrderDetailsAdminPage = () => {
           <div className="bg-white border border-gray-200/60 rounded-2xl p-6 shadow-sm mt-6">
             <div className="flex justify-between items-center mb-6">
               <h3 className="font-semibold text-[#1D1D1F]">Estado de Pagos</h3>
-              {Math.max((order.total_amount + (Number(shippingCost) || 0)) - (order.amount_paid || 0), 0) > 0 && (
+              {Math.max(order.total_amount - (order.amount_paid || 0), 0) > 0 && (
                 <button
                   onClick={() => setIsPaymentModalOpen(true)}
                   className="px-4 py-2 bg-[#0066CC] hover:bg-[#005bb5] text-white text-sm font-medium rounded-lg transition-colors"
@@ -638,14 +613,14 @@ export const OrderDetailsAdminPage = () => {
               <div className="w-full bg-gray-200 rounded-full h-2 mb-2 overflow-hidden">
                 <div 
                   className="bg-[#0066CC] h-2 rounded-full transition-all duration-500" 
-                  style={{ width: `${Math.min(((order.amount_paid || 0) / (order.total_amount + (Number(shippingCost) || 0))) * 100, 100)}%` }}
+                  style={{ width: `${order.total_amount > 0 ? Math.min(((order.amount_paid || 0) / order.total_amount) * 100, 100) : 100}%` }}
                 />
               </div>
               <div className="flex justify-between text-[13px] mt-2 border-t border-gray-200/60 pt-2">
                 <span className="text-gray-600 font-medium">Saldo Pendiente</span>
                 <span className="font-bold text-[#1D1D1F]">
                   {new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(
-                    Math.max((order.total_amount + (Number(shippingCost) || 0)) - (order.amount_paid || 0), 0)
+                    Math.max(order.total_amount - (order.amount_paid || 0), 0)
                   )}
                 </span>
               </div>
@@ -756,14 +731,14 @@ export const OrderDetailsAdminPage = () => {
                 type="number"
                 step="0.01"
                 min="0.01"
-                max={Math.max((order.total_amount + (Number(shippingCost) || 0)) - (order.amount_paid || 0), 0)}
+                max={Math.max(order.total_amount - (order.amount_paid || 0), 0)}
                 required
                 value={paymentAmount}
                 onChange={(e) => setPaymentAmount(e.target.value)}
                 className="pl-8 w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0066CC]/20 focus:border-[#0066CC]"
               />
             </div>
-            <p className="text-xs text-gray-500 mt-1">Saldo pendiente: ${Math.max((order.total_amount + (Number(shippingCost) || 0)) - (order.amount_paid || 0), 0).toFixed(2)}</p>
+            <p className="text-xs text-gray-500 mt-1">Saldo pendiente: ${Math.max(order.total_amount - (order.amount_paid || 0), 0).toFixed(2)}</p>
           </div>
 
           {paymentMethod === 'TRANSFER' && (

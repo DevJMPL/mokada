@@ -57,21 +57,33 @@ export const AsyncSearchSelect = ({
     return () => clearTimeout(timeoutId);
   }, [query, isOpen]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const closeWhenOutside = (event: Event) => {
+      if (!wrapperRef.current?.contains(event.target as Node | null)) setIsOpen(false);
+    };
+    const closeWithEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setIsOpen(false);
+    };
+
+    document.addEventListener('pointerdown', closeWhenOutside);
+    document.addEventListener('focusin', closeWhenOutside);
+    document.addEventListener('keydown', closeWithEscape);
+    return () => {
+      document.removeEventListener('pointerdown', closeWhenOutside);
+      document.removeEventListener('focusin', closeWhenOutside);
+      document.removeEventListener('keydown', closeWithEscape);
+    };
+  }, [isOpen]);
+
   const selectOption = (option: AsyncSearchSelectOption) => {
     onChange(option.value);
     setIsOpen(false);
   };
 
   return (
-    <div
-      ref={wrapperRef}
-      className="relative min-w-0"
-      onBlur={(event) => {
-        if (!wrapperRef.current?.contains(event.relatedTarget as Node | null)) {
-          setIsOpen(false);
-        }
-      }}
-    >
+    <div ref={wrapperRef} className="relative min-w-0">
       <span className="mb-1.5 block text-[13px] font-medium text-[#1D1D1F]">{label}</span>
       <button
         type="button"

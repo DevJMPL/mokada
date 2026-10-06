@@ -98,10 +98,7 @@ export const TransferFormPage = () => {
       for (const item of validItems) {
         const stock = availableStock.find(row => row.product_id === item.product_id);
         if (!Number.isFinite(Number(item.quantity)) || !stock || Number(item.quantity) > Number(stock.available_quantity)) throw new Error('La cantidad de un producto supera el disponible del almacén de origen.');
-        if (item.unit_price == null || item.unit_price === '' || !Number.isFinite(Number(item.unit_price)) || Number(item.unit_price) < 0) throw new Error('Captura un precio interno válido para cada producto.');
-        if (stock.average_cost != null && Number(item.unit_price) <= Number(stock.average_cost)) throw new Error('El precio interno debe ser mayor que el costo promedio del almacén de compras.');
-        const destinationStock = stockData?.find(row => row.product_id === item.product_id && row.warehouse_id === data.destination_warehouse_id && row.location_id == null);
-        if (destinationStock && Number(destinationStock.quantity) > 0 && (destinationStock.average_cost == null || destinationStock.original_average_cost == null)) throw new Error('Hay existencias antiguas sin costo en el almacén de ventas. Configura sus costos antes de completar el traspaso.');
+        if (stock.average_cost == null || stock.original_average_cost == null) throw new Error('Falta configurar el costo del producto en el almacén de compras.');
       }
       
       if (validItems.length === 0) {
@@ -121,7 +118,7 @@ export const TransferFormPage = () => {
         items: validItems.map((item: any) => ({
           product_id: item.product_id,
           quantity: Number(item.quantity),
-          unit_price: item.unit_price != null && item.unit_price !== '' ? Number(item.unit_price) : null
+          unit_price: availableStock.find(row => row.product_id === item.product_id)?.average_cost ?? null
         }))
       };
       
@@ -218,7 +215,7 @@ export const TransferFormPage = () => {
 
           <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-xl text-[13px] text-amber-800">
             <Tag className="w-5 h-5 shrink-0" />
-            El precio interno debe ser mayor que el costo promedio de compra. Se convierte en el costo del almacén de ventas; el precio público, los descuentos y mayoreo se configuran en el producto.
+            El precio de traspaso se toma automáticamente del costo promedio del almacén de compras. El almacén principal queda sin margen y el almacén de ventas recibe un costo válido para calcular la ganancia de los pedidos.
           </div>
 
           <div>
@@ -288,7 +285,7 @@ export const TransferFormPage = () => {
                                   keywords: p.product_code
                                 }))}
                                 value={field.value}
-                                onChange={value => {field.onChange(value); setValue(`items.${index}.quantity`, 1); setValue(`items.${index}.unit_price`, null);}}
+                                onChange={value => {field.onChange(value); setValue(`items.${index}.quantity`, 1); setValue(`items.${index}.unit_price`, availableStock.find(item => item.product_id === value)?.average_cost ?? null);}}
                                 placeholder="Busca en el inventario del origen..."
                                 disabled={!sourceWarehouseId}
                               />
@@ -357,26 +354,21 @@ export const TransferFormPage = () => {
                           </div>
 
                           <div className="min-w-0">
-                            <label className="block text-[12px] font-medium text-[#86868B] mb-1 truncate flex items-center gap-1" title="Precio interno (MXN)">
+                            <label className="block text-[12px] font-medium text-[#86868B] mb-1 truncate flex items-center gap-1" title="Precio de traspaso (MXN)">
                               <Tag className="w-3 h-3 text-amber-500" />
-                              Precio interno
+                              Precio de traspaso
                             </label>
-                            <div className="relative">
+                            <div className="relative" title="Se calcula con el costo promedio del almacén de origen">
                               <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[13px] text-gray-400 font-medium">$</span>
                               <input
                                 type="number"
-                                min="0"
-                                step="0.01"
-                                {...register(`items.${index}.unit_price`, {
-                                  valueAsNumber: true,
-                                  required: true,
-                                  min: 0
-                                })}
-                                disabled={!currentProductId}
+                                value={stockItem?.average_cost ?? ''}
+                                readOnly
+                                disabled={!currentProductId || stockItem?.average_cost == null}
                                 placeholder="0.00"
-                                className="w-full pl-6 pr-2 py-2 bg-white border border-gray-200/60 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0066CC]/20 focus:border-[#0066CC] text-[14px] transition-all disabled:opacity-50"
+                                className="w-full pl-6 pr-2 py-2 bg-gray-50 border border-gray-200/60 rounded-lg text-[14px] text-[#1D1D1F] disabled:opacity-50"
                               />
-                              {errors.items?.[index]?.unit_price && <p className="text-red-600 text-[11px] mt-1">Captura el precio interno.</p>}
+                              {currentProductId && stockItem?.average_cost == null && <p className="text-red-600 text-[11px] mt-1">Configura el costo del origen.</p>}
                             </div>
                           </div>
 
@@ -393,7 +385,7 @@ export const TransferFormPage = () => {
                       </div>
 
                     </div>
-                    {currentProductId && <InventoryProductInfo source={stockItem} destination={destinationStock} sourceName={sourceWarehouse?.name} destinationName={destinationWarehouse?.name} productId={currentProductId} quantity={Number(watch(`items.${index}.quantity`))} unitPrice={watch(`items.${index}.unit_price`)} stockLoaded={!loadingStock && !stockError} />}
+                    {currentProductId && <InventoryProductInfo source={stockItem} destination={destinationStock} sourceName={sourceWarehouse?.name} destinationName={destinationWarehouse?.name} productId={currentProductId} quantity={Number(watch(`items.${index}.quantity`))} unitPrice={stockItem?.average_cost} stockLoaded={!loadingStock && !stockError} />}
                   </div>
                 );
               })}

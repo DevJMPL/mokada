@@ -15,6 +15,7 @@ import {
 import { supabase } from '../../../lib/supabase/client';
 import { returnsService } from '../services/returns.service';
 import { statusConfig } from './OrdersPage';
+import { useRouteStore } from '../../../store/routeStore';
 
 type WarrantyStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
 
@@ -33,6 +34,7 @@ export const WarrantyOrdersPage = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<'ALL' | WarrantyStatus>('ALL');
+  const { globalSelectedRouteId } = useRouteStore();
 
   const fetchWarranties = useCallback(async (showLoader = false) => {
     try {
@@ -73,11 +75,13 @@ export const WarrantyOrdersPage = () => {
     const item = firstRelation<any>(warranty.item);
     const product = firstRelation<any>(item?.products);
     const customer = firstRelation<any>(order?.customers);
+    const branch = firstRelation<any>(order?.customer_branches);
     const term = search.trim().toLowerCase();
     const matchesSearch = !term || [warranty.id, order?.id, product?.code, product?.name, customer?.name, customer?.email]
       .some(value => String(value || '').toLowerCase().includes(term));
-    return matchesSearch && (statusFilter === 'ALL' || warranty.status === statusFilter);
-  }), [search, statusFilter, warranties]);
+    const matchesRoute = !globalSelectedRouteId || branch?.route_id === globalSelectedRouteId;
+    return matchesSearch && matchesRoute && (statusFilter === 'ALL' || warranty.status === statusFilter);
+  }), [search, statusFilter, warranties, globalSelectedRouteId]);
 
   return (
     <div className="space-y-6">

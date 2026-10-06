@@ -13,8 +13,6 @@ import { useWarehouses } from '../../inventory/hooks/useInventory';
 import { configService } from '../../configuration/services/config.service';
 import { supabase } from '../../../lib/supabase/client';
 import { CreditSelector } from '../components/CreditSelector';
-import { useCustomerFiscalProfiles } from '../../customers/hooks/useCustomers';
-import { invoicePaymentForms } from '../utils/orderInvoice';
 
 export const CheckoutPage = () => {
   const { items, clearCart } = useCartStore();
@@ -376,14 +374,10 @@ export const CheckoutPage = () => {
                 <span>Subtotal ({items.length} prod.)</span>
                 <span>{new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(orderTotal)}</span>
               </div>
-              <div className="flex justify-between items-center text-[14px] text-gray-600">
-                <span>Costo de Envío</span>
-                <span className="text-[#86868B] italic">Por definir</span>
-              </div>
             </div>
 
             <div className="flex justify-between items-center py-4 text-lg font-bold text-[#1D1D1F]">
-              <span>Total Estimado</span>
+              <span>Total</span>
               <span>{new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(orderTotal)}</span>
             </div>
 

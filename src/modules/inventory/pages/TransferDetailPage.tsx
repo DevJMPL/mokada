@@ -19,12 +19,8 @@ export const TransferDetailPage = () => {
   const blockers = transfer?.status === 'DRAFT' ? (transfer.items || []).flatMap((item: any) => {
     const source = stock?.find(row => row.product_id === item.product_id && row.warehouse_id === transfer.source_warehouse_id && row.location_id == null);
     const label = item.products?.code || item.product_id;
-    if (item.unit_price == null || !Number.isFinite(Number(item.unit_price)) || Number(item.unit_price)<0) return [`${label}: falta precio interno.`];
     if ((source?.available_quantity ?? 0) < item.quantity) return [`${label}: cantidad superior al disponible del origen.`];
     if (source?.average_cost == null || source?.original_average_cost == null) return [`${label}: falta costo en ${transfer.source?.name}.`];
-    if (Number(item.unit_price) <= Number(source.average_cost)) return [`${label}: el precio interno debe superar el costo promedio del origen.`];
-    const destination = stock?.find(row => row.product_id === item.product_id && row.warehouse_id === transfer.destination_warehouse_id && row.location_id == null);
-    if (destination && Number(destination.quantity)>0 && (destination.average_cost == null || destination.original_average_cost == null)) return [`${label}: faltan costos para existencias anteriores del destino.`];
     return [];
   }) : [];
   
@@ -64,7 +60,7 @@ export const TransferDetailPage = () => {
       setConfirmModal(false);
       let detail = error?.message || 'Hubo un error al completar el traspaso.';
       if (detail.startsWith('Configura el costo')) {
-        detail = 'Falta registrar el costo de compra de un producto en el almacén de origen. Ve a Inventario → Costos y ganancias → Costos del inventario, configura sus costos y vuelve a completar el traspaso. El precio interno del traspaso es distinto del costo de compra.';
+        detail = 'Falta registrar el costo de compra de un producto en el almacén de origen. Ve a Inventario → Costos y ganancias → Costos del inventario, configura sus costos y vuelve a completar el traspaso.';
       } else if (detail.includes('Insufficient stock') || detail.includes('INSUFFICIENT_STOCK') || detail.includes('Inventario disponible insuficiente')) {
         detail = 'No hay suficiente inventario en el almacén de origen para uno o más productos.';
       }
@@ -254,7 +250,7 @@ export const TransferDetailPage = () => {
                   )
                 },
                 { header: 'Cantidad', accessorKey: 'quantity', className: 'font-semibold' },
-                { header: 'Precio interno', cell: (item: any) => item.unit_price == null ? 'Sin precio' : new Intl.NumberFormat('es-MX', {style: 'currency', currency: 'MXN'}).format(item.unit_price) },
+                { header: 'Precio de traspaso', cell: (item: any) => item.unit_price == null ? 'Sin costo' : new Intl.NumberFormat('es-MX', {style: 'currency', currency: 'MXN'}).format(item.unit_price) },
                 { header: 'Inventario y precios', cell: (item: any) => <div className="min-w-80"><InventoryProductInfo productId={item.product_id} source={stock?.find(row => row.product_id===item.product_id && row.warehouse_id===transfer.source_warehouse_id && row.location_id==null)} destination={stock?.find(row => row.product_id===item.product_id && row.warehouse_id===transfer.destination_warehouse_id && row.location_id==null)} sourceName={transfer.source?.name} destinationName={transfer.destination?.name} quantity={transfer.status==='DRAFT' ? Number(item.quantity) : undefined} unitPrice={item.unit_price} stockLoaded={!loadingStock && !stockError} /></div> }
               ]}
             />
@@ -299,7 +295,7 @@ export const TransferDetailPage = () => {
                       
                       <div className="mt-auto pt-4 border-t border-gray-100 flex flex-wrap gap-x-8 gap-y-3">
                         <div><p className="text-[11px] text-[#86868B] uppercase tracking-wider">Cantidad</p><p className="text-[14px] font-semibold text-[#1D1D1F] mt-1">{item.quantity}</p></div>
-                        <div><p className="text-[11px] text-[#86868B] uppercase tracking-wider">Precio interno</p><p className="text-[14px] font-semibold text-[#1D1D1F] mt-1">{item.unit_price == null ? 'Sin precio' : new Intl.NumberFormat('es-MX', {style: 'currency', currency: 'MXN'}).format(item.unit_price)}</p></div>
+                        <div><p className="text-[11px] text-[#86868B] uppercase tracking-wider">Precio de traspaso</p><p className="text-[14px] font-semibold text-[#1D1D1F] mt-1">{item.unit_price == null ? 'Sin costo' : new Intl.NumberFormat('es-MX', {style: 'currency', currency: 'MXN'}).format(item.unit_price)}</p></div>
                       </div>
                     </div>
                   </div>

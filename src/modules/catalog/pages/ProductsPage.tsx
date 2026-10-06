@@ -57,7 +57,7 @@ export const ProductsPage = () => {
           <p className="text-[15px] text-[#86868B] mt-1">Catálogo general de refacciones</p>
         </div>
         
-        <div className="flex items-center gap-3 w-full sm:w-auto">
+        <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
           <div className="relative w-full sm:w-72">
             <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <input 
@@ -75,7 +75,7 @@ export const ProductsPage = () => {
             />
           </div>
           
-          <div className="hidden sm:block w-48">
+          <div className="w-[calc(50%-0.375rem)] min-w-0 sm:w-48">
             <AsyncSelect
               loadOptions={async (query) => {
                 const data = await catalogService.searchBrands(query);
@@ -92,7 +92,7 @@ export const ProductsPage = () => {
             />
           </div>
 
-          <div className="hidden sm:block w-48">
+          <div className="w-[calc(50%-0.375rem)] min-w-0 sm:w-48">
             <AsyncSelect
               loadOptions={async (query) => {
                 const data = await catalogService.searchCategories(query);
@@ -112,7 +112,7 @@ export const ProductsPage = () => {
           {isAdmin && (
             <button 
               onClick={() => navigate('/catalog/products/new')}
-              className="flex items-center justify-center gap-2 bg-[#0066CC] hover:bg-[#005bb5] text-white px-4 py-2 rounded-xl text-[14px] font-medium transition-colors whitespace-nowrap shadow-sm"
+              className="flex flex-1 sm:flex-none items-center justify-center gap-2 bg-[#0066CC] hover:bg-[#005bb5] text-white px-4 py-2 rounded-xl text-[14px] font-medium transition-colors whitespace-nowrap shadow-sm"
             >
               <Plus className="w-4 h-4" />
               Nuevo producto

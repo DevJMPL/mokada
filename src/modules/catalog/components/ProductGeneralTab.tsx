@@ -1,17 +1,17 @@
 import { useFormContext } from 'react-hook-form';
 import { SearchSelect } from '../../../components/ui/SearchSelect';
+import { AsyncSelect, AsyncSelectOption } from '../../../components/ui/AsyncSelect';
+import { catalogService } from '../services/catalog.service';
 
 interface Props {
-  brands: any[];
-  categories: any[];
+  initialBrand?: AsyncSelectOption;
+  initialCategory?: AsyncSelectOption;
   units: any[];
 }
 
-export const ProductGeneralTab = ({ brands, categories, units }: Props) => {
+export const ProductGeneralTab = ({ initialBrand, initialCategory, units }: Props) => {
   const { register, watch, setValue, formState: { errors } } = useFormContext();
 
-  const brandOptions = brands.map(b => ({ value: b.id, label: b.name }));
-  const categoryOptions = categories.map(c => ({ value: c.id, label: c.name }));
   const unitOptions = units.map(u => ({ value: u.id, label: `${u.name} (${u.code})` }));
 
   return (
@@ -54,23 +54,31 @@ export const ProductGeneralTab = ({ brands, categories, units }: Props) => {
         </div>
 
         {/* Brand */}
-        <SearchSelect
+        <AsyncSelect
           label="Marca"
-          options={brandOptions}
+          loadOptions={async (query) => {
+            const data = await catalogService.searchBrands(query);
+            return data.map(b => ({ value: b.id, label: b.name }));
+          }}
+          defaultOption={initialBrand}
           value={watch('brand_id')}
           onChange={v => setValue('brand_id', v, { shouldDirty: true, shouldValidate: true })}
           onClear={() => setValue('brand_id', null, { shouldDirty: true })}
-          placeholder="Seleccione una marca"
+          placeholder="Buscar marca..."
         />
 
         {/* Category */}
-        <SearchSelect
+        <AsyncSelect
           label="Categoría"
-          options={categoryOptions}
+          loadOptions={async (query) => {
+            const data = await catalogService.searchCategories(query);
+            return data.map(c => ({ value: c.id, label: c.name }));
+          }}
+          defaultOption={initialCategory}
           value={watch('category_id')}
           onChange={v => setValue('category_id', v, { shouldDirty: true, shouldValidate: true })}
           onClear={() => setValue('category_id', null, { shouldDirty: true })}
-          placeholder="Seleccione una categoría"
+          placeholder="Buscar categoría..."
         />
 
         {/* UOM */}

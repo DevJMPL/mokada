@@ -22,8 +22,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       nextProfile = await authService.getProfileByAuthUserId(nextSession.user.id);
     } catch (error) {
       console.error('Error fetching user profile:', error);
-      // Do NOT sign out on network/database errors. Keep current session and profile state.
-      return;
+      // If there's a network error but we already have a session, DO NOT setProfile to null.
+      // If we don't have a profile yet (initial load), we might want to flag an error state,
+      // but for now, we will leave it as is to avoid destroying the session.
+      // Retrying could be implemented here.
+      throw error; // Throw so that the caller knows it failed.
     }
 
     if (!nextProfile) {
@@ -59,11 +62,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, nextSession) => {
-      loadProfile(nextSession).catch(async () => {
+    } = supabase.auth.onAuthStateChange((event, nextSession) => {
+      // Only process state changes if it's a significant event (like SIGNED_IN or TOKEN_REFRESHED)
+      // and do not aggressively log out if the profile fetch fails (e.g. due to brief network drop).
+      if (event === 'SIGNED_OUT') {
         setProfile(null);
-        await authService.signOut();
-      });
+        setSession(null);
+      } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
+        loadProfile(nextSession).catch((error) => {
+          console.error('Error in onAuthStateChange profile load:', error);
+          // Deliberately NOT calling signOut() here! If the token refreshed but the 
+          // network dropped during the profile fetch, we should keep the user logged in.
+        });
+      }
     });
 
     return () => {

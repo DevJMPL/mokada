@@ -66,8 +66,28 @@ export const catalogService = {
     return data;
   },
 
+  async searchBrands(query: string) {
+    let q = supabase.from('product_brands').select('id, name');
+    if (query) {
+      q = q.ilike('name', `%${query}%`);
+    }
+    const { data, error } = await q.order('name').limit(30);
+    if (error) throw error;
+    return data;
+  },
+
   async getCategories() {
     const { data, error } = await supabase.from('product_categories').select('*').order('name');
+    if (error) throw error;
+    return data;
+  },
+
+  async searchCategories(query: string) {
+    let q = supabase.from('product_categories').select('id, name');
+    if (query) {
+      q = q.ilike('name', `%${query}%`);
+    }
+    const { data, error } = await q.order('name').limit(30);
     if (error) throw error;
     return data;
   },
@@ -82,7 +102,7 @@ export const catalogService = {
     // Basic product details
     const { data: product, error: productError } = await (supabase as any)
       .from('products')
-      .select('*')
+      .select('*, brand:product_brands(name), category:product_categories(name)')
       .eq('id', productId)
       .single();
     if (productError) throw productError;

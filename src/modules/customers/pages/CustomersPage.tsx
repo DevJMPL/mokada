@@ -11,11 +11,12 @@ import { IconButton } from '../../../components/ui/IconButton';
 import { useCustomers, useCustomerRoutes, useSaveCustomer } from '../hooks/useCustomers';
 import type { CustomerSummary } from '../services/customers.service';
 import { useAuth } from '../../auth/context/useAuth';
+import { useRouteStore } from '../../../store/routeStore';
 
 export const CustomersPage = () => {
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
-  const [selectedRouteId, setSelectedRouteId] = useState<string>('');
+  const { globalSelectedRouteId } = useRouteStore();
   const [customerToToggle, setCustomerToToggle] = useState<CustomerSummary | null>(null);
   const [alertModal, setAlertModal] = useState<{ isOpen: boolean; title: string; message: string; type: 'error' | 'success' | 'info' }>({
     isOpen: false,
@@ -28,13 +29,7 @@ export const CustomersPage = () => {
   const saveCustomer = useSaveCustomer();
   const { isAdmin } = useAuth();
 
-  useEffect(() => {
-    if (!isAdmin && routeOptions.length > 0 && !selectedRouteId) {
-      setSelectedRouteId(routeOptions[0].id);
-    }
-  }, [isAdmin, routeOptions, selectedRouteId]);
-
-  const filteredCustomers = customers.filter((customer) => !selectedRouteId || customer.main_branch_route_id === selectedRouteId);
+  const filteredCustomers = customers.filter((customer) => !globalSelectedRouteId || customer.main_branch_route_id === globalSelectedRouteId);
 
   const handleToggleCustomer = (customer: CustomerSummary) => {
     setAlertModal((current) => ({ ...current, isOpen: false }));
@@ -99,22 +94,6 @@ export const CustomersPage = () => {
             className="min-w-0 flex-1 bg-transparent text-sm outline-none"
             placeholder="Buscar por nombre, correo o teléfono"
           />
-        </label>
-        
-        <label className="flex h-11 shrink-0 items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 shadow-sm focus-within:border-[#0066CC] focus-within:ring-2 focus-within:ring-[#0066CC]/15 sm:w-64">
-          <Route className="h-4 w-4 text-[#86868B]" />
-          <select
-            value={selectedRouteId}
-            onChange={(event) => setSelectedRouteId(event.target.value)}
-            className="min-w-0 flex-1 bg-transparent text-sm outline-none"
-          >
-            {isAdmin && <option value="">Todas las rutas</option>}
-            {routeOptions.map((route) => (
-              <option key={route.id} value={route.id}>
-                {route.name}
-              </option>
-            ))}
-          </select>
         </label>
       </div>
 

@@ -80,6 +80,7 @@ export const ordersService = {
       .select(`
         *,
         customers (name, email),
+        customer_branches (route_id),
         sales_order_items (
           *,
           products (name, code)

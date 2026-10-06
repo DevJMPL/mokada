@@ -12,7 +12,8 @@ export const returnsService = {
           *,
           source_order:sales_orders!sales_order_returns_order_id_fkey(
             id, created_at, status, customer_id,
-            customers(name, email)
+            customers(name, email),
+            customer_branches(route_id)
           ),
           item:sales_order_items!sales_order_returns_item_id_fkey(
             id, product_id,

@@ -5,6 +5,7 @@ import { Search, Filter, ShoppingCart, Loader2, FileText, CheckCircle2, Truck, X
 import { format } from 'date-fns';
 import { supabase } from '../../../lib/supabase/client';
 import { useAuth } from '../../auth/context/useAuth';
+import { useRouteStore } from '../../../store/routeStore';
 
 export const statusConfig = {
   PENDING: { label: 'Pendiente', color: 'bg-yellow-100 text-yellow-800', icon: Clock },
@@ -22,6 +23,7 @@ export const OrdersPage = ({ initialPaymentFilter = 'ALL' }: { initialPaymentFil
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
+  const { globalSelectedRouteId } = useRouteStore();
   const [paymentFilter, setPaymentFilter] = useState<'ALL' | 'UNPAID' | 'PAID'>(initialPaymentFilter);
   const isAgent = profile?.user_type === 'AGENT';
 
@@ -64,9 +66,10 @@ export const OrdersPage = ({ initialPaymentFilter = 'ALL' }: { initialPaymentFil
       order.id.toLowerCase().includes(search.toLowerCase()) || 
       order.customers?.name?.toLowerCase().includes(search.toLowerCase());
     const matchesStatus = statusFilter === 'ALL' || order.status === statusFilter;
+    const matchesRoute = !globalSelectedRouteId || order.customer_branches?.route_id === globalSelectedRouteId;
     const { isPaid } = getPaymentSummary(order);
     const matchesPayment = paymentFilter === 'ALL' || (paymentFilter === 'PAID' ? isPaid : !isPaid);
-    return matchesSearch && matchesStatus && matchesPayment;
+    return matchesSearch && matchesStatus && matchesRoute && matchesPayment;
   });
 
   const paymentCounts = orders.reduce((counts, order) => {

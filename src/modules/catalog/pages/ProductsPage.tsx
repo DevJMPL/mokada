@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useInfiniteProducts, useBrands, useCategories } from '../hooks/useCatalog';
+import { useInfiniteProducts } from '../hooks/useCatalog';
 import { catalogService } from '../services/catalog.service';
 import { StatusBadge } from '../../../components/ui/StatusBadge';
 import { Search, Plus, PackageSearch, ShoppingCart, Loader2 } from 'lucide-react';
@@ -9,7 +9,7 @@ import { useCartStore } from '../store/useCartStore';
 import { CartDrawer } from '../components/CartDrawer';
 import { useDebounce } from '../../../hooks/useDebounce';
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
-import { SearchSelect } from '../../../components/ui/SearchSelect';
+import { AsyncSelect } from '../../../components/ui/AsyncSelect';
 
 export const ProductsPage = () => {
   const navigate = useNavigate();
@@ -21,11 +21,7 @@ export const ProductsPage = () => {
   const [selectedBrand, setSelectedBrand] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
 
-  const { data: brandsData } = useBrands();
-  const { data: categoriesData } = useCategories();
 
-  const brands = brandsData || [];
-  const categories = categoriesData || [];
 
   const { 
 
@@ -80,11 +76,15 @@ export const ProductsPage = () => {
           </div>
           
           <div className="w-[calc(50%-0.375rem)] min-w-0 sm:w-48">
-            <SearchSelect
-              options={brands.map((b: any) => ({ value: b.name, label: b.name }))}
+            <AsyncSelect
+              loadOptions={async (query) => {
+                const data = await catalogService.searchBrands(query);
+                return data.map(b => ({ value: b.name, label: b.name }));
+              }}
               value={selectedBrand}
+              defaultOption={selectedBrand ? { value: selectedBrand, label: selectedBrand } : undefined}
               onChange={(value) => {
-                setSelectedBrand(value);
+                setSelectedBrand(value || '');
                 if (value) setSearch('');
               }}
               onClear={() => setSelectedBrand('')}
@@ -93,11 +93,15 @@ export const ProductsPage = () => {
           </div>
 
           <div className="w-[calc(50%-0.375rem)] min-w-0 sm:w-48">
-            <SearchSelect
-              options={categories.map((c: any) => ({ value: c.name, label: c.name }))}
+            <AsyncSelect
+              loadOptions={async (query) => {
+                const data = await catalogService.searchCategories(query);
+                return data.map(c => ({ value: c.name, label: c.name }));
+              }}
               value={selectedCategory}
+              defaultOption={selectedCategory ? { value: selectedCategory, label: selectedCategory } : undefined}
               onChange={(value) => {
-                setSelectedCategory(value);
+                setSelectedCategory(value || '');
                 if (value) setSearch('');
               }}
               onClear={() => setSelectedCategory('')}

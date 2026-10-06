@@ -50,7 +50,7 @@ const invokeAdminUsers = async <T>(
 
   if (!response.ok) {
     if (response.status === 401) {
-      await supabase.auth.signOut();
+      // NOTE: Do not call signOut() here. The token might just be expiring and the SDK will refresh it automatically on the next request.
       throw new Error('Tu sesion expiro. Inicia sesion de nuevo.');
     }
 

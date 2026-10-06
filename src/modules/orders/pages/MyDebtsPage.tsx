@@ -33,7 +33,7 @@ export const MyDebtsPage = () => {
 
   const processedOrders = useMemo(() => {
     return orders.map((order) => {
-      const totalCost = Number(order.total_amount || 0) + Number(order.shipping_cost || 0);
+      const totalCost = Number(order.total_amount || 0);
       const amountPaid = Number(order.amount_paid || 0);
       const remainingBalance = Math.max(totalCost - amountPaid, 0);
 

@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Check, ChevronDown, Search, X } from 'lucide-react';
 
 export interface SearchSelectOption {
@@ -51,6 +51,26 @@ export const SearchSelect = ({
       .slice(0, 30);
   }, [options, query]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const closeWhenOutside = (event: Event) => {
+      if (!wrapperRef.current?.contains(event.target as Node | null)) setIsOpen(false);
+    };
+    const closeWithEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setIsOpen(false);
+    };
+
+    document.addEventListener('pointerdown', closeWhenOutside);
+    document.addEventListener('focusin', closeWhenOutside);
+    document.addEventListener('keydown', closeWithEscape);
+    return () => {
+      document.removeEventListener('pointerdown', closeWhenOutside);
+      document.removeEventListener('focusin', closeWhenOutside);
+      document.removeEventListener('keydown', closeWithEscape);
+    };
+  }, [isOpen]);
+
   const selectOption = (option: SearchSelectOption) => {
     onChange(option.value);
     setQuery('');
@@ -58,15 +78,7 @@ export const SearchSelect = ({
   };
 
   return (
-    <div
-      ref={wrapperRef}
-      className="relative min-w-0"
-      onBlur={(event) => {
-        if (!wrapperRef.current?.contains(event.relatedTarget as Node | null)) {
-          setIsOpen(false);
-        }
-      }}
-    >
+    <div ref={wrapperRef} className="relative min-w-0">
       {label && <span className="mb-1.5 block text-[13px] font-medium text-[#1D1D1F]">{label}</span>}
       <button
         type="button"

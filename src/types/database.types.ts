@@ -2043,6 +2043,7 @@ export type Database = {
       }
       routes: {
         Row: {
+          agent_id: string | null
           code: string
           created_at: string
           default_weekly_budget: number
@@ -2055,6 +2056,7 @@ export type Database = {
           working_days: string[] | null
         }
         Insert: {
+          agent_id?: string | null
           code: string
           created_at?: string
           default_weekly_budget?: number
@@ -2067,6 +2069,7 @@ export type Database = {
           working_days?: string[] | null
         }
         Update: {
+          agent_id?: string | null
           code?: string
           created_at?: string
           default_weekly_budget?: number
@@ -2078,7 +2081,15 @@ export type Database = {
           updated_at?: string
           working_days?: string[] | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "routes_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       sales_item_costs: {
         Row: {
@@ -2109,6 +2120,93 @@ export type Database = {
             columns: ["item_id"]
             isOneToOne: true
             referencedRelation: "sales_order_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sales_order_invoice_request_items: {
+        Row: {
+          created_at: string
+          id: string
+          invoice_request_id: string
+          order_item_id: string
+          quantity: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          invoice_request_id: string
+          order_item_id: string
+          quantity: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          invoice_request_id?: string
+          order_item_id?: string
+          quantity?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_order_invoice_request_items_invoice_request_id_fkey"
+            columns: ["invoice_request_id"]
+            isOneToOne: false
+            referencedRelation: "sales_order_invoice_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_order_invoice_request_items_order_item_id_fkey"
+            columns: ["order_item_id"]
+            isOneToOne: false
+            referencedRelation: "sales_order_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sales_order_invoice_requests: {
+        Row: {
+          created_at: string
+          fiscal_profile_id: string
+          id: string
+          invoice_details: Json
+          invoice_payment_form: string
+          order_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          fiscal_profile_id: string
+          id?: string
+          invoice_details: Json
+          invoice_payment_form: string
+          order_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          fiscal_profile_id?: string
+          id?: string
+          invoice_details?: Json
+          invoice_payment_form?: string
+          order_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_order_invoice_requests_fiscal_profile_id_fkey"
+            columns: ["fiscal_profile_id"]
+            isOneToOne: false
+            referencedRelation: "customer_fiscal_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_order_invoice_requests_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "sales_orders"
             referencedColumns: ["id"]
           },
         ]
@@ -2352,7 +2450,7 @@ export type Database = {
           price_list_id: string | null
           requires_invoice: boolean
           shipping_address: string | null
-          shipping_cost: number | null
+          shipping_cost: number
           status: Database["public"]["Enums"]["sales_order_status"]
           total_amount: number
           updated_at: string
@@ -2382,7 +2480,7 @@ export type Database = {
           price_list_id?: string | null
           requires_invoice?: boolean
           shipping_address?: string | null
-          shipping_cost?: number | null
+          shipping_cost?: number
           status?: Database["public"]["Enums"]["sales_order_status"]
           total_amount: number
           updated_at?: string
@@ -2412,7 +2510,7 @@ export type Database = {
           price_list_id?: string | null
           requires_invoice?: boolean
           shipping_address?: string | null
-          shipping_cost?: number | null
+          shipping_cost?: number
           status?: Database["public"]["Enums"]["sales_order_status"]
           total_amount?: number
           updated_at?: string
@@ -3495,7 +3593,7 @@ export type Database = {
           price_list_id: string | null
           requires_invoice: boolean
           shipping_address: string | null
-          shipping_cost: number | null
+          shipping_cost: number
           status: Database["public"]["Enums"]["sales_order_status"]
           total_amount: number
           updated_at: string
@@ -3586,7 +3684,7 @@ export type Database = {
           price_list_id: string | null
           requires_invoice: boolean
           shipping_address: string | null
-          shipping_cost: number | null
+          shipping_cost: number
           status: Database["public"]["Enums"]["sales_order_status"]
           total_amount: number
           updated_at: string

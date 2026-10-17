@@ -84,7 +84,7 @@ export const MovementsPage = () => {
             <select
               value={selectedWarehouse}
               onChange={(e) => setSelectedWarehouse(e.target.value)}
-              className="pl-9 pr-8 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent text-[13px] text-gray-700 shadow-sm transition appearance-none cursor-pointer hover:bg-gray-50"
+              className="pl-9 pr-8 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:border-accent focus:ring-4 focus:ring-accent/15 text-[13px] text-gray-700 shadow-sm transition appearance-none cursor-pointer hover:bg-gray-50"
             >
               <option value="">Todos los almacenes</option>
               {warehouses?.map(w => (

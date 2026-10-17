@@ -64,7 +64,7 @@ export const WarehouseFormModal = ({ isOpen, onClose, warehouse }: Props) => {
           <input
             type="text"
             {...register('code', { required: 'El código es obligatorio' })}
-            className="w-full px-3 py-2 bg-white border border-gray-200/60 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-[14px]"
+            className="w-full px-3 py-2 bg-white border border-gray-200/60 rounded-lg focus:outline-none focus:ring-4 focus:ring-accent/15 focus:border-accent text-[14px]"
             placeholder="Ej: ALM-01"
           />
           {errors.code && <p className="text-red-500 text-xs mt-1">{errors.code.message?.toString()}</p>}
@@ -75,7 +75,7 @@ export const WarehouseFormModal = ({ isOpen, onClose, warehouse }: Props) => {
           <input
             type="text"
             {...register('name', { required: 'El nombre es obligatorio' })}
-            className="w-full px-3 py-2 bg-white border border-gray-200/60 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-[14px]"
+            className="w-full px-3 py-2 bg-white border border-gray-200/60 rounded-lg focus:outline-none focus:ring-4 focus:ring-accent/15 focus:border-accent text-[14px]"
             placeholder="Ej: Almacén Central"
           />
           {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name.message?.toString()}</p>}
@@ -83,7 +83,7 @@ export const WarehouseFormModal = ({ isOpen, onClose, warehouse }: Props) => {
 
         <div>
           <label className="block text-[13px] font-medium text-ink mb-1.5">Función del almacén *</label>
-          <select {...register('warehouse_role', {required: true})} className="w-full px-3 py-2 bg-white border border-gray-200/60 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-[14px]">
+          <select {...register('warehouse_role', {required: true})} className="w-full px-3 py-2 bg-white border border-gray-200/60 rounded-lg focus:outline-none focus:ring-4 focus:ring-accent/15 focus:border-accent text-[14px]">
             <option value="PURCHASE">Compras y abastecimiento</option>
             <option value="SALES">Ventas a clientes</option>
           </select>
@@ -95,14 +95,14 @@ export const WarehouseFormModal = ({ isOpen, onClose, warehouse }: Props) => {
           <textarea
             {...register('description')}
             rows={3}
-            className="w-full px-3 py-2 bg-white border border-gray-200/60 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-[14px] resize-none"
+            className="w-full px-3 py-2 bg-white border border-gray-200/60 rounded-lg focus:outline-none focus:ring-4 focus:ring-accent/15 focus:border-accent text-[14px] resize-none"
             placeholder="Ubicación o detalles del almacén..."
           />
         </div>
 
         {watch('warehouse_role') === 'SALES' && <div>
           <label className="block text-[13px] font-medium text-ink mb-1.5">Lista de venta predeterminada</label>
-          <select {...register('price_list_id', {required: watch('warehouse_role') === 'SALES'})} disabled={!!priceError} className="w-full px-3 py-2 bg-white border border-gray-200/60 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-[14px]">
+          <select {...register('price_list_id', {required: watch('warehouse_role') === 'SALES'})} disabled={!!priceError} className="w-full px-3 py-2 bg-white border border-gray-200/60 rounded-lg focus:outline-none focus:ring-4 focus:ring-accent/15 focus:border-accent text-[14px]">
             <option value="">Selecciona la lista predeterminada</option>
             {priceLists?.filter(list => list.is_active || list.id === warehouse?.price_list_id).map(list => <option key={list.id} value={list.id}>{list.name}{!list.is_active ? ' (inactiva)' : ''}</option>)}
           </select>

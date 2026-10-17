@@ -127,7 +127,7 @@ export const FleetVehiclesPage = () => {
               <div 
                 key={item.id}
                 onClick={() => openEdit(item)}
-                className="group bg-white border border-gray-200/60 rounded-[24px] overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition duration-300 cursor-pointer flex flex-col"
+                className="group bg-white border border-gray-200/60 rounded-[24px] overflow-hidden shadow-sm hover-lift cursor-pointer flex flex-col"
               >
                 {/* Image Section */}
                 <div className="relative aspect-video bg-canvas p-6 flex items-center justify-center overflow-hidden">
@@ -196,27 +196,27 @@ export const FleetVehiclesPage = () => {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-[13px] font-medium text-ink mb-1">Código interno *</label>
-              <input value={form.internal_code} onChange={e => setForm({ ...form, internal_code: e.target.value })} required className="w-full rounded-lg border border-gray-200 px-3 py-2 text-[14px] focus:border-accent focus:ring-1 focus:ring-accent outline-none" />
+              <input value={form.internal_code} onChange={e => setForm({ ...form, internal_code: e.target.value })} required className="w-full rounded-lg border border-gray-200 px-3 py-2 text-[14px] focus:border-accent focus:ring-4 focus:ring-accent/15 outline-none" />
             </div>
             <div>
               <label className="block text-[13px] font-medium text-ink mb-1">Placas</label>
-              <input value={form.plate_number} onChange={e => setForm({ ...form, plate_number: e.target.value })} className="w-full rounded-lg border border-gray-200 px-3 py-2 text-[14px] focus:border-accent focus:ring-1 focus:ring-accent outline-none" />
+              <input value={form.plate_number} onChange={e => setForm({ ...form, plate_number: e.target.value })} className="w-full rounded-lg border border-gray-200 px-3 py-2 text-[14px] focus:border-accent focus:ring-4 focus:ring-accent/15 outline-none" />
             </div>
             <div>
               <label className="block text-[13px] font-medium text-ink mb-1">VIN</label>
-              <input value={form.vin} onChange={e => setForm({ ...form, vin: e.target.value })} className="w-full rounded-lg border border-gray-200 px-3 py-2 text-[14px] focus:border-accent focus:ring-1 focus:ring-accent outline-none" />
+              <input value={form.vin} onChange={e => setForm({ ...form, vin: e.target.value })} className="w-full rounded-lg border border-gray-200 px-3 py-2 text-[14px] focus:border-accent focus:ring-4 focus:ring-accent/15 outline-none" />
             </div>
             <div>
               <label className="block text-[13px] font-medium text-ink mb-1">Marca</label>
-              <input value={form.brand} onChange={e => setForm({ ...form, brand: e.target.value })} className="w-full rounded-lg border border-gray-200 px-3 py-2 text-[14px] focus:border-accent focus:ring-1 focus:ring-accent outline-none" />
+              <input value={form.brand} onChange={e => setForm({ ...form, brand: e.target.value })} className="w-full rounded-lg border border-gray-200 px-3 py-2 text-[14px] focus:border-accent focus:ring-4 focus:ring-accent/15 outline-none" />
             </div>
             <div>
               <label className="block text-[13px] font-medium text-ink mb-1">Modelo</label>
-              <input value={form.model} onChange={e => setForm({ ...form, model: e.target.value })} className="w-full rounded-lg border border-gray-200 px-3 py-2 text-[14px] focus:border-accent focus:ring-1 focus:ring-accent outline-none" />
+              <input value={form.model} onChange={e => setForm({ ...form, model: e.target.value })} className="w-full rounded-lg border border-gray-200 px-3 py-2 text-[14px] focus:border-accent focus:ring-4 focus:ring-accent/15 outline-none" />
             </div>
             <div>
               <label className="block text-[13px] font-medium text-ink mb-1">Año</label>
-              <input type="number" value={form.year} onChange={e => setForm({ ...form, year: Number(e.target.value) })} className="w-full rounded-lg border border-gray-200 px-3 py-2 text-[14px] focus:border-accent focus:ring-1 focus:ring-accent outline-none" />
+              <input type="number" value={form.year} onChange={e => setForm({ ...form, year: Number(e.target.value) })} className="w-full rounded-lg border border-gray-200 px-3 py-2 text-[14px] focus:border-accent focus:ring-4 focus:ring-accent/15 outline-none" />
             </div>
             <div>
               <label className="block text-[13px] font-medium text-ink mb-1">Color</label>
@@ -231,13 +231,13 @@ export const FleetVehiclesPage = () => {
                   value={form.color}
                   onChange={e => setForm({ ...form, color: e.target.value })}
                   placeholder="Ej. #FFFFFF o Blanco"
-                  className="w-full rounded-lg border border-gray-200 pl-10 pr-3 py-2 text-[14px] uppercase focus:border-accent focus:ring-1 focus:ring-accent outline-none"
+                  className="w-full rounded-lg border border-gray-200 pl-10 pr-3 py-2 text-[14px] uppercase focus:border-accent focus:ring-4 focus:ring-accent/15 outline-none"
                 />
               </div>
             </div>
             <div>
               <label className="block text-[13px] font-medium text-ink mb-1">Tipo de vehículo</label>
-              <select value={form.vehicle_type} onChange={e => setForm({ ...form, vehicle_type: e.target.value })} className="w-full rounded-lg border border-gray-200 px-3 py-2 text-[14px] focus:border-accent focus:ring-1 focus:ring-accent outline-none bg-white">
+              <select value={form.vehicle_type} onChange={e => setForm({ ...form, vehicle_type: e.target.value })} className="w-full rounded-lg border border-gray-200 px-3 py-2 text-[14px] focus:border-accent focus:ring-4 focus:ring-accent/15 outline-none bg-white">
                 <option value="">Seleccionar...</option>
                 <option value="Sedán">Sedán</option>
                 <option value="SUV">SUV</option>
@@ -252,7 +252,7 @@ export const FleetVehiclesPage = () => {
             </div>
             <div>
               <label className="block text-[13px] font-medium text-ink mb-1">Combustible</label>
-              <select value={form.fuel_type} onChange={e => setForm({ ...form, fuel_type: e.target.value })} className="w-full rounded-lg border border-gray-200 px-3 py-2 text-[14px] focus:border-accent focus:ring-1 focus:ring-accent outline-none bg-white">
+              <select value={form.fuel_type} onChange={e => setForm({ ...form, fuel_type: e.target.value })} className="w-full rounded-lg border border-gray-200 px-3 py-2 text-[14px] focus:border-accent focus:ring-4 focus:ring-accent/15 outline-none bg-white">
                 <option value="">Seleccionar...</option>
                 <option value="Gasolina">Gasolina</option>
                 <option value="Diésel">Diésel</option>
@@ -264,7 +264,7 @@ export const FleetVehiclesPage = () => {
             </div>
             <div>
               <label className="block text-[13px] font-medium text-ink mb-1">Transmisión</label>
-              <select value={form.transmission} onChange={e => setForm({ ...form, transmission: e.target.value })} className="w-full rounded-lg border border-gray-200 px-3 py-2 text-[14px] focus:border-accent focus:ring-1 focus:ring-accent outline-none bg-white">
+              <select value={form.transmission} onChange={e => setForm({ ...form, transmission: e.target.value })} className="w-full rounded-lg border border-gray-200 px-3 py-2 text-[14px] focus:border-accent focus:ring-4 focus:ring-accent/15 outline-none bg-white">
                 <option value="">Seleccionar...</option>
                 <option value="Automática">Automática</option>
                 <option value="Manual">Manual</option>
@@ -275,22 +275,22 @@ export const FleetVehiclesPage = () => {
             </div>
             <div>
               <label className="block text-[13px] font-medium text-ink mb-1">Motor</label>
-              <input value={form.engine} onChange={e => setForm({ ...form, engine: e.target.value })} className="w-full rounded-lg border border-gray-200 px-3 py-2 text-[14px] focus:border-accent focus:ring-1 focus:ring-accent outline-none" />
+              <input value={form.engine} onChange={e => setForm({ ...form, engine: e.target.value })} className="w-full rounded-lg border border-gray-200 px-3 py-2 text-[14px] focus:border-accent focus:ring-4 focus:ring-accent/15 outline-none" />
             </div>
             <div>
               <label className="block text-[13px] font-medium text-ink mb-1">Kilometraje</label>
-              <input type="number" value={form.mileage} onChange={e => setForm({ ...form, mileage: Number(e.target.value) })} className="w-full rounded-lg border border-gray-200 px-3 py-2 text-[14px] focus:border-accent focus:ring-1 focus:ring-accent outline-none" />
+              <input type="number" value={form.mileage} onChange={e => setForm({ ...form, mileage: Number(e.target.value) })} className="w-full rounded-lg border border-gray-200 px-3 py-2 text-[14px] focus:border-accent focus:ring-4 focus:ring-accent/15 outline-none" />
             </div>
             <div>
               <label className="block text-[13px] font-medium text-ink mb-1">Estado</label>
-              <select value={form.status} onChange={e => setForm({ ...form, status: e.target.value })} className="w-full rounded-lg border border-gray-200 px-3 py-2 text-[14px] focus:border-accent focus:ring-1 focus:ring-accent outline-none bg-white">
+              <select value={form.status} onChange={e => setForm({ ...form, status: e.target.value })} className="w-full rounded-lg border border-gray-200 px-3 py-2 text-[14px] focus:border-accent focus:ring-4 focus:ring-accent/15 outline-none bg-white">
                 {VEHICLE_STATUSES.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
               </select>
             </div>
           </div>
           <div>
             <label className="block text-[13px] font-medium text-ink mb-1">Notas</label>
-            <textarea value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} rows={2} className="w-full rounded-lg border border-gray-200 px-3 py-2 text-[14px] focus:border-accent focus:ring-1 focus:ring-accent outline-none resize-none" />
+            <textarea value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} rows={2} className="w-full rounded-lg border border-gray-200 px-3 py-2 text-[14px] focus:border-accent focus:ring-4 focus:ring-accent/15 outline-none resize-none" />
           </div>
           <div className="flex justify-end gap-3 pt-2">
             <button type="button" onClick={() => setModalOpen(false)} className="px-4 py-2 text-[13px] font-medium text-muted hover:text-ink transition-colors">

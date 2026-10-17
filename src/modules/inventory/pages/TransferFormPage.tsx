@@ -223,7 +223,7 @@ export const TransferFormPage = () => {
             <input
               type="text"
               {...register('notes')}
-              className="w-full px-3 py-2 bg-gray-50 border border-transparent rounded-lg focus:bg-white focus:border-accent focus:ring-1 focus:ring-accent text-[14px] transition"
+              className="w-full px-3 py-2 bg-gray-50 border border-transparent rounded-lg focus:bg-white focus:border-accent focus:ring-4 focus:ring-accent/15 text-[14px] transition"
               placeholder="Ej: Traspaso urgente para sucursal norte"
             />
           </div>
@@ -348,7 +348,7 @@ export const TransferFormPage = () => {
                                 valueAsNumber: true 
                               })}
                               disabled={!currentProductId}
-                              className="w-full px-3 py-2 bg-gray-50 border border-transparent rounded-lg focus:bg-white focus:border-accent focus:ring-1 focus:ring-accent text-[14px] transition disabled:opacity-50"
+                              className="w-full px-3 py-2 bg-gray-50 border border-transparent rounded-lg focus:bg-white focus:border-accent focus:ring-4 focus:ring-accent/15 text-[14px] transition disabled:opacity-50"
                             />
                             {errors.items?.[index]?.quantity && <p className="text-red-600 text-[11px] mt-1">Cantidad inválida o superior al disponible.</p>}
                           </div>

@@ -79,7 +79,7 @@ export const AttributeFormModal = ({ isOpen, onClose, attribute }: AttributeForm
               type="text"
               {...register('code', { required: 'El código es obligatorio' })}
               placeholder="Ej: COLOR, VOLTAJE"
-              className="w-full px-3 py-2 bg-gray-50 border border-transparent rounded-lg focus:bg-white focus:border-accent focus:ring-1 focus:ring-accent text-[14px] transition uppercase"
+              className="w-full px-3 py-2 bg-gray-50 border border-transparent rounded-lg focus:bg-white focus:border-accent focus:ring-4 focus:ring-accent/15 text-[14px] transition uppercase"
               disabled={isPending}
             />
             {errors.code && <p className="text-red-500 text-xs mt-1">{errors.code.message?.toString()}</p>}
@@ -91,7 +91,7 @@ export const AttributeFormModal = ({ isOpen, onClose, attribute }: AttributeForm
               type="text"
               {...register('name', { required: 'El nombre es obligatorio' })}
               placeholder="Ej: Color, Voltaje"
-              className="w-full px-3 py-2 bg-gray-50 border border-transparent rounded-lg focus:bg-white focus:border-accent focus:ring-1 focus:ring-accent text-[14px] transition"
+              className="w-full px-3 py-2 bg-gray-50 border border-transparent rounded-lg focus:bg-white focus:border-accent focus:ring-4 focus:ring-accent/15 text-[14px] transition"
               disabled={isPending}
             />
             {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name.message?.toString()}</p>}
@@ -103,7 +103,7 @@ export const AttributeFormModal = ({ isOpen, onClose, attribute }: AttributeForm
             <label className="block text-[13px] font-medium text-ink mb-1.5">Tipo de Dato *</label>
             <select
               {...register('data_type')}
-              className="w-full px-3 py-2 bg-gray-50 border border-transparent rounded-lg focus:bg-white focus:border-accent focus:ring-1 focus:ring-accent text-[14px] transition"
+              className="w-full px-3 py-2 bg-gray-50 border border-transparent rounded-lg focus:bg-white focus:border-accent focus:ring-4 focus:ring-accent/15 text-[14px] transition"
               disabled={isPending}
             >
               <option value="TEXT">Texto (Text)</option>
@@ -118,7 +118,7 @@ export const AttributeFormModal = ({ isOpen, onClose, attribute }: AttributeForm
               type="text"
               {...register('unit')}
               placeholder="Ej: V, W, cm"
-              className="w-full px-3 py-2 bg-gray-50 border border-transparent rounded-lg focus:bg-white focus:border-accent focus:ring-1 focus:ring-accent text-[14px] transition"
+              className="w-full px-3 py-2 bg-gray-50 border border-transparent rounded-lg focus:bg-white focus:border-accent focus:ring-4 focus:ring-accent/15 text-[14px] transition"
               disabled={isPending}
             />
           </div>
@@ -129,7 +129,7 @@ export const AttributeFormModal = ({ isOpen, onClose, attribute }: AttributeForm
           <textarea
             {...register('description')}
             rows={2}
-            className="w-full px-3 py-2 bg-gray-50 border border-transparent rounded-lg focus:bg-white focus:border-accent focus:ring-1 focus:ring-accent text-[14px] transition resize-none"
+            className="w-full px-3 py-2 bg-gray-50 border border-transparent rounded-lg focus:bg-white focus:border-accent focus:ring-4 focus:ring-accent/15 text-[14px] transition resize-none"
             disabled={isPending}
           />
         </div>

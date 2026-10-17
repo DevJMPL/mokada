@@ -160,7 +160,7 @@ export const MovementFormModal = ({ isOpen, onClose }: Props) => {
             <label className="block text-[13px] font-medium text-ink mb-1.5">Tipo de Movimiento *</label>
             <select
               {...register('movement_type', { required: true })}
-              className="w-full px-3 py-2 bg-white border border-gray-200/60 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-[14px]"
+              className="w-full px-3 py-2 bg-white border border-gray-200/60 rounded-lg focus:outline-none focus:ring-4 focus:ring-accent/15 focus:border-accent text-[14px]"
             >
               <option value="PURCHASE">Compra (+)</option>
               <option value="INITIAL_STOCK">Stock Inicial (+)</option>
@@ -177,7 +177,7 @@ export const MovementFormModal = ({ isOpen, onClose }: Props) => {
               min="0.01"
               max={movementType === 'ADJUSTMENT_OUT' ? selectedStock?.available_quantity ?? 0 : undefined}
               {...register('quantity', { required: 'La cantidad es obligatoria', min: 0.01, validate: value => movementType !== 'ADJUSTMENT_OUT' || Number(value) <= (selectedStock?.available_quantity ?? 0) || 'La cantidad supera el disponible' })}
-              className="w-full px-3 py-2 bg-white border border-gray-200/60 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-[14px]"
+              className="w-full px-3 py-2 bg-white border border-gray-200/60 rounded-lg focus:outline-none focus:ring-4 focus:ring-accent/15 focus:border-accent text-[14px]"
               placeholder="0.00"
             />
             {errors.quantity && <p className="text-red-500 text-xs mt-1">{errors.quantity.message?.toString()}</p>}
@@ -187,7 +187,7 @@ export const MovementFormModal = ({ isOpen, onClose }: Props) => {
         {incoming && (
           <div>
             <label className="block text-[13px] font-medium text-ink mb-1.5">{movementType === 'PURCHASE' ? 'Costo de compra por unidad' : 'Costo de la entrada por unidad'} ($) *</label>
-            <input type="number" min="0" step="0.0001" className="w-full px-3 py-2 bg-white border border-gray-200/60 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-[14px] transition disabled:opacity-50"
+            <input type="number" min="0" step="0.0001" className="w-full px-3 py-2 bg-white border border-gray-200/60 rounded-lg focus:outline-none focus:ring-4 focus:ring-accent/15 focus:border-accent text-[14px] transition disabled:opacity-50"
               {...register('unit_cost', { required: 'Captura el costo', min: 0 })} />
             {errors.unit_cost && <p className="text-red-500 text-xs">{String(errors.unit_cost.message)}</p>}
             <p className="text-[12px] text-muted mt-2">Este costo pertenece al almacén de compras. El precio interno se captura después, al traspasar al almacén de ventas.</p>
@@ -198,7 +198,7 @@ export const MovementFormModal = ({ isOpen, onClose }: Props) => {
           <textarea
             {...register('notes')}
             rows={2}
-            className="w-full px-3 py-2 bg-white border border-gray-200/60 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-[14px] resize-none"
+            className="w-full px-3 py-2 bg-white border border-gray-200/60 rounded-lg focus:outline-none focus:ring-4 focus:ring-accent/15 focus:border-accent text-[14px] resize-none"
             placeholder="Motivo del ajuste..."
           />
         </div>

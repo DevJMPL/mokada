@@ -545,7 +545,7 @@ export const CustomerBranchFormModal = ({
               maxLength={240}
               onChange={(event) => setForm((current) => ({ ...current, location_references: event.target.value }))}
               rows={3}
-              className="w-full min-w-0 rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/15"
+              className="w-full min-w-0 rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-accent focus:ring-4 focus:ring-accent/15"
             />
           </label>
         </div>
@@ -729,7 +729,7 @@ const TextInput = ({
       disabled={disabled}
       readOnly={readOnly}
       onChange={(event) => onChange(event.target.value)}
-      className="h-10 w-full min-w-0 rounded-lg border border-gray-300 px-3 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/15 disabled:bg-gray-50 disabled:text-muted read-only:bg-gray-50 read-only:text-muted"
+      className="h-10 w-full min-w-0 rounded-lg border border-gray-300 px-3 text-sm outline-none focus:border-accent focus:ring-4 focus:ring-accent/15 disabled:bg-gray-50 disabled:text-muted read-only:bg-gray-50 read-only:text-muted"
     />
   </label>
 );
@@ -755,7 +755,7 @@ const SelectInput = ({
       value={value}
       disabled={disabled}
       onChange={(event) => onChange(event.target.value)}
-      className="h-10 w-full min-w-0 rounded-lg border border-gray-300 bg-white px-3 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/15 disabled:bg-gray-50 disabled:text-muted"
+      className="h-10 w-full min-w-0 rounded-lg border border-gray-300 bg-white px-3 text-sm outline-none focus:border-accent focus:ring-4 focus:ring-accent/15 disabled:bg-gray-50 disabled:text-muted"
     >
       {placeholder && (
         <option value="" disabled>

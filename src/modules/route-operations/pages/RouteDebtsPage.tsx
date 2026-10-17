@@ -446,7 +446,7 @@ export const RouteDebtsPage = () => {
                   required
                   value={paymentAmount}
                   onChange={(e) => setPaymentAmount(e.target.value)}
-                  className="pl-8 w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-sm font-semibold text-ink"
+                  className="pl-8 w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-4 focus:ring-accent/15 focus:border-accent text-sm font-semibold text-ink"
                 />
               </div>
               <p className="text-xs text-gray-500 mt-1">

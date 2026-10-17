@@ -868,7 +868,7 @@ const FiscalFormModal = ({
                   };
                 })
               }
-              className="h-10 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/15"
+              className="h-10 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm outline-none focus:border-accent focus:ring-4 focus:ring-accent/15"
             >
               <option value="INDIVIDUAL">Persona física</option>
               <option value="LEGAL_ENTITY">Persona moral</option>
@@ -943,7 +943,7 @@ const FiscalFormModal = ({
                   value={form.billing_neighborhood || ''}
                   disabled={billingNeighborhoods.length === 1}
                   onChange={(event) => setForm((current) => ({ ...current, billing_neighborhood: event.target.value }))}
-                  className="h-10 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/15 disabled:bg-gray-50 disabled:text-muted"
+                  className="h-10 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm outline-none focus:border-accent focus:ring-4 focus:ring-accent/15 disabled:bg-gray-50 disabled:text-muted"
                 >
                   {billingNeighborhoods.map((neighborhood) => (
                     <option key={neighborhood} value={neighborhood}>
@@ -1155,7 +1155,7 @@ const TextInput = ({
       inputMode={inputMode}
       disabled={disabled}
       onChange={(event) => onChange(event.target.value)}
-      className="h-10 w-full min-w-0 rounded-lg border border-gray-300 px-3 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/15 disabled:bg-gray-50 disabled:text-muted"
+      className="h-10 w-full min-w-0 rounded-lg border border-gray-300 px-3 text-sm outline-none focus:border-accent focus:ring-4 focus:ring-accent/15 disabled:bg-gray-50 disabled:text-muted"
     />
   </label>
 );

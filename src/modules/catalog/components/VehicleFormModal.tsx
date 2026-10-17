@@ -96,7 +96,7 @@ export const VehicleFormModal = ({ isOpen, onClose, vehicle }: Props) => {
           <select
             value={watch('make_id')}
             onChange={handleMakeChange}
-            className="w-full px-3 py-2 bg-white border border-gray-200/60 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-[14px] text-ink"
+            className="w-full px-3 py-2 bg-white border border-gray-200/60 rounded-lg focus:outline-none focus:ring-4 focus:ring-accent/15 focus:border-accent text-[14px] text-ink"
             required
           >
             <option value="">Seleccione una marca</option>
@@ -113,7 +113,7 @@ export const VehicleFormModal = ({ isOpen, onClose, vehicle }: Props) => {
             <input
               type="text"
               {...register('new_make_name', { required: isCreatingMake ? 'El nombre de la marca es requerido' : false })}
-              className="w-full px-3 py-2 bg-white border border-gray-200/60 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-[14px]"
+              className="w-full px-3 py-2 bg-white border border-gray-200/60 rounded-lg focus:outline-none focus:ring-4 focus:ring-accent/15 focus:border-accent text-[14px]"
               placeholder="Ej: Toyota"
             />
             {errors.new_make_name && <p className="text-red-500 text-xs mt-1">{errors.new_make_name.message?.toString()}</p>}
@@ -125,7 +125,7 @@ export const VehicleFormModal = ({ isOpen, onClose, vehicle }: Props) => {
           <input
             type="text"
             {...register('name', { required: 'El modelo es obligatorio' })}
-            className="w-full px-3 py-2 bg-white border border-gray-200/60 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-[14px]"
+            className="w-full px-3 py-2 bg-white border border-gray-200/60 rounded-lg focus:outline-none focus:ring-4 focus:ring-accent/15 focus:border-accent text-[14px]"
             placeholder="Ej: Corolla"
           />
           {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name.message?.toString()}</p>}
@@ -136,7 +136,7 @@ export const VehicleFormModal = ({ isOpen, onClose, vehicle }: Props) => {
           <input
             type="text"
             {...register('generation')}
-            className="w-full px-3 py-2 bg-white border border-gray-200/60 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-[14px]"
+            className="w-full px-3 py-2 bg-white border border-gray-200/60 rounded-lg focus:outline-none focus:ring-4 focus:ring-accent/15 focus:border-accent text-[14px]"
             placeholder="Ej: 2014-2019, Mk7, etc. (Opcional)"
           />
         </div>

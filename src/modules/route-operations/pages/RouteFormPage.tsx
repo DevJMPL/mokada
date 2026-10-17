@@ -176,7 +176,7 @@ export const RouteFormPage = () => {
             <select
               value={form.agent_id}
               onChange={(event) => setForm((current) => ({ ...current, agent_id: event.target.value }))}
-              className="h-10 w-full min-w-0 rounded-lg border border-gray-200 bg-white px-3 text-[14px] outline-none focus:border-accent focus:ring-1 focus:ring-accent"
+              className="h-10 w-full min-w-0 rounded-lg border border-gray-200 bg-white px-3 text-[14px] outline-none focus:border-accent focus:ring-4 focus:ring-accent/15"
             >
               <option value="">Sin vendedor asignado (Global)</option>
               {agents.map((agent) => (
@@ -193,7 +193,7 @@ export const RouteFormPage = () => {
               maxLength={240}
               onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))}
               rows={2}
-              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-[14px] outline-none focus:border-accent focus:ring-1 focus:ring-accent"
+              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-[14px] outline-none focus:border-accent focus:ring-4 focus:ring-accent/15"
             />
           </label>
           <div>
@@ -418,7 +418,7 @@ const TextInput = ({
       step={step}
       maxLength={maxLength}
       onChange={(event) => onChange(event.target.value)}
-      className="h-10 w-full min-w-0 rounded-lg border border-gray-200 px-3 text-[14px] outline-none focus:border-accent focus:ring-1 focus:ring-accent"
+      className="h-10 w-full min-w-0 rounded-lg border border-gray-200 px-3 text-[14px] outline-none focus:border-accent focus:ring-4 focus:ring-accent/15"
     />
   </label>
 );

@@ -63,7 +63,7 @@ export const ProductsPage = () => {
             <input 
               type="text" 
               placeholder="Buscar por código o nombre..." 
-              className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200/60 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-[14px] transition shadow-sm"
+              className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200/60 rounded-xl focus:outline-none focus:ring-4 focus:ring-accent/15 focus:border-accent text-[14px] transition shadow-sm"
               value={search}
               onChange={(e) => {
                 setSearch(e.target.value);
@@ -138,21 +138,21 @@ export const ProductsPage = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {[...Array(8)].map((_, i) => (
             <div key={i} className="bg-white border border-gray-200/60 rounded-[24px] overflow-hidden shadow-sm flex flex-col">
-              <div className="relative aspect-[4/3] bg-gray-100 border-b border-gray-50 animate-pulse" />
+              <div className="relative aspect-[4/3] bg-gray-100 border-b border-gray-50 skeleton" />
               <div className="p-4 flex-1 flex flex-col gap-3">
                 <div className="flex items-center justify-between">
-                  <div className="h-4 w-20 bg-gray-200 rounded animate-pulse" />
-                  <div className="h-5 w-16 bg-gray-200 rounded-full animate-pulse" />
+                  <div className="h-4 w-20 bg-gray-200 rounded skeleton" />
+                  <div className="h-5 w-16 bg-gray-200 rounded-full skeleton" />
                 </div>
-                <div className="h-4 w-full bg-gray-200 rounded animate-pulse" />
-                <div className="h-4 w-2/3 bg-gray-200 rounded animate-pulse mb-auto" />
+                <div className="h-4 w-full bg-gray-200 rounded skeleton" />
+                <div className="h-4 w-2/3 bg-gray-200 rounded skeleton mb-auto" />
                 <div className="flex gap-2 pt-2">
-                  <div className="h-5 w-16 bg-gray-200 rounded-md animate-pulse" />
-                  <div className="h-5 w-20 bg-gray-200 rounded-md animate-pulse" />
+                  <div className="h-5 w-16 bg-gray-200 rounded-md skeleton" />
+                  <div className="h-5 w-20 bg-gray-200 rounded-md skeleton" />
                 </div>
                 <div className="flex items-center justify-between border-t border-gray-100 pt-3 mt-1">
-                  <div className="h-3 w-20 bg-gray-200 rounded animate-pulse" />
-                  <div className="h-5 w-24 bg-gray-200 rounded animate-pulse" />
+                  <div className="h-3 w-20 bg-gray-200 rounded skeleton" />
+                  <div className="h-5 w-24 bg-gray-200 rounded skeleton" />
                 </div>
               </div>
             </div>
@@ -177,7 +177,7 @@ export const ProductsPage = () => {
               <div 
                 key={item.id}
                 onClick={() => isAdmin ? navigate(`/catalog/products/${item.id}`) : undefined}
-                className={`group bg-white border border-gray-200/60 rounded-[24px] overflow-hidden shadow-sm flex flex-col ${isAdmin ? 'hover:shadow-xl hover:-translate-y-1 transition duration-300 cursor-pointer' : ''}`}
+                className={`group bg-white border border-gray-200/60 rounded-[24px] overflow-hidden shadow-sm flex flex-col ${isAdmin ? 'hover-lift cursor-pointer' : ''}`}
               >
                 {/* Image Section */}
                 <div className="relative aspect-[4/3] bg-white border-b border-gray-100 flex items-center justify-center overflow-hidden p-3">

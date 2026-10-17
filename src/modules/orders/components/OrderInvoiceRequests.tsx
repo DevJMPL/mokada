@@ -237,7 +237,7 @@ const NewInvoiceRequestModal = ({ isOpen, onClose, order, availableItems }: { is
                     }}
                     placeholder="0"
                     disabled={item.available_quantity === 0}
-                    className="w-20 px-2 py-1 text-sm border border-gray-200 rounded focus:border-accent focus:ring-1 focus:ring-accent disabled:opacity-50 disabled:bg-gray-50"
+                    className="w-20 px-2 py-1 text-sm border border-gray-200 rounded focus:border-accent focus:ring-4 focus:ring-accent/15 disabled:opacity-50 disabled:bg-gray-50"
                   />
                 </div>
               </div>

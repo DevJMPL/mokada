@@ -134,7 +134,7 @@ const PasswordField = ({ label, value, onChange, autoComplete }: PasswordFieldPr
         type="password"
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="h-11 w-full rounded-lg border border-gray-300 px-3 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/15"
+        className="h-11 w-full rounded-lg border border-gray-300 px-3 text-sm outline-none focus:border-accent focus:ring-4 focus:ring-accent/15"
         autoComplete={autoComplete}
         required
       />

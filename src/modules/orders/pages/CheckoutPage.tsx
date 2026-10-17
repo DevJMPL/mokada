@@ -313,7 +313,7 @@ export const CheckoutPage = () => {
                   value={selectedBranchId}
                   onChange={(e) => setSelectedBranchId(e.target.value)}
                   disabled={!selectedCustomerId || branches.length === 0}
-                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition disabled:opacity-50"
+                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-accent/15 focus:border-accent transition disabled:opacity-50"
                 >
                   <option value="">
                     {!selectedCustomerId 

@@ -43,7 +43,7 @@ export const ProductInventoryTab = ({ warehouses }: Props) => {
                       step="0.01"
                       min="0"
                       {...register(`inventory.${index}.minimum_stock`, { valueAsNumber: true })}
-                      className="w-full px-3 py-1.5 bg-white border border-gray-200/60 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-[14px] transition"
+                      className="w-full px-3 py-1.5 bg-white border border-gray-200/60 rounded-lg focus:outline-none focus:ring-4 focus:ring-accent/15 focus:border-accent text-[14px] transition"
                       placeholder="0"
                     />
                   </td>
@@ -53,7 +53,7 @@ export const ProductInventoryTab = ({ warehouses }: Props) => {
                       step="0.01"
                       min="0"
                       {...register(`inventory.${index}.maximum_stock`, { valueAsNumber: true })}
-                      className="w-full px-3 py-1.5 bg-white border border-gray-200/60 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-[14px] transition"
+                      className="w-full px-3 py-1.5 bg-white border border-gray-200/60 rounded-lg focus:outline-none focus:ring-4 focus:ring-accent/15 focus:border-accent text-[14px] transition"
                       placeholder="Ilimitado"
                     />
                   </td>

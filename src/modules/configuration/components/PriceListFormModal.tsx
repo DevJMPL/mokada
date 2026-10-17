@@ -74,7 +74,7 @@ export const PriceListFormModal = ({ isOpen, onClose, priceList }: PriceListForm
             type="text"
             {...register('code', { required: 'El código es obligatorio' })}
             placeholder="Ej: MAYOREO, DISTRIBUIDOR"
-            className="w-full px-3 py-2 bg-gray-50 border border-transparent rounded-lg focus:bg-white focus:border-accent focus:ring-1 focus:ring-accent text-[14px] transition"
+            className="w-full px-3 py-2 bg-gray-50 border border-transparent rounded-lg focus:bg-white focus:border-accent focus:ring-4 focus:ring-accent/15 text-[14px] transition"
             disabled={isPending}
           />
           {errors.code && <p className="text-red-500 text-xs mt-1">{errors.code.message?.toString()}</p>}
@@ -86,7 +86,7 @@ export const PriceListFormModal = ({ isOpen, onClose, priceList }: PriceListForm
             type="text"
             {...register('name', { required: 'El nombre es obligatorio' })}
             placeholder="Ej: Lista Mayoreo"
-            className="w-full px-3 py-2 bg-gray-50 border border-transparent rounded-lg focus:bg-white focus:border-accent focus:ring-1 focus:ring-accent text-[14px] transition"
+            className="w-full px-3 py-2 bg-gray-50 border border-transparent rounded-lg focus:bg-white focus:border-accent focus:ring-4 focus:ring-accent/15 text-[14px] transition"
             disabled={isPending}
           />
           {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name.message?.toString()}</p>}
@@ -104,7 +104,7 @@ export const PriceListFormModal = ({ isOpen, onClose, priceList }: PriceListForm
                 max: { value: 100, message: 'Máximo 100%' }
               })}
               placeholder="0.00"
-              className="w-full px-3 py-2 bg-gray-50 border border-transparent rounded-lg focus:bg-white focus:border-accent focus:ring-1 focus:ring-accent text-[14px] transition"
+              className="w-full px-3 py-2 bg-gray-50 border border-transparent rounded-lg focus:bg-white focus:border-accent focus:ring-4 focus:ring-accent/15 text-[14px] transition"
               disabled={isPending}
             />
             {errors.discount_percentage && <p className="text-red-500 text-xs mt-1">{errors.discount_percentage.message?.toString()}</p>}
@@ -114,7 +114,7 @@ export const PriceListFormModal = ({ isOpen, onClose, priceList }: PriceListForm
             <label className="block text-[13px] font-medium text-ink mb-1.5">Moneda *</label>
             <select
               {...register('currency')}
-              className="w-full px-3 py-2 bg-gray-50 border border-transparent rounded-lg focus:bg-white focus:border-accent focus:ring-1 focus:ring-accent text-[14px] transition"
+              className="w-full px-3 py-2 bg-gray-50 border border-transparent rounded-lg focus:bg-white focus:border-accent focus:ring-4 focus:ring-accent/15 text-[14px] transition"
               disabled={isPending}
             >
               <option value="MXN">MXN - Pesos</option>

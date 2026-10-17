@@ -108,7 +108,7 @@ export const WarrantyOrdersPage = () => {
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
           <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-          <input value={search} onChange={event => setSearch(event.target.value)} placeholder="Buscar cliente, producto o folio..." className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200/60 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-[14px] shadow-sm" />
+          <input value={search} onChange={event => setSearch(event.target.value)} placeholder="Buscar cliente, producto o folio..." className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200/60 rounded-xl focus:outline-none focus:ring-4 focus:ring-accent/15 focus:border-accent text-[14px] shadow-sm" />
         </div>
         <select value={statusFilter} onChange={event => setStatusFilter(event.target.value as 'ALL' | WarrantyStatus)} className="px-4 py-2.5 bg-white border border-gray-200/60 rounded-xl text-[14px] font-medium text-ink shadow-sm">
           <option value="ALL">Todos los estados</option>

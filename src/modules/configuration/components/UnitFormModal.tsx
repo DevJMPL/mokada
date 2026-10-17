@@ -67,7 +67,7 @@ export const UnitFormModal = ({ isOpen, onClose, unit }: UnitFormModalProps) => 
             type="text"
             {...register('code', { required: 'El código es obligatorio' })}
             placeholder="Ej: PZA, KG, LTS"
-            className="w-full px-3 py-2 bg-gray-50 border border-transparent rounded-lg focus:bg-white focus:border-accent focus:ring-1 focus:ring-accent text-[14px] transition"
+            className="w-full px-3 py-2 bg-gray-50 border border-transparent rounded-lg focus:bg-white focus:border-accent focus:ring-4 focus:ring-accent/15 text-[14px] transition"
             disabled={isPending}
           />
           {errors.code && <p className="text-red-500 text-xs mt-1">{errors.code.message?.toString()}</p>}
@@ -79,7 +79,7 @@ export const UnitFormModal = ({ isOpen, onClose, unit }: UnitFormModalProps) => 
             type="text"
             {...register('name', { required: 'El nombre es obligatorio' })}
             placeholder="Ej: Pieza, Kilogramo"
-            className="w-full px-3 py-2 bg-gray-50 border border-transparent rounded-lg focus:bg-white focus:border-accent focus:ring-1 focus:ring-accent text-[14px] transition"
+            className="w-full px-3 py-2 bg-gray-50 border border-transparent rounded-lg focus:bg-white focus:border-accent focus:ring-4 focus:ring-accent/15 text-[14px] transition"
             disabled={isPending}
           />
           {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name.message?.toString()}</p>}

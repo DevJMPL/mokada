@@ -55,7 +55,7 @@ export const ProductPricesTab = ({ priceLists }: Props) => {
                         setValueAs: value => value === '' ? null : Number(value),
                         validate: value => value == null || (Number.isFinite(value) && value > 0) || 'Captura un precio mayor que cero'
                       })}
-                      className="w-full px-3 py-1.5 bg-white border border-gray-200/60 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-[14px] transition"
+                      className="w-full px-3 py-1.5 bg-white border border-gray-200/60 rounded-lg focus:outline-none focus:ring-4 focus:ring-accent/15 focus:border-accent text-[14px] transition"
                       placeholder="Sin precio"
                     />}
                     {(errors.prices as any)?.[index]?.amount && <p className="text-xs text-red-600 mt-1">El precio debe ser mayor que cero.</p>}

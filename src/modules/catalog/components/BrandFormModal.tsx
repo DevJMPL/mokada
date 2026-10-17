@@ -54,7 +54,7 @@ export const BrandFormModal = ({ isOpen, onClose, brand }: Props) => {
           <input
             type="text"
             {...register('code')}
-            className="w-full px-3 py-2 bg-white border border-gray-200/60 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-[14px]"
+            className="w-full px-3 py-2 bg-white border border-gray-200/60 rounded-lg focus:outline-none focus:ring-4 focus:ring-accent/15 focus:border-accent text-[14px]"
             placeholder="Opcional"
           />
         </div>
@@ -64,7 +64,7 @@ export const BrandFormModal = ({ isOpen, onClose, brand }: Props) => {
           <input
             type="text"
             {...register('name', { required: 'El nombre es obligatorio' })}
-            className="w-full px-3 py-2 bg-white border border-gray-200/60 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-[14px]"
+            className="w-full px-3 py-2 bg-white border border-gray-200/60 rounded-lg focus:outline-none focus:ring-4 focus:ring-accent/15 focus:border-accent text-[14px]"
             placeholder="Ej: Bosch"
           />
           {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name.message?.toString()}</p>}

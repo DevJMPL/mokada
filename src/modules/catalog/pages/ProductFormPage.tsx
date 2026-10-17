@@ -170,26 +170,26 @@ export const ProductFormPage = () => {
       <div className="flex flex-col lg:flex-row min-h-[calc(100vh-theme(spacing.16))] -m-4 md:-m-6 lg:-m-8">
         {/* Left Column Skeleton */}
         <div className="w-full lg:w-[45%] bg-canvas flex flex-col p-6 md:p-8 lg:p-12 border-b lg:border-b-0 lg:border-r border-gray-200/60 lg:sticky lg:top-0 lg:h-[calc(100vh-theme(spacing.16))]">
-          <div className="mb-8 h-4 w-32 bg-gray-200 rounded animate-pulse" />
+          <div className="mb-8 h-4 w-32 bg-gray-200 rounded skeleton" />
           <div className="flex-1 flex items-center justify-center relative">
-            <div className="w-full max-w-[420px] aspect-square bg-gray-200 rounded-2xl animate-pulse" />
+            <div className="w-full max-w-[420px] aspect-square bg-gray-200 rounded-2xl skeleton" />
           </div>
         </div>
         {/* Right Column Skeleton */}
         <div className="flex-1 flex flex-col bg-white">
           <div className="flex-1 p-6 md:p-8 lg:p-12 overflow-y-auto">
             <div className="mb-8">
-              <div className="h-8 w-64 bg-gray-200 rounded animate-pulse mb-3" />
-              <div className="h-4 w-96 bg-gray-200 rounded animate-pulse" />
+              <div className="h-8 w-64 bg-gray-200 rounded skeleton mb-3" />
+              <div className="h-4 w-96 bg-gray-200 rounded skeleton" />
             </div>
             <div className="flex space-x-2 mb-8">
-              <div className="h-10 flex-1 bg-gray-200 rounded-lg animate-pulse max-w-2xl" />
+              <div className="h-10 flex-1 bg-gray-200 rounded-lg skeleton max-w-2xl" />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-x-8 md:gap-y-6">
               {[...Array(6)].map((_, i) => (
                 <div key={i} className={i === 2 || i === 5 ? "md:col-span-2" : ""}>
-                  <div className="h-4 w-24 bg-gray-200 rounded animate-pulse mb-2" />
-                  <div className={`w-full bg-gray-200 rounded-lg animate-pulse ${i === 5 ? "h-24" : "h-10"}`} />
+                  <div className="h-4 w-24 bg-gray-200 rounded skeleton mb-2" />
+                  <div className={`w-full bg-gray-200 rounded-lg skeleton ${i === 5 ? "h-24" : "h-10"}`} />
                 </div>
               ))}
             </div>

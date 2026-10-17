@@ -435,7 +435,7 @@ export const MyRoutePage = () => {
         <form onSubmit={handleSaveExpense} className="space-y-4">
           <div>
             <label className="block text-[13px] font-medium text-ink mb-1">Categoría *</label>
-            <select value={form.expense_category_id} onChange={e => setForm({ ...form, expense_category_id: e.target.value })} required className="w-full rounded-lg border border-gray-200 px-3 py-2 text-[14px] focus:border-accent focus:ring-1 focus:ring-accent outline-none bg-white">
+            <select value={form.expense_category_id} onChange={e => setForm({ ...form, expense_category_id: e.target.value })} required className="w-full rounded-lg border border-gray-200 px-3 py-2 text-[14px] focus:border-accent focus:ring-4 focus:ring-accent/15 outline-none bg-white">
               <option value="">Seleccionar</option>
               {categories?.map((c: any) => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
@@ -443,25 +443,25 @@ export const MyRoutePage = () => {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-[13px] font-medium text-ink mb-1">Monto (MXN) *</label>
-              <input type="number" value={form.amount || ''} onChange={e => setForm({ ...form, amount: Number(e.target.value) })} min={0.01} step="0.01" required className="w-full rounded-lg border border-gray-200 px-3 py-2 text-[14px] focus:border-accent focus:ring-1 focus:ring-accent outline-none" />
+              <input type="number" value={form.amount || ''} onChange={e => setForm({ ...form, amount: Number(e.target.value) })} min={0.01} step="0.01" required className="w-full rounded-lg border border-gray-200 px-3 py-2 text-[14px] focus:border-accent focus:ring-4 focus:ring-accent/15 outline-none" />
             </div>
             <div>
               <label className="block text-[13px] font-medium text-ink mb-1">Fecha *</label>
-              <input type="date" value={form.expense_date} onChange={e => setForm({ ...form, expense_date: e.target.value })} required className="w-full rounded-lg border border-gray-200 px-3 py-2 text-[14px] focus:border-accent focus:ring-1 focus:ring-accent outline-none" />
+              <input type="date" value={form.expense_date} onChange={e => setForm({ ...form, expense_date: e.target.value })} required className="w-full rounded-lg border border-gray-200 px-3 py-2 text-[14px] focus:border-accent focus:ring-4 focus:ring-accent/15 outline-none" />
             </div>
           </div>
           <div>
             <label className="block text-[13px] font-medium text-ink mb-1">Lugar</label>
-            <input value={form.place_name} onChange={e => setForm({ ...form, place_name: e.target.value })} placeholder="Ej. Gasolinera Pemex Querétaro" className="w-full rounded-lg border border-gray-200 px-3 py-2 text-[14px] focus:border-accent focus:ring-1 focus:ring-accent outline-none" />
+            <input value={form.place_name} onChange={e => setForm({ ...form, place_name: e.target.value })} placeholder="Ej. Gasolinera Pemex Querétaro" className="w-full rounded-lg border border-gray-200 px-3 py-2 text-[14px] focus:border-accent focus:ring-4 focus:ring-accent/15 outline-none" />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-[13px] font-medium text-ink mb-1">Ciudad</label>
-              <input value={form.city} onChange={e => setForm({ ...form, city: e.target.value })} className="w-full rounded-lg border border-gray-200 px-3 py-2 text-[14px] focus:border-accent focus:ring-1 focus:ring-accent outline-none" />
+              <input value={form.city} onChange={e => setForm({ ...form, city: e.target.value })} className="w-full rounded-lg border border-gray-200 px-3 py-2 text-[14px] focus:border-accent focus:ring-4 focus:ring-accent/15 outline-none" />
             </div>
             <div>
               <label className="block text-[13px] font-medium text-ink mb-1">Estado</label>
-              <select value={form.state} onChange={e => setForm({ ...form, state: e.target.value })} className="w-full rounded-lg border border-gray-200 px-3 py-2 text-[14px] focus:border-accent focus:ring-1 focus:ring-accent outline-none bg-white">
+              <select value={form.state} onChange={e => setForm({ ...form, state: e.target.value })} className="w-full rounded-lg border border-gray-200 px-3 py-2 text-[14px] focus:border-accent focus:ring-4 focus:ring-accent/15 outline-none bg-white">
                 <option value="">Seleccionar</option>
                 <option value="Aguascalientes">Aguascalientes</option>
                 <option value="Baja California">Baja California</option>
@@ -500,11 +500,11 @@ export const MyRoutePage = () => {
           </div>
           <div>
             <label className="block text-[13px] font-medium text-ink mb-1">Descripción</label>
-            <textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} rows={2} className="w-full rounded-lg border border-gray-200 px-3 py-2 text-[14px] focus:border-accent focus:ring-1 focus:ring-accent outline-none resize-none" />
+            <textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} rows={2} className="w-full rounded-lg border border-gray-200 px-3 py-2 text-[14px] focus:border-accent focus:ring-4 focus:ring-accent/15 outline-none resize-none" />
           </div>
           <div>
             <label className="block text-[13px] font-medium text-ink mb-1">Comercio / Proveedor</label>
-            <input value={form.merchant_name} onChange={e => setForm({ ...form, merchant_name: e.target.value })} className="w-full rounded-lg border border-gray-200 px-3 py-2 text-[14px] focus:border-accent focus:ring-1 focus:ring-accent outline-none" />
+            <input value={form.merchant_name} onChange={e => setForm({ ...form, merchant_name: e.target.value })} className="w-full rounded-lg border border-gray-200 px-3 py-2 text-[14px] focus:border-accent focus:ring-4 focus:ring-accent/15 outline-none" />
           </div>
           <div>
             <label className="block text-[13px] font-medium text-ink mb-1">Evidencia (recibo/foto)</label>

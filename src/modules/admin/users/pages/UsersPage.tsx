@@ -349,23 +349,23 @@ export const UsersPage = () => {
       <div className="space-y-6">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
           <div className="space-y-2">
-            <div className="h-8 w-32 animate-pulse rounded-lg bg-gray-200" />
-            <div className="h-4 w-64 animate-pulse rounded-lg bg-gray-200" />
+            <div className="h-8 w-32 skeleton rounded-lg bg-gray-200" />
+            <div className="h-4 w-64 skeleton rounded-lg bg-gray-200" />
           </div>
-          <div className="h-10 w-36 animate-pulse rounded-lg bg-gray-200" />
+          <div className="h-10 w-36 skeleton rounded-lg bg-gray-200" />
         </div>
         
         <div className="flex flex-col gap-3 sm:flex-row">
-          <div className="h-11 w-full flex-1 animate-pulse rounded-lg bg-gray-200" />
-          <div className="h-11 w-full sm:w-40 animate-pulse rounded-lg bg-gray-200" />
-          <div className="h-11 w-full sm:w-40 animate-pulse rounded-lg bg-gray-200" />
+          <div className="h-11 w-full flex-1 skeleton rounded-lg bg-gray-200" />
+          <div className="h-11 w-full sm:w-40 skeleton rounded-lg bg-gray-200" />
+          <div className="h-11 w-full sm:w-40 skeleton rounded-lg bg-gray-200" />
         </div>
 
         <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
           <div className="border-b border-gray-200 bg-gray-50/50 p-4">
             <div className="flex justify-between gap-4">
               {[...Array(5)].map((_, i) => (
-                <div key={i} className="h-4 w-24 animate-pulse rounded bg-gray-200" />
+                <div key={i} className="h-4 w-24 skeleton rounded bg-gray-200" />
               ))}
             </div>
           </div>
@@ -373,15 +373,15 @@ export const UsersPage = () => {
             {[...Array(5)].map((_, i) => (
               <div key={i} className="flex items-center justify-between gap-4 p-4">
                 <div className="flex items-center gap-4">
-                  <div className="h-10 w-10 shrink-0 animate-pulse rounded-full bg-gray-200" />
+                  <div className="h-10 w-10 shrink-0 skeleton rounded-full bg-gray-200" />
                   <div className="space-y-2">
-                    <div className="h-4 w-32 animate-pulse rounded bg-gray-200" />
-                    <div className="h-3 w-24 animate-pulse rounded bg-gray-200" />
+                    <div className="h-4 w-32 skeleton rounded bg-gray-200" />
+                    <div className="h-3 w-24 skeleton rounded bg-gray-200" />
                   </div>
                 </div>
-                <div className="h-6 w-20 animate-pulse rounded-full bg-gray-200" />
-                <div className="hidden h-4 w-24 animate-pulse rounded bg-gray-200 md:block" />
-                <div className="hidden h-8 w-8 animate-pulse rounded-lg bg-gray-200 sm:block" />
+                <div className="h-6 w-20 skeleton rounded-full bg-gray-200" />
+                <div className="hidden h-4 w-24 skeleton rounded bg-gray-200 md:block" />
+                <div className="hidden h-8 w-8 skeleton rounded-lg bg-gray-200 sm:block" />
               </div>
             ))}
           </div>
@@ -428,7 +428,7 @@ export const UsersPage = () => {
         <select
           value={typeFilter}
           onChange={(event) => setTypeFilter(event.target.value as UserType | 'ALL')}
-          className="h-11 rounded-lg border border-gray-300 bg-white px-3 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/15"
+          className="h-11 rounded-lg border border-gray-300 bg-white px-3 text-sm outline-none focus:border-accent focus:ring-4 focus:ring-accent/15"
         >
           <option value="ALL">Todos los tipos</option>
           <option value="CUSTOMER">Clientes</option>
@@ -438,7 +438,7 @@ export const UsersPage = () => {
         <select
           value={statusFilter}
           onChange={(event) => setStatusFilter(event.target.value as 'ALL' | 'ACTIVE' | 'INACTIVE')}
-          className="h-11 rounded-lg border border-gray-300 bg-white px-3 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/15"
+          className="h-11 rounded-lg border border-gray-300 bg-white px-3 text-sm outline-none focus:border-accent focus:ring-4 focus:ring-accent/15"
         >
           <option value="ALL">Todos los estados</option>
           <option value="ACTIVE">Activos</option>
@@ -588,7 +588,7 @@ const formatAgentFunctions = (functions: AgentFunction[] | null | undefined) => 
 const UserIdentity = ({ user, onAvatarClick }: { user: ManagedUserProfile; onAvatarClick: () => void }) => {
   return (
     <div className="flex min-w-0 items-center gap-2.5 sm:min-w-[220px] sm:gap-3">
-      <button type="button" onClick={onAvatarClick} className="rounded-full focus:outline-none focus:ring-2 focus:ring-accent/30">
+      <button type="button" onClick={onAvatarClick} className="rounded-full focus:outline-none focus:ring-4 focus:ring-accent/15">
         <UserAvatar
           firstName={user.first_name}
           lastName={user.last_name}
@@ -894,10 +894,10 @@ const UserFormDialog = ({
   onDocumentPreview,
 }: UserFormDialogProps) => {
   return (
-    <div className="fixed inset-0 z-50 flex items-stretch justify-center overflow-x-hidden bg-black/30 p-0 sm:items-center sm:px-4 sm:py-6">
+    <div className="fixed inset-0 z-50 flex items-stretch justify-center overflow-x-hidden bg-black/30 p-0 backdrop-blur-[6px] animate-fade-in sm:items-center sm:px-4 sm:py-6">
       <form
         onSubmit={onSubmit}
-        className="flex h-[100dvh] w-full max-w-full flex-col overflow-hidden bg-white shadow-xl sm:h-auto sm:max-h-[calc(100vh-1.5rem)] sm:max-w-4xl sm:rounded-lg sm:border sm:border-gray-200"
+        className="flex h-[100dvh] w-full max-w-full flex-col overflow-hidden bg-white shadow-xl sm:h-auto sm:max-h-[calc(100vh-1.5rem)] sm:max-w-4xl sm:rounded-3xl sm:ring-1 sm:ring-black/5 sm:animate-pop-in"
       >
         <div className="flex items-center justify-between border-b border-gray-200 bg-white px-3 py-3 sm:px-6 sm:py-4">
           <div className="flex min-w-0 items-center gap-3">
@@ -990,7 +990,7 @@ const UserFormDialog = ({
                 <select
                   value={form.user_type}
                   onChange={(event) => onUserTypeChange(event.target.value as UserType)}
-                  className="h-10 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/15 sm:h-11"
+                  className="h-10 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm outline-none focus:border-accent focus:ring-4 focus:ring-accent/15 sm:h-11"
                 >
                   <option value="AGENT">Agente</option>
                   <option value="ADMIN">Administrador</option>
@@ -1116,7 +1116,7 @@ const AgentFunctionPicker = ({ values, onChange }: AgentFunctionPickerProps) => 
       <button
         type="button"
         onClick={() => setIsOpen((current) => !current)}
-        className={`flex h-10 w-full min-w-0 items-center justify-between gap-2 rounded-lg border bg-white px-3 text-left text-sm outline-none transition-colors hover:bg-gray-50 focus:border-accent focus:ring-2 focus:ring-accent/15 sm:h-11 ${
+        className={`flex h-10 w-full min-w-0 items-center justify-between gap-2 rounded-lg border bg-white px-3 text-left text-sm outline-none transition-colors hover:bg-gray-50 focus:border-accent focus:ring-4 focus:ring-accent/15 sm:h-11 ${
           isOpen ? 'border-accent ring-2 ring-accent/15' : 'border-gray-300'
         }`}
       >
@@ -1188,7 +1188,7 @@ const TextInput = ({
         placeholder={placeholder}
         required={required}
         onChange={(event) => onChange(event.target.value)}
-        className="h-10 w-full min-w-0 rounded-lg border border-gray-300 px-3 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/15 sm:h-11"
+        className="h-10 w-full min-w-0 rounded-lg border border-gray-300 px-3 text-sm outline-none focus:border-accent focus:ring-4 focus:ring-accent/15 sm:h-11"
       />
     </label>
   );
@@ -1231,8 +1231,8 @@ interface MediaViewerProps {
 
 const MediaViewer = ({ preview, onClose }: MediaViewerProps) => {
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/55 px-3 py-4">
-      <div className="flex max-h-[calc(100vh-2rem)] w-full max-w-5xl flex-col overflow-hidden rounded-lg bg-white shadow-2xl">
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/55 px-3 py-4 backdrop-blur-[6px] animate-fade-in">
+      <div className="flex max-h-[calc(100vh-2rem)] w-full max-w-5xl flex-col overflow-hidden rounded-3xl bg-white shadow-2xl animate-pop-in">
         <div className="flex items-center justify-between gap-3 border-b border-gray-200 px-4 py-3">
           <div className="min-w-0">
             <h3 className="truncate text-sm font-semibold text-ink">{preview.title}</h3>

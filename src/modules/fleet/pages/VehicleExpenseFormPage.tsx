@@ -106,7 +106,7 @@ export const VehicleExpenseFormPage = () => {
             </label>
             <select
               {...register('vehicle_id', { required: 'El vehículo es requerido' })}
-              className={`w-full rounded-lg border bg-white px-4 py-2.5 outline-none transition-colors focus:ring-2 focus:ring-accent/20 ${errors.vehicle_id ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-accent'}`}
+              className={`w-full rounded-lg border bg-white px-4 py-2.5 outline-none transition-colors focus:ring-4 focus:ring-accent/15 ${errors.vehicle_id ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-accent'}`}
             >
               <option value="">Selecciona un vehículo...</option>
               {vehicles.map(v => (
@@ -122,7 +122,7 @@ export const VehicleExpenseFormPage = () => {
             </label>
             <select
               {...register('expense_category_id', { required: 'La categoría es requerida' })}
-              className={`w-full rounded-lg border bg-white px-4 py-2.5 outline-none transition-colors focus:ring-2 focus:ring-accent/20 ${errors.expense_category_id ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-accent'}`}
+              className={`w-full rounded-lg border bg-white px-4 py-2.5 outline-none transition-colors focus:ring-4 focus:ring-accent/15 ${errors.expense_category_id ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-accent'}`}
             >
               <option value="">Selecciona una categoría...</option>
               {categories.map(c => (
@@ -141,7 +141,7 @@ export const VehicleExpenseFormPage = () => {
               step="0.01"
               placeholder="0.00"
               {...register('amount', { required: 'El monto es requerido', min: { value: 0.1, message: 'El monto debe ser mayor a 0' } })}
-              className={`w-full rounded-lg border bg-white px-4 py-2.5 outline-none transition-colors focus:ring-2 focus:ring-accent/20 ${errors.amount ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-accent'}`}
+              className={`w-full rounded-lg border bg-white px-4 py-2.5 outline-none transition-colors focus:ring-4 focus:ring-accent/15 ${errors.amount ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-accent'}`}
             />
             {errors.amount && <p className="text-xs text-red-500">{errors.amount.message as string}</p>}
           </div>
@@ -153,7 +153,7 @@ export const VehicleExpenseFormPage = () => {
             <input
               type="date"
               {...register('expense_date', { required: 'La fecha es requerida' })}
-              className={`w-full rounded-lg border bg-white px-4 py-2.5 outline-none transition-colors focus:ring-2 focus:ring-accent/20 ${errors.expense_date ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-accent'}`}
+              className={`w-full rounded-lg border bg-white px-4 py-2.5 outline-none transition-colors focus:ring-4 focus:ring-accent/15 ${errors.expense_date ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-accent'}`}
             />
             {errors.expense_date && <p className="text-xs text-red-500">{errors.expense_date.message as string}</p>}
           </div>
@@ -166,7 +166,7 @@ export const VehicleExpenseFormPage = () => {
               type="text"
               placeholder="Ej. Taller Mecánico Los Hermanos"
               {...register('merchant_name')}
-              className={`w-full rounded-lg border bg-white px-4 py-2.5 outline-none transition-colors focus:ring-2 focus:ring-accent/20 ${errors.merchant_name ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-accent'}`}
+              className={`w-full rounded-lg border bg-white px-4 py-2.5 outline-none transition-colors focus:ring-4 focus:ring-accent/15 ${errors.merchant_name ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-accent'}`}
             />
             {errors.merchant_name && <p className="text-xs text-red-500">{errors.merchant_name.message as string}</p>}
           </div>
@@ -177,7 +177,7 @@ export const VehicleExpenseFormPage = () => {
               {...register('description')}
               rows={3}
               placeholder="Describe el trabajo realizado o las piezas compradas..."
-              className="w-full rounded-lg border border-gray-300 bg-white p-4 outline-none transition-colors focus:border-accent focus:ring-2 focus:ring-accent/20 resize-none"
+              className="w-full rounded-lg border border-gray-300 bg-white p-4 outline-none transition-colors focus:border-accent focus:ring-4 focus:ring-accent/15 resize-none"
             />
           </div>
         </div>

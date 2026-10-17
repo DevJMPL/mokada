@@ -263,7 +263,7 @@ const TextInput = ({ label, value, onChange, autoComplete, required = true }: Te
         required={required}
         autoComplete={autoComplete}
         onChange={(event) => onChange(event.target.value)}
-        className="h-11 w-full rounded-lg border border-gray-300 px-3 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/15"
+        className="h-11 w-full rounded-lg border border-gray-300 px-3 text-sm outline-none focus:border-accent focus:ring-4 focus:ring-accent/15"
       />
     </label>
   );
@@ -313,10 +313,10 @@ const PasswordChangeDialog = ({ onClose, onUpdatePassword }: PasswordChangeDialo
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-stretch justify-center bg-black/40 p-0 sm:items-center sm:p-4">
+    <div className="fixed inset-0 z-50 flex items-stretch justify-center bg-black/30 p-0 backdrop-blur-[6px] animate-fade-in sm:items-center sm:p-4">
       <form
         onSubmit={handleSubmit}
-        className="flex h-[100dvh] w-full max-w-md flex-col overflow-hidden bg-white shadow-2xl sm:h-auto sm:max-h-[calc(100vh-2rem)] sm:rounded-lg"
+        className="flex h-[100dvh] w-full max-w-md flex-col overflow-hidden bg-white shadow-2xl sm:h-auto sm:max-h-[calc(100vh-2rem)] sm:rounded-3xl sm:animate-pop-in"
       >
         <div className="flex items-center justify-between gap-3 border-b border-gray-200 px-4 py-3 sm:px-5 sm:py-4">
           <div className="flex min-w-0 items-center gap-3">
@@ -410,7 +410,7 @@ const PasswordField = ({ label, value, onChange, autoComplete }: PasswordFieldPr
         type="password"
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="h-10 w-full rounded-lg border border-gray-300 px-3 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/15 sm:h-11"
+        className="h-10 w-full rounded-lg border border-gray-300 px-3 text-sm outline-none focus:border-accent focus:ring-4 focus:ring-accent/15 sm:h-11"
         autoComplete={autoComplete}
         required
       />
@@ -425,8 +425,8 @@ interface MediaPreviewDialogProps {
 
 const MediaPreviewDialog = ({ preview, onClose }: MediaPreviewDialogProps) => {
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/55 px-3 py-4">
-      <div className="flex max-h-[calc(100vh-2rem)] w-full max-w-4xl flex-col overflow-hidden rounded-lg bg-white shadow-2xl">
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/55 px-3 py-4 backdrop-blur-[6px] animate-fade-in">
+      <div className="flex max-h-[calc(100vh-2rem)] w-full max-w-4xl flex-col overflow-hidden rounded-3xl bg-white shadow-2xl animate-pop-in">
         <div className="flex items-center justify-between gap-3 border-b border-gray-200 px-4 py-3">
           <div className="min-w-0">
             <h3 className="truncate text-sm font-semibold text-ink">{preview.title}</h3>

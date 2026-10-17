@@ -120,10 +120,10 @@ export const VehicleExpensesPage = () => {
       <div className="space-y-6">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
           <div className="space-y-2">
-            <div className="h-8 w-64 animate-pulse rounded-lg bg-gray-200" />
-            <div className="h-4 w-96 animate-pulse rounded-lg bg-gray-200" />
+            <div className="h-8 w-64 skeleton rounded-lg bg-gray-200" />
+            <div className="h-4 w-96 skeleton rounded-lg bg-gray-200" />
           </div>
-          <div className="h-10 w-48 animate-pulse rounded-lg bg-gray-200" />
+          <div className="h-10 w-48 skeleton rounded-lg bg-gray-200" />
         </div>
         <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
           <div className="p-10 flex justify-center"><div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-accent"></div></div>
@@ -169,7 +169,7 @@ export const VehicleExpensesPage = () => {
         <select
           value={vehicleFilter}
           onChange={(e) => setVehicleFilter(e.target.value)}
-          className="h-11 rounded-lg border border-gray-300 bg-white px-3 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/15"
+          className="h-11 rounded-lg border border-gray-300 bg-white px-3 text-sm outline-none focus:border-accent focus:ring-4 focus:ring-accent/15"
         >
           <option value="ALL">Todos los vehículos</option>
           {vehicles.map(v => (
@@ -180,7 +180,7 @@ export const VehicleExpensesPage = () => {
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="h-11 rounded-lg border border-gray-300 bg-white px-3 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/15"
+          className="h-11 rounded-lg border border-gray-300 bg-white px-3 text-sm outline-none focus:border-accent focus:ring-4 focus:ring-accent/15"
         >
           <option value="ALL">Todos los estados</option>
           <option value="SUBMITTED">Pendientes</option>
@@ -210,7 +210,7 @@ export const VehicleExpensesPage = () => {
             <Link
               key={expense.id}
               to={`/fleet/expenses/${expense.id}`}
-              className="group relative flex flex-col justify-between rounded-2xl border border-gray-200 bg-white p-5 transition duration-300 hover:-translate-y-1 hover:border-transparent hover:shadow-xl"
+              className="group relative flex flex-col justify-between rounded-2xl border border-gray-200 bg-white p-5 hover-lift hover:border-transparent"
             >
               <div>
                 <div className="mb-4 flex items-start justify-between">

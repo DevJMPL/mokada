@@ -421,7 +421,7 @@ export const OrderDetailsAdminPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <div className="flex flex-col">
               <label className="block text-[13px] font-medium text-ink mb-1.5">Almacén de salida</label>
-              <select value={warehouseId} disabled={!!order.inventory_posted_at || order.status === 'CANCELLED'} onChange={e => setWarehouseId(e.target.value)} className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition disabled:opacity-50 text-[14px] text-ink">
+              <select value={warehouseId} disabled={!!order.inventory_posted_at || order.status === 'CANCELLED'} onChange={e => setWarehouseId(e.target.value)} className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-accent/15 focus:border-accent transition disabled:opacity-50 text-[14px] text-ink">
                 <option value="">Selecciona el almacén</option>
                 {warehouses?.filter(w => (w.is_active && w.warehouse_role === 'SALES') || w.id === warehouseId).map(w => <option key={w.id} value={w.id} disabled={w.warehouse_role !== 'SALES'}>{w.name}{w.warehouse_role !== 'SALES' ? ' · no apto para venta' : ''}</option>)}
               </select>
@@ -436,7 +436,7 @@ export const OrderDetailsAdminPage = () => {
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
                 disabled={isShippedOrDelivered}
-                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent disabled:opacity-70 transition text-sm"
+                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-accent/15 focus:border-accent disabled:opacity-70 transition text-sm"
               >
                 {Object.entries(statusConfig).filter(([key]) => key !== 'DELIVERED' || status === 'DELIVERED').map(([key, value]) => (
                   <option key={key} value={key}>{value.label}</option>
@@ -455,7 +455,7 @@ export const OrderDetailsAdminPage = () => {
                   value={estimatedDate}
                   onChange={(e) => setEstimatedDate(e.target.value)}
                   disabled={isShippedOrDelivered}
-                  className="w-full pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent disabled:opacity-70 transition text-sm"
+                  className="w-full pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-accent/15 focus:border-accent disabled:opacity-70 transition text-sm"
                 />
               </div>
             </div>
@@ -468,7 +468,7 @@ export const OrderDetailsAdminPage = () => {
                 value={adminComments}
                 onChange={(e) => setAdminComments(e.target.value)}
                 disabled={isShippedOrDelivered}
-                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent disabled:opacity-70 transition text-sm h-16 resize-none"
+                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-accent/15 focus:border-accent disabled:opacity-70 transition text-sm h-16 resize-none"
                 placeholder="Notas para el cliente..."
               />
             </div>
@@ -735,7 +735,7 @@ export const OrderDetailsAdminPage = () => {
                 required
                 value={paymentAmount}
                 onChange={(e) => setPaymentAmount(e.target.value)}
-                className="pl-8 w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent"
+                className="pl-8 w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-4 focus:ring-accent/15 focus:border-accent"
               />
             </div>
             <p className="text-xs text-gray-500 mt-1">Saldo pendiente: ${Math.max(order.total_amount - (order.amount_paid || 0), 0).toFixed(2)}</p>

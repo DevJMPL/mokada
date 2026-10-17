@@ -66,7 +66,7 @@ export const CategoryFormModal = ({ isOpen, onClose, category }: Props) => {
           <input
             type="text"
             {...register('code')}
-            className="w-full px-3 py-2 bg-white border border-gray-200/60 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-[14px]"
+            className="w-full px-3 py-2 bg-white border border-gray-200/60 rounded-lg focus:outline-none focus:ring-4 focus:ring-accent/15 focus:border-accent text-[14px]"
             placeholder="Opcional"
           />
         </div>
@@ -76,7 +76,7 @@ export const CategoryFormModal = ({ isOpen, onClose, category }: Props) => {
           <input
             type="text"
             {...register('name', { required: 'El nombre es obligatorio' })}
-            className="w-full px-3 py-2 bg-white border border-gray-200/60 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-[14px]"
+            className="w-full px-3 py-2 bg-white border border-gray-200/60 rounded-lg focus:outline-none focus:ring-4 focus:ring-accent/15 focus:border-accent text-[14px]"
             placeholder="Ej: Suspensión"
           />
           {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name.message?.toString()}</p>}
@@ -86,7 +86,7 @@ export const CategoryFormModal = ({ isOpen, onClose, category }: Props) => {
           <label className="block text-[13px] font-medium text-ink mb-1.5">Categoría Padre</label>
           <select
             {...register('parent_id')}
-            className="w-full px-3 py-2 bg-white border border-gray-200/60 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-[14px] text-ink"
+            className="w-full px-3 py-2 bg-white border border-gray-200/60 rounded-lg focus:outline-none focus:ring-4 focus:ring-accent/15 focus:border-accent text-[14px] text-ink"
           >
             <option value="">Ninguna (Categoría Principal)</option>
             {availableParents.map((p: any) => (
@@ -100,7 +100,7 @@ export const CategoryFormModal = ({ isOpen, onClose, category }: Props) => {
           <textarea
             {...register('description')}
             rows={3}
-            className="w-full px-3 py-2 bg-white border border-gray-200/60 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-[14px] resize-y"
+            className="w-full px-3 py-2 bg-white border border-gray-200/60 rounded-lg focus:outline-none focus:ring-4 focus:ring-accent/15 focus:border-accent text-[14px] resize-y"
             placeholder="Opcional"
           />
         </div>

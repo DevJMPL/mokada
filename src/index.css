@@ -225,7 +225,7 @@
   -webkit-backdrop-filter: saturate(180%) blur(20px);
 }
 @utility material-sidebar {
-  background-color: rgb(242 242 245 / 0.82);
+  background-color: rgb(236 236 240 / 0.82);
   backdrop-filter: saturate(160%) blur(24px);
   -webkit-backdrop-filter: saturate(160%) blur(24px);
 }
@@ -363,7 +363,7 @@
     -webkit-backdrop-filter: none;
   }
   .material-sidebar {
-    background-color: #F2F2F5;
+    background-color: #ECECF0;
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
   }

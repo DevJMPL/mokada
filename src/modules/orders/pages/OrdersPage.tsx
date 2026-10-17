@@ -93,7 +93,7 @@ export const OrdersPage = ({ initialPaymentFilter = 'ALL' }: { initialPaymentFil
             <input 
               type="text" 
               placeholder="Buscar por cliente o folio..." 
-              className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200/60 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-[14px] transition shadow-sm"
+              className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200/60 rounded-xl focus:outline-none focus:ring-4 focus:ring-accent/15 focus:border-accent text-[14px] transition shadow-sm"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -103,7 +103,7 @@ export const OrdersPage = ({ initialPaymentFilter = 'ALL' }: { initialPaymentFil
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="appearance-none pl-10 pr-10 py-2 bg-white border border-gray-200/60 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-[14px] font-medium text-ink transition shadow-sm cursor-pointer"
+              className="appearance-none pl-10 pr-10 py-2 bg-white border border-gray-200/60 rounded-xl focus:outline-none focus:ring-4 focus:ring-accent/15 focus:border-accent text-[14px] font-medium text-ink transition shadow-sm cursor-pointer"
             >
               <option value="ALL">Todos los estados</option>
               {Object.entries(statusConfig).map(([key, value]) => (

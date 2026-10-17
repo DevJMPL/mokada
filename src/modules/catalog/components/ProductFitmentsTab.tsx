@@ -60,7 +60,7 @@ export const ProductFitmentsTab = () => {
                     type="number"
                     placeholder="Ej: 2015"
                     {...register(`fitments.${index}.year_from`, { valueAsNumber: true })}
-                    className="w-full px-3 py-1.5 bg-gray-50 border border-transparent rounded-lg focus:bg-white focus:border-accent focus:ring-1 focus:ring-accent text-[14px] transition"
+                    className="w-full px-3 py-1.5 bg-gray-50 border border-transparent rounded-lg focus:bg-white focus:border-accent focus:ring-4 focus:ring-accent/15 text-[14px] transition"
                   />
                 </div>
 
@@ -71,7 +71,7 @@ export const ProductFitmentsTab = () => {
                     type="number"
                     placeholder="Ej: 2020"
                     {...register(`fitments.${index}.year_to`, { valueAsNumber: true })}
-                    className="w-full px-3 py-1.5 bg-gray-50 border border-transparent rounded-lg focus:bg-white focus:border-accent focus:ring-1 focus:ring-accent text-[14px] transition"
+                    className="w-full px-3 py-1.5 bg-gray-50 border border-transparent rounded-lg focus:bg-white focus:border-accent focus:ring-4 focus:ring-accent/15 text-[14px] transition"
                   />
                 </div>
 
@@ -82,7 +82,7 @@ export const ProductFitmentsTab = () => {
                     type="text"
                     placeholder="Ej: 1.6L 4Cyl"
                     {...register(`fitments.${index}.engine`)}
-                    className="w-full px-3 py-1.5 bg-gray-50 border border-transparent rounded-lg focus:bg-white focus:border-accent focus:ring-1 focus:ring-accent text-[14px] transition"
+                    className="w-full px-3 py-1.5 bg-gray-50 border border-transparent rounded-lg focus:bg-white focus:border-accent focus:ring-4 focus:ring-accent/15 text-[14px] transition"
                   />
                 </div>
 

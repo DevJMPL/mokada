@@ -38,18 +38,18 @@ export const OrderItemDiscount = ({item,onSaved}:{item:{id:string;discount_perce
         <div className="flex gap-2">
           <label className="flex-1">
             <span className="block text-gray-600 mb-0.5">% Desc.</span>
-            <input aria-label="Descuento del producto" disabled={saving} required type="number" min="0" max="100" step="any" value={percent} onChange={e=>setPercent(e.target.value)} className="w-full p-1.5 border border-gray-200 rounded-md focus:border-accent focus:ring-1 focus:ring-accent" />
+            <input aria-label="Descuento del producto" disabled={saving} required type="number" min="0" max="100" step="any" value={percent} onChange={e=>setPercent(e.target.value)} className="w-full p-1.5 border border-gray-200 rounded-md focus:border-accent focus:ring-4 focus:ring-accent/15" />
           </label>
           {item.list_unit_price!=null && item.list_unit_price>0 && (
             <label className="flex-1">
               <span className="block text-gray-600 mb-0.5">Precio Final</span>
-              <input aria-label="Precio final del producto" disabled={saving} type="number" min="0" max={item.list_unit_price} step="0.01" value={Math.round(item.list_unit_price*(1-Number(percent)/100)*100)/100} onChange={e=>{if(e.target.value!=='')setPercent(String(100*(1-Number(e.target.value)/item.list_unit_price!)));}} className="w-full p-1.5 border border-gray-200 rounded-md focus:border-accent focus:ring-1 focus:ring-accent" />
+              <input aria-label="Precio final del producto" disabled={saving} type="number" min="0" max={item.list_unit_price} step="0.01" value={Math.round(item.list_unit_price*(1-Number(percent)/100)*100)/100} onChange={e=>{if(e.target.value!=='')setPercent(String(100*(1-Number(e.target.value)/item.list_unit_price!)));}} className="w-full p-1.5 border border-gray-200 rounded-md focus:border-accent focus:ring-4 focus:ring-accent/15" />
             </label>
           )}
         </div>
         <label>
           <span className="block text-gray-600 mb-0.5">Motivo del descuento</span>
-          <input disabled={saving} required={Number(percent)>0} value={reason} onChange={e=>setReason(e.target.value)} placeholder="Ej. Mayoreo, Promoción..." className="w-full p-1.5 border border-gray-200 rounded-md focus:border-accent focus:ring-1 focus:ring-accent" />
+          <input disabled={saving} required={Number(percent)>0} value={reason} onChange={e=>setReason(e.target.value)} placeholder="Ej. Mayoreo, Promoción..." className="w-full p-1.5 border border-gray-200 rounded-md focus:border-accent focus:ring-4 focus:ring-accent/15" />
         </label>
         <div className="flex justify-end gap-2 mt-1">
           <button type="button" onClick={() => { setIsEditing(false); setPercent(String(item.discount_percent || 0)); setReason(item.discount_reason || ''); }} className="px-2 py-1 text-gray-600 hover:bg-gray-200 rounded-md">Cancelar</button>

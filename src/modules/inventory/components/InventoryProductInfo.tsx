@@ -10,7 +10,7 @@ import { formatCurrency, formatQuantity } from '../../../utils/formatters';
 import type { InventoryStock } from '../services/inventory.service';
 
 const money = (value: number | null | undefined) => value == null ? 'Sin costo' : formatCurrency(value);
-const inputStyle = 'w-full px-3 py-2 bg-white border border-gray-200/60 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-[14px] mt-1.5';
+const inputStyle = 'w-full px-3 py-2 bg-white border border-gray-200/60 rounded-lg focus:outline-none focus:ring-4 focus:ring-accent/15 focus:border-accent text-[14px] mt-1.5';
 
 export const InventoryCostModal = ({ stock, onClose }: { stock: InventoryStock | null; onClose: () => void }) => {
   const queryClient = useQueryClient();

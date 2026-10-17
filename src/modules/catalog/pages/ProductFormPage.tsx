@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useForm, FormProvider } from 'react-hook-form';
 import { ArrowLeft, Save } from 'lucide-react';
 import { toast } from 'react-hot-toast';
@@ -10,6 +10,7 @@ import { ProductGeneralTab } from '../components/ProductGeneralTab';
 import { ProductPricesTab } from '../components/ProductPricesTab';
 import { ProductInventoryTab } from '../components/ProductInventoryTab';
 import { ProductFitmentsTab } from '../components/ProductFitmentsTab';
+import { ProductSaleLinksTab } from '../components/ProductSaleLinksTab';
 import { useBarcodeScanner } from '../../../utils/useBarcodeScanner';
 import { ImageUpload } from '../../../components/ui/ImageUpload';
 import { useAuth } from '../../auth/context/useAuth';
@@ -18,8 +19,9 @@ export const ProductFormPage = () => {
   const { isAdmin } = useAuth();
   const { id } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const isEditing = Boolean(id);
-  const [activeTab, setActiveTab] = useState<'general' | 'prices' | 'inventory' | 'fitments'>('general');
+  const [activeTab, setActiveTab] = useState<'general' | 'prices' | 'links' | 'inventory' | 'fitments'>('general');
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [currentImageUrl, setCurrentImageUrl] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -51,6 +53,8 @@ export const ProductFormPage = () => {
     category_id: string;
     unit_of_measure_id: string;
     status: string;
+    item_type: 'SALE' | 'PURCHASE';
+    sale_links: { sale_product_id: string; code: string; name: string; is_default: boolean }[];
     prices: { price_list_id: string; amount: number | null }[];
     inventory: { warehouse_id: string; minimum_stock: number; maximum_stock: number | null }[];
     fitments: { vehicle_model_id: string; year_from: number | null; year_to: number | null; engine: string; notes: string }[];
@@ -65,6 +69,8 @@ export const ProductFormPage = () => {
       category_id: '',
       unit_of_measure_id: '',
       status: 'ACTIVE',
+      item_type: searchParams.get('type') === 'PURCHASE' ? 'PURCHASE' : 'SALE',
+      sale_links: [],
       prices: [],
       inventory: [],
       fitments: []
@@ -85,6 +91,10 @@ export const ProductFormPage = () => {
         category_id: p.category_id || '',
         unit_of_measure_id: p.unit_of_measure_id || '',
         status: p.status || 'ACTIVE',
+        item_type: p.item_type === 'PURCHASE' ? 'PURCHASE' : 'SALE',
+        sale_links: (fullProduct.links || [])
+          .filter((l: any) => l.purchase_product_id === p.id)
+          .map((l: any) => ({ sale_product_id: l.sale_product_id, code: l.sale?.code || '', name: l.sale?.name || '', is_default: l.is_default })),
         prices: priceLists
           ? priceLists.filter(pl => pl.is_active || fullProduct.prices.some((price: any) => price.price_list_id === pl.id))
               .map(pl => ({
@@ -119,11 +129,19 @@ export const ProductFormPage = () => {
     }
   });
 
+  const itemType = methods.watch('item_type');
+  const purchaseCodes = (fullProduct?.links || [])
+    .filter((l: any) => l.sale_product_id === id)
+    .map((l: any) => ({ id: l.purchase_product_id, code: l.purchase?.code || '', name: l.purchase?.name || '' }));
+
   const onSubmit = async (data: any) => {
     try {
       setIsUploading(true);
       const cleanData = {
         ...data,
+        sale_links: data.item_type === 'PURCHASE'
+          ? data.sale_links.map((l: any) => ({ sale_product_id: l.sale_product_id, is_default: Boolean(l.is_default) }))
+          : null,
         prices: data.prices
           .filter((price: {price_list_id: string}) =>
             (priceLists?.find(pl => pl.id === price.price_list_id) as {pricing_mode?: string} | undefined)?.pricing_mode !== 'PUBLIC_DISCOUNT')
@@ -199,12 +217,14 @@ export const ProductFormPage = () => {
     );
   }
 
+  // Purchase codes carry cost, not sale prices.
   const tabs = [
     { id: 'general', label: 'General' },
-    { id: 'prices', label: 'Precios' },
+    ...(itemType === 'SALE' ? [{ id: 'prices', label: 'Precios' }] : []),
+    { id: 'links', label: itemType === 'PURCHASE' ? 'Claves de venta' : 'Código y costo' },
     { id: 'inventory', label: 'Inventario' },
     { id: 'fitments', label: 'Compatibilidad' },
-  ] as const;
+  ];
 
   return (
     <FormProvider {...methods}>
@@ -245,6 +265,28 @@ export const ProductFormPage = () => {
               </p>
             </div>
 
+            {/* Item type: fixed once created */}
+            <div className="flex p-1 space-x-1 bg-gray-100/80 rounded-xl max-w-sm mb-6" role="radiogroup" aria-label="Tipo de producto">
+              {([['SALE', 'Clave de venta'], ['PURCHASE', 'Código de compra']] as const).map(([value, label]) => (
+                <button
+                  key={value}
+                  type="button"
+                  role="radio"
+                  aria-checked={itemType === value}
+                  disabled={isEditing}
+                  onClick={() => {
+                    methods.setValue('item_type', value, { shouldDirty: true });
+                    if (activeTab === 'prices') setActiveTab('general');
+                  }}
+                  className={`flex-1 py-2 text-[13px] font-semibold rounded-lg transition-all disabled:cursor-default ${
+                    itemType === value ? 'bg-white text-[#1D1D1F] shadow-sm' : 'text-[#86868B] hover:text-[#1D1D1F] disabled:hover:text-[#86868B]'
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+
             {/* Tab Navigation */}
             <div className="flex p-1 space-x-1 bg-gray-100/80 rounded-xl max-w-2xl mb-8">
               {tabs.map((tab) => (
@@ -275,8 +317,11 @@ export const ProductFormPage = () => {
               {activeTab === 'prices' && (
                 <ProductPricesTab priceLists={priceLists || []} />
               )}
+              {activeTab === 'links' && (
+                <ProductSaleLinksTab itemType={itemType} purchaseCodes={purchaseCodes} costs={(fullProduct?.costs as any) || []} />
+              )}
               {activeTab === 'inventory' && (
-                <ProductInventoryTab warehouses={warehouses || []} />
+                <ProductInventoryTab warehouses={warehouses || []} itemType={itemType} />
               )}
               {activeTab === 'fitments' && (
                 <ProductFitmentsTab />

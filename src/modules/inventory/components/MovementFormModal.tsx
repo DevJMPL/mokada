@@ -86,7 +86,15 @@ export const MovementFormModal = ({ isOpen, onClose }: Props) => {
                   {!field.value ? (
                     <SearchSelect
                       label="Producto *"
-                      options={products.map((p: any) => ({
+                      options={products
+                        // Entries only go to the purchase warehouse, which only holds purchase codes.
+                        .filter((p: any) => {
+                          const role = warehouses?.find(w => w.id === warehouseId)?.warehouse_role;
+                          if (incoming || role === 'PURCHASE') return p.item_type === 'PURCHASE';
+                          if (role === 'SALES') return p.item_type === 'SALE';
+                          return true;
+                        })
+                        .map((p: any) => ({
                         value: p.id,
                         label: `[${p.code}] ${p.name}`,
                         keywords: p.code

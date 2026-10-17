@@ -20,8 +20,10 @@ export const ProductsPage = () => {
   const { addItem, getItemCount } = useCartStore();
   const [selectedBrand, setSelectedBrand] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
-
-
+  // Agents and customers only ever get sale keys; admins can switch to purchase codes.
+  const [itemType, setItemType] = useState<'SALE' | 'PURCHASE'>('SALE');
+  const isPurchaseView = isAdmin && itemType === 'PURCHASE';
+  const currency = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' });
 
   const { 
 
@@ -36,7 +38,9 @@ export const ProductsPage = () => {
     pageSize: 25, 
     search: debouncedSearch,
     brand: selectedBrand,
-    category: selectedCategory
+    category: selectedCategory,
+    itemType: isAdmin ? itemType : 'SALE',
+    withCosts: isAdmin
   });
 
   const products = data?.pages.flatMap((page) => page.data) || [];
@@ -54,7 +58,27 @@ export const ProductsPage = () => {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h2 className="text-[28px] font-bold tracking-tight text-[#1D1D1F]">Productos</h2>
-          <p className="text-[15px] text-[#86868B] mt-1">Catálogo general de refacciones</p>
+          <p className="text-[15px] text-[#86868B] mt-1">
+            {isPurchaseView ? 'Códigos del almacén principal con su costo' : 'Catálogo de venta de refacciones'}
+          </p>
+          {isAdmin && (
+            <div className="mt-3 inline-flex p-1 bg-gray-100/80 rounded-xl" role="tablist" aria-label="Tipo de catálogo">
+              {([['SALE', 'Claves de venta'], ['PURCHASE', 'Códigos de compra']] as const).map(([value, label]) => (
+                <button
+                  key={value}
+                  type="button"
+                  role="tab"
+                  aria-selected={itemType === value}
+                  onClick={() => setItemType(value)}
+                  className={`px-3 py-1.5 text-[13px] font-semibold rounded-lg transition-all ${
+                    itemType === value ? 'bg-white text-[#1D1D1F] shadow-sm' : 'text-[#86868B] hover:text-[#1D1D1F]'
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
         
         <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
@@ -62,7 +86,7 @@ export const ProductsPage = () => {
             <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <input 
               type="text" 
-              placeholder="Buscar por código o nombre..." 
+              placeholder={isAdmin ? 'Buscar por clave, código o nombre...' : 'Buscar por clave o nombre...'}
               className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200/60 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0066CC]/20 focus:border-[#0066CC] text-[14px] transition-all shadow-sm"
               value={search}
               onChange={(e) => {
@@ -111,7 +135,7 @@ export const ProductsPage = () => {
 
           {isAdmin && (
             <button 
-              onClick={() => navigate('/catalog/products/new')}
+              onClick={() => navigate(isPurchaseView ? '/catalog/products/new?type=PURCHASE' : '/catalog/products/new')}
               className="flex flex-1 sm:flex-none items-center justify-center gap-2 bg-[#0066CC] hover:bg-[#005bb5] text-white px-4 py-2 rounded-xl text-[14px] font-medium transition-colors whitespace-nowrap shadow-sm"
             >
               <Plus className="w-4 h-4" />
@@ -205,10 +229,15 @@ export const ProductsPage = () => {
                 <div className="p-4 flex-1 flex flex-col">
                   <div className="flex items-start justify-between gap-2 mb-1.5">
                     <span className="text-[11px] font-medium text-[#0066CC] truncate">
-                      {item.code}
+                      {isAdmin && (item.item_type === 'PURCHASE' ? 'Código ' : 'Clave ')}{item.code}
                     </span>
                     <StatusBadge status={item.status} />
                   </div>
+                  {isAdmin && item.linked_codes?.length > 0 && (
+                    <p className="text-[11px] text-[#86868B] truncate -mt-1 mb-1.5" title={item.linked_codes.join(', ')}>
+                      {item.item_type === 'PURCHASE' ? 'Claves: ' : 'Código: '}{item.linked_codes.join(', ')}
+                    </p>
+                  )}
                   
                   <h3 className="text-[14px] font-semibold text-[#1D1D1F] leading-snug mb-2 line-clamp-2">
                     {item.name}
@@ -228,12 +257,21 @@ export const ProductsPage = () => {
                       <div className="flex items-center justify-between border-t border-gray-100 pt-3">
                         <span className="text-[12px] font-medium text-[#86868B]">Precio Público</span>
                         <span className="text-[16px] font-bold text-[#1D1D1F]">
-                          {new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(item.public_price)}
+                          {currency.format(item.public_price)}
+                        </span>
+                      </div>
+                    )}
+                    {isAdmin && (
+                      <div className={`flex items-center justify-between ${item.public_price != null ? 'pt-1' : 'border-t border-gray-100 pt-3'}`}>
+                        <span className="text-[12px] font-medium text-[#86868B]">Costo</span>
+                        <span className="text-[13px] font-semibold text-[#86868B]">
+                          {item.cost != null ? currency.format(item.cost) : 'Sin costo'}
                         </span>
                       </div>
                     )}
                   </div>
 
+                  {item.item_type !== 'PURCHASE' && (
                     <button 
                       type="button"
                       disabled={item.status !== 'ACTIVE' || !(Number(item.public_price) > 0)}
@@ -254,6 +292,7 @@ export const ProductsPage = () => {
                       <ShoppingCart className="w-4 h-4" />
                       {Number(item.public_price) > 0 ? 'Agregar al carrito' : 'Sin precio público'}
                     </button>
+                  )}
                 </div>
               </div>
             );

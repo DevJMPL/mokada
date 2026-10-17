@@ -20,7 +20,9 @@ export const ProductGeneralTab = ({ initialBrand, initialCategory, units }: Prop
 
         {/* Code */}
         <div>
-          <label className="block text-[13px] font-medium text-[#1D1D1F] mb-1.5">Código *</label>
+          <label className="block text-[13px] font-medium text-[#1D1D1F] mb-1.5">
+            {watch('item_type') === 'PURCHASE' ? 'Código de compra *' : 'Clave de venta *'}
+          </label>
           <input 
             type="text" 
             {...register('code', { required: 'El código es obligatorio' })}

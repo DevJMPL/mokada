@@ -47,7 +47,7 @@ export const StockPage = () => {
   }, [filteredData]);
 
   const columns: Column<any>[] = [
-    { header: 'Código', accessorKey: 'product_code', className: 'font-medium text-slate-900' },
+    { header: 'Código / Clave', accessorKey: 'product_code', className: 'font-medium text-slate-900' },
     { 
       header: 'Producto', 
       cell: (item) => {

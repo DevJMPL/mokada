@@ -99,7 +99,7 @@ export const TransferDetailPage = () => {
   if (isLoading) {
     return (
       <div className="py-12 flex justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0066CC]"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent"></div>
       </div>
     );
   }
@@ -118,18 +118,18 @@ export const TransferDetailPage = () => {
         <div className="flex items-center gap-4">
           <button 
             onClick={() => navigate('/inventory/transfers')}
-            className="p-2 text-gray-400 hover:text-[#1D1D1F] hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-2 text-gray-400 hover:text-ink hover:bg-gray-100 rounded-lg transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div>
             <div className="flex items-center gap-3">
-              <h2 className="text-[28px] font-bold tracking-tight text-[#1D1D1F]">
+              <h2 className="text-[28px] font-bold tracking-tight text-ink">
                 {transfer.transfer_number}
               </h2>
               <StatusBadge status={transfer.status} />
             </div>
-            <p className="text-[14px] text-[#86868B] mt-1">
+            <p className="text-[14px] text-muted mt-1">
               Creado el {formatDate(transfer.created_at)}
             </p>
           </div>
@@ -139,7 +139,7 @@ export const TransferDetailPage = () => {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setCancelModal(true)}
-              className="px-4 py-2 text-[14px] font-medium text-[#E02424] bg-white border border-gray-200 rounded-xl hover:bg-red-50 hover:border-red-200 transition-colors shadow-sm flex items-center gap-2"
+              className="px-4 py-2 text-[14px] font-medium text-red-600 bg-white border border-gray-200 rounded-xl hover:bg-red-50 hover:border-red-200 transition-colors shadow-sm flex items-center gap-2"
             >
               <XCircle className="w-4 h-4" />
               Cancelar
@@ -154,7 +154,7 @@ export const TransferDetailPage = () => {
             <button
               onClick={() => setConfirmModal(true)}
               disabled={isCompleting || isCancelling || loadingStock || !!stockError || blockers.length>0 || !transfer.items?.length}
-              className="px-5 py-2 text-[14px] font-medium text-white bg-[#0066CC] rounded-xl hover:bg-[#0055FF] transition-colors shadow-sm flex items-center gap-2 ml-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-5 py-2 text-[14px] font-medium text-white bg-accent rounded-xl hover:bg-accent-hover transition-colors shadow-sm flex items-center gap-2 ml-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <CheckCircle2 className="w-4 h-4" />
               Completar Traspaso
@@ -167,26 +167,26 @@ export const TransferDetailPage = () => {
         {stockError && <p className="text-[13px] text-red-600 mb-4">No se pudo consultar el inventario. <button onClick={() => refreshStock()} className="underline">Reintentar</button></p>}
         {transfer.status === 'DRAFT' && !loadingStock && !stockError && blockers.length>0 && <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl text-[13px] text-amber-800 mb-4">{blockers.map((message: string) => <p key={message}>{message}</p>)}</div>}
         {transfer.status === 'DRAFT' && (
-          <p className="text-[13px] text-[#86868B] bg-gray-50 border border-gray-200/60 rounded-xl p-4 mb-6">
+          <p className="text-[13px] text-muted bg-gray-50 border border-gray-200/60 rounded-xl p-4 mb-6">
             Antes de completar, los productos deben tener su costo registrado en el almacén de origen.{' '}
-            <Link to="/admin/margins" className="text-[#0066CC] font-medium hover:underline">Configurar costos del inventario</Link>
+            <Link to="/admin/margins" className="text-accent font-medium hover:underline">Configurar costos del inventario</Link>
           </p>
         )}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
           <div>
-            <p className="text-[12px] font-semibold text-[#86868B] uppercase tracking-wider mb-2">Almacén de Origen</p>
-            <p className="text-[16px] font-medium text-[#1D1D1F]">{transfer.source?.name}</p>
+            <p className="text-[12px] font-semibold text-muted uppercase tracking-wider mb-2">Almacén de Origen</p>
+            <p className="text-[16px] font-medium text-ink">{transfer.source?.name}</p>
           </div>
           <div>
-            <p className="text-[12px] font-semibold text-[#86868B] uppercase tracking-wider mb-2">Almacén de Destino</p>
-            <p className="text-[16px] font-medium text-[#1D1D1F]">{transfer.destination?.name}</p>
+            <p className="text-[12px] font-semibold text-muted uppercase tracking-wider mb-2">Almacén de Destino</p>
+            <p className="text-[16px] font-medium text-ink">{transfer.destination?.name}</p>
           </div>
         </div>
 
         {transfer.notes && (
           <div className="mb-8">
-            <p className="text-[12px] font-semibold text-[#86868B] uppercase tracking-wider mb-2">Notas / Referencia</p>
-            <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 text-[14px] text-[#1D1D1F]">
+            <p className="text-[12px] font-semibold text-muted uppercase tracking-wider mb-2">Notas / Referencia</p>
+            <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 text-[14px] text-ink">
               {transfer.notes}
             </div>
           </div>
@@ -194,14 +194,14 @@ export const TransferDetailPage = () => {
 
         <div>
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-[17px] font-semibold text-[#1D1D1F]">Productos Involucrados</h3>
+            <h3 className="text-[17px] font-semibold text-ink">Productos Involucrados</h3>
             <div className="flex items-center bg-gray-100/80 p-1 rounded-xl border border-gray-200/50">
               <button
                 onClick={() => setViewMode('table')}
-                className={`p-1.5 rounded-lg transition-all ${
+                className={`p-1.5 rounded-lg transition ${
                   viewMode === 'table' 
-                    ? 'bg-white shadow-sm text-[#1D1D1F]' 
-                    : 'text-gray-500 hover:text-[#1D1D1F]'
+                    ? 'bg-white shadow-sm text-ink' 
+                    : 'text-gray-500 hover:text-ink'
                 }`}
                 title="Vista de Tabla"
               >
@@ -209,10 +209,10 @@ export const TransferDetailPage = () => {
               </button>
               <button
                 onClick={() => setViewMode('grid')}
-                className={`p-1.5 rounded-lg transition-all ${
+                className={`p-1.5 rounded-lg transition ${
                   viewMode === 'grid' 
-                    ? 'bg-white shadow-sm text-[#1D1D1F]' 
-                    : 'text-gray-500 hover:text-[#1D1D1F]'
+                    ? 'bg-white shadow-sm text-ink' 
+                    : 'text-gray-500 hover:text-ink'
                 }`}
                 title="Vista de Cuadrícula"
               >
@@ -227,7 +227,14 @@ export const TransferDetailPage = () => {
               columns={[
                 { 
                   header: 'Código', 
-                  cell: (item: any) => <span className="font-medium text-[#0066CC]">{item.products?.code}</span> 
+                  cell: (item: any) => (
+                    <div className="leading-tight">
+                      <span className="font-medium text-accent">{item.products?.code}</span>
+                      {item.destination && item.destination.id !== item.product_id && (
+                        <span className="block text-[12px] text-muted">Entra como {item.destination.code}</span>
+                      )}
+                    </div>
+                  ) 
                 },
                 { 
                   header: 'Producto', 
@@ -245,13 +252,13 @@ export const TransferDetailPage = () => {
                           <Package className="w-5 h-5 text-gray-300 stroke-[1.5]" />
                         )}
                       </div>
-                      <span className="font-medium text-[#1D1D1F]">{item.products?.name}</span>
+                      <span className="font-medium text-ink">{item.products?.name}</span>
                     </div>
                   )
                 },
                 { header: 'Cantidad', accessorKey: 'quantity', className: 'font-semibold' },
                 { header: 'Precio de traspaso', cell: (item: any) => item.unit_price == null ? 'Sin costo' : new Intl.NumberFormat('es-MX', {style: 'currency', currency: 'MXN'}).format(item.unit_price) },
-                { header: 'Inventario y precios', cell: (item: any) => <div className="min-w-80"><InventoryProductInfo productId={item.product_id} source={stock?.find(row => row.product_id===item.product_id && row.warehouse_id===transfer.source_warehouse_id && row.location_id==null)} destination={stock?.find(row => row.product_id===item.product_id && row.warehouse_id===transfer.destination_warehouse_id && row.location_id==null)} sourceName={transfer.source?.name} destinationName={transfer.destination?.name} quantity={transfer.status==='DRAFT' ? Number(item.quantity) : undefined} unitPrice={item.unit_price} stockLoaded={!loadingStock && !stockError} /></div> }
+                { header: 'Inventario y precios', cell: (item: any) => <div className="min-w-80"><InventoryProductInfo productId={item.destination_product_id || item.product_id} source={stock?.find(row => row.product_id===item.product_id && row.warehouse_id===transfer.source_warehouse_id && row.location_id==null)} destination={stock?.find(row => row.product_id===(item.destination_product_id || item.product_id) && row.warehouse_id===transfer.destination_warehouse_id && row.location_id==null)} sourceName={transfer.source?.name} destinationName={transfer.destination?.name} quantity={transfer.status==='DRAFT' ? Number(item.quantity) : undefined} unitPrice={item.unit_price} stockLoaded={!loadingStock && !stockError} /></div> }
               ]}
             />
           ) : (
@@ -261,7 +268,7 @@ export const TransferDetailPage = () => {
                 return (
                   <div 
                     key={item.id || index}
-                    className="group min-w-0 bg-white border border-gray-200/60 rounded-[24px] overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 grid grid-cols-1 md:grid-cols-[14rem_minmax(0,1fr)]"
+                    className="group min-w-0 bg-white border border-gray-200/60 rounded-[24px] overflow-hidden shadow-sm hover:shadow-lg transition duration-300 grid grid-cols-1 md:grid-cols-[14rem_minmax(0,1fr)]"
                   >
                     {/* Image Section */}
                     <div className="relative aspect-[4/3] md:aspect-auto md:min-h-72 bg-white border-b md:border-b-0 md:border-r border-gray-100 p-6 flex items-center justify-center overflow-hidden">
@@ -280,22 +287,23 @@ export const TransferDetailPage = () => {
                     {/* Info Section */}
                     <div className="p-4 sm:p-5 min-w-0 flex flex-col">
                       <div className="flex flex-wrap items-start justify-between gap-2 mb-2">
-                        <span className="min-w-0 text-[12px] font-medium text-[#0066CC] break-all">
+                        <span className="min-w-0 text-[12px] font-medium text-accent break-all">
                           {item.products?.code}
+                          {item.destination && item.destination.id !== item.product_id && ` → ${item.destination.code}`}
                         </span>
                         <span className="shrink-0 text-[12px] font-medium text-emerald-600">
                           • Traspaso
                         </span>
                       </div>
                       
-                      <h3 className="text-[15px] font-semibold text-[#1D1D1F] leading-snug mb-2 break-words" title={item.products?.name}>
+                      <h3 className="text-[15px] font-semibold text-ink leading-snug mb-2 break-words" title={item.products?.name}>
                         {item.products?.name}
                       </h3>
-                      <InventoryProductInfo productId={item.product_id} source={stock?.find(row => row.product_id===item.product_id && row.warehouse_id===transfer.source_warehouse_id && row.location_id==null)} destination={stock?.find(row => row.product_id===item.product_id && row.warehouse_id===transfer.destination_warehouse_id && row.location_id==null)} sourceName={transfer.source?.name} destinationName={transfer.destination?.name} quantity={transfer.status==='DRAFT' ? Number(item.quantity) : undefined} unitPrice={item.unit_price} stockLoaded={!loadingStock && !stockError} />
+                      <InventoryProductInfo productId={item.destination_product_id || item.product_id} source={stock?.find(row => row.product_id===item.product_id && row.warehouse_id===transfer.source_warehouse_id && row.location_id==null)} destination={stock?.find(row => row.product_id===(item.destination_product_id || item.product_id) && row.warehouse_id===transfer.destination_warehouse_id && row.location_id==null)} sourceName={transfer.source?.name} destinationName={transfer.destination?.name} quantity={transfer.status==='DRAFT' ? Number(item.quantity) : undefined} unitPrice={item.unit_price} stockLoaded={!loadingStock && !stockError} />
                       
                       <div className="mt-auto pt-4 border-t border-gray-100 flex flex-wrap gap-x-8 gap-y-3">
-                        <div><p className="text-[11px] text-[#86868B] uppercase tracking-wider">Cantidad</p><p className="text-[14px] font-semibold text-[#1D1D1F] mt-1">{item.quantity}</p></div>
-                        <div><p className="text-[11px] text-[#86868B] uppercase tracking-wider">Precio de traspaso</p><p className="text-[14px] font-semibold text-[#1D1D1F] mt-1">{item.unit_price == null ? 'Sin costo' : new Intl.NumberFormat('es-MX', {style: 'currency', currency: 'MXN'}).format(item.unit_price)}</p></div>
+                        <div><p className="text-[11px] text-muted uppercase tracking-wider">Cantidad</p><p className="text-[14px] font-semibold text-ink mt-1">{item.quantity}</p></div>
+                        <div><p className="text-[11px] text-muted uppercase tracking-wider">Precio de traspaso</p><p className="text-[14px] font-semibold text-ink mt-1">{item.unit_price == null ? 'Sin costo' : new Intl.NumberFormat('es-MX', {style: 'currency', currency: 'MXN'}).format(item.unit_price)}</p></div>
                       </div>
                     </div>
                   </div>

@@ -11,12 +11,12 @@ import { IconButton } from '../../../components/ui/IconButton';
 import { useCustomers, useCustomerRoutes, useSaveCustomer } from '../hooks/useCustomers';
 import type { CustomerSummary } from '../services/customers.service';
 import { useAuth } from '../../auth/context/useAuth';
-import { useRouteStore } from '../../../store/routeStore';
+import { useRouteScope } from '../../route-operations/hooks/useRouteScope';
 
 export const CustomersPage = () => {
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
-  const { globalSelectedRouteId } = useRouteStore();
+  const { matchesRoute } = useRouteScope();
   const [customerToToggle, setCustomerToToggle] = useState<CustomerSummary | null>(null);
   const [alertModal, setAlertModal] = useState<{ isOpen: boolean; title: string; message: string; type: 'error' | 'success' | 'info' }>({
     isOpen: false,
@@ -29,7 +29,7 @@ export const CustomersPage = () => {
   const saveCustomer = useSaveCustomer();
   const { isAdmin } = useAuth();
 
-  const filteredCustomers = customers.filter((customer) => !globalSelectedRouteId || customer.main_branch_route_id === globalSelectedRouteId);
+  const filteredCustomers = customers.filter((customer) => matchesRoute(customer.main_branch_route_id));
 
   const handleToggleCustomer = (customer: CustomerSummary) => {
     setAlertModal((current) => ({ ...current, isOpen: false }));

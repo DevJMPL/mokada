@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
-import { useSaveTransfer, useUpdateTransfer, useTransferFull, useWarehouses, useStock } from '../hooks/useInventory';
+import { useSaveTransfer, useUpdateTransfer, useTransferFull, useWarehouses, useStock, useSaleLinks } from '../hooks/useInventory';
 import { Plus, Trash2, Package, Tag } from 'lucide-react';
 import { AlertModal } from '../../../components/ui/AlertModal';
 import { SearchSelect } from '../../../components/ui/SearchSelect';
@@ -21,6 +21,13 @@ export const TransferFormPage = () => {
 
   const { data: warehouses } = useWarehouses();
   const { data: stockData, isLoading: loadingStock, error: stockError, refetch: refreshStock } = useStock();
+  const { data: saleLinks, isLoading: loadingLinks } = useSaleLinks();
+  // A purchase code goes out of ALM-01 and comes into ALM-02 as one of its linked sale keys.
+  const linksFor = (productId: string) => (saleLinks || [])
+    .filter(link => link.purchase_product_id === productId)
+    .sort((a, b) => Number(b.is_default) - Number(a.is_default));
+  const defaultDestination = (productId: string) => linksFor(productId)[0]?.sale_product_id || '';
+  const isPurchaseCode = (productId: string) => stockData?.some(s => s.product_id === productId && s.item_type === 'PURCHASE') ?? false;
 
   const [alertModal, setAlertModal] = useState<{ isOpen: boolean; title: string; message: string; type: 'error' | 'success' | 'info' }>({
     isOpen: false,
@@ -37,7 +44,7 @@ export const TransferFormPage = () => {
       source_warehouse_id: '',
       destination_warehouse_id: '',
       notes: '',
-      items: [{ product_id: '', quantity: 1, unit_price: null as number | null }]
+      items: [{ product_id: '', destination_product_id: '', quantity: 1, unit_price: null as number | null }]
     }
   });
 
@@ -68,10 +75,11 @@ export const TransferFormPage = () => {
         items: transferData.items?.length > 0 
           ? transferData.items.map((item: any) => ({
               product_id: item.product_id,
+              destination_product_id: item.destination_product_id || '',
               quantity: item.quantity,
               unit_price: item.unit_price ?? null
             }))
-          : [{ product_id: '', quantity: 1, unit_price: null }]
+          : [{ product_id: '', destination_product_id: '', quantity: 1, unit_price: null }]
       });
     }
   }, [transferData, reset, id, isDirty]);
@@ -94,10 +102,18 @@ export const TransferFormPage = () => {
       if (id && transferData?.status !== 'DRAFT') throw new Error('Solo se pueden editar traspasos en borrador.');
       if (!sourceWarehouse?.is_active || !destinationWarehouse?.is_active) throw new Error('Selecciona almacenes activos.');
       if (sourceWarehouse.warehouse_role !== 'PURCHASE' || destinationWarehouse.warehouse_role !== 'SALES') throw new Error('El traspaso debe ir del almacén de compras al de ventas.');
-      if (new Set(validItems.map((item: any) => item.product_id)).size !== validItems.length) throw new Error('El producto está repetido. Agrupa la cantidad en una sola partida.');
+      if (loadingLinks) throw new Error('Cargando las claves de venta, intenta de nuevo.');
       for (const item of validItems) {
-        const stock = availableStock.find(row => row.product_id === item.product_id);
-        if (!Number.isFinite(Number(item.quantity)) || !stock || Number(item.quantity) > Number(stock.available_quantity)) throw new Error('La cantidad de un producto supera el disponible del almacén de origen.');
+        if (isPurchaseCode(item.product_id) && !item.destination_product_id) throw new Error('Elige la clave de venta destino de cada código.');
+      }
+      const lineKey = (item: any) => `${item.product_id}:${item.destination_product_id || item.product_id}`;
+      if (new Set(validItems.map(lineKey)).size !== validItems.length) throw new Error('El producto está repetido con la misma clave. Agrupa la cantidad en una sola partida.');
+      // One code can feed several keys, so availability is checked on the total per code.
+      const totals = new Map<string, number>();
+      for (const item of validItems) totals.set(item.product_id, (totals.get(item.product_id) || 0) + Number(item.quantity));
+      for (const [productId, total] of totals) {
+        const stock = availableStock.find(row => row.product_id === productId);
+        if (!Number.isFinite(total) || !stock || total > Number(stock.available_quantity)) throw new Error('La cantidad de un producto supera el disponible del almacén de origen.');
         if (stock.average_cost == null || stock.original_average_cost == null) throw new Error('Falta configurar el costo del producto en el almacén de compras.');
       }
       
@@ -117,6 +133,7 @@ export const TransferFormPage = () => {
         notes: data.notes,
         items: validItems.map((item: any) => ({
           product_id: item.product_id,
+          destination_product_id: item.destination_product_id || null,
           quantity: Number(item.quantity),
           unit_price: availableStock.find(row => row.product_id === item.product_id)?.average_cost ?? null
         }))
@@ -179,7 +196,7 @@ export const TransferFormPage = () => {
                     value={field.value}
                     onChange={(val) => {
                       if (val !== field.value) {
-                        setValue('items', [{ product_id: '', quantity: 1, unit_price: null }]);
+                        setValue('items', [{ product_id: '', destination_product_id: '', quantity: 1, unit_price: null }]);
                         if (val === destinationWarehouseId) setValue('destination_warehouse_id', '');
                       }
                       field.onChange(val);
@@ -240,7 +257,7 @@ export const TransferFormPage = () => {
               </div>
               <button
                 type="button"
-                onClick={() => append({ product_id: '', quantity: 1, unit_price: null })}
+                onClick={() => append({ product_id: '', destination_product_id: '', quantity: 1, unit_price: null })}
                 disabled={!sourceWarehouseId}
                 className="flex w-full sm:w-auto items-center justify-center gap-2 px-3 py-2 text-[13px] font-medium text-[#0066CC] bg-[#0066CC]/10 rounded-lg hover:bg-[#0066CC]/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
@@ -252,8 +269,10 @@ export const TransferFormPage = () => {
             <div className="space-y-4">
               {fields.map((field, index) => {
                 const currentProductId = watch(`items.${index}.product_id`);
+                const currentDestinationId = watch(`items.${index}.destination_product_id`) || currentProductId;
+                const productLinks = currentProductId ? linksFor(currentProductId) : [];
                 const stockItem = stockData?.find(s => s.product_id === currentProductId && s.warehouse_id === sourceWarehouseId && s.location_id == null);
-                const destinationStock = stockData?.find(s => s.product_id === currentProductId && s.warehouse_id === destinationWarehouseId && s.location_id == null);
+                const destinationStock = stockData?.find(s => s.product_id === currentDestinationId && s.warehouse_id === destinationWarehouseId && s.location_id == null);
                 const transferItem = transferData?.items?.find((i: any) => i.product_id === currentProductId);
                 const productStockInfo = stockItem || (transferItem ? {
                   product_code: transferItem.products?.code,
@@ -278,14 +297,22 @@ export const TransferFormPage = () => {
                             render={({ field }) => (
                               <SearchSelect
                                 label="Buscar Producto *"
-                                options={availableStock.filter(p => !watchedItems.some((item, otherIndex) => otherIndex !== index && item.product_id === p.product_id)).map((p: any) => ({
+                                options={availableStock.filter(p => linksFor(p.product_id!).length > 1 || !watchedItems.some((item, otherIndex) => otherIndex !== index && item.product_id === p.product_id)).map((p: any) => ({
                                   value: p.product_id,
                                   label: `[${p.product_code}] ${p.product_name}`,
                                   description: `Disponible: ${p.available_quantity}`,
                                   keywords: p.product_code
                                 }))}
                                 value={field.value}
-                                onChange={value => {field.onChange(value); setValue(`items.${index}.quantity`, 1); setValue(`items.${index}.unit_price`, availableStock.find(item => item.product_id === value)?.average_cost ?? null);}}
+                                onChange={value => {
+                                  field.onChange(value);
+                                  setValue(`items.${index}.quantity`, 1);
+                                  setValue(`items.${index}.unit_price`, availableStock.find(item => item.product_id === value)?.average_cost ?? null);
+                                  // Prefer a key this code is not already sending to on another line.
+                                  const used = watchedItems.filter((_, otherIndex) => otherIndex !== index && _.product_id === value).map(item => item.destination_product_id);
+                                  const next = linksFor(value || '').find(link => !used.includes(link.sale_product_id))?.sale_product_id;
+                                  setValue(`items.${index}.destination_product_id`, next || defaultDestination(value || ''));
+                                }}
                                 placeholder="Busca en el inventario del origen..."
                                 disabled={!sourceWarehouseId}
                               />
@@ -320,12 +347,40 @@ export const TransferFormPage = () => {
                                 </div>
                                 <button
                                   type="button"
-                                  onClick={() => {setValue(`items.${index}.product_id`, ''); setValue(`items.${index}.unit_price`, null); setValue(`items.${index}.quantity`, 1);}}
+                                  onClick={() => {setValue(`items.${index}.product_id`, ''); setValue(`items.${index}.destination_product_id`, ''); setValue(`items.${index}.unit_price`, null); setValue(`items.${index}.quantity`, 1);}}
                                   className="text-[12px] text-[#0066CC] hover:underline font-medium"
                                 >
                                   Cambiar producto
                                 </button>
                               </div>
+                              {isPurchaseCode(currentProductId) && (
+                                <div className="mt-3 max-w-md">
+                                  {productLinks.length > 0 ? (
+                                    <Controller
+                                      name={`items.${index}.destination_product_id`}
+                                      control={control}
+                                      render={({ field }) => (
+                                        <SearchSelect
+                                          label="Entra a ventas como clave *"
+                                          options={productLinks.map(link => ({
+                                            value: link.sale_product_id,
+                                            label: link.sale?.code || 'Clave',
+                                            description: `${link.sale?.name || ''}${link.is_default ? ' · predeterminada' : ''}`,
+                                            keywords: link.sale?.code
+                                          }))}
+                                          value={field.value}
+                                          onChange={field.onChange}
+                                          placeholder="Elige la clave de venta"
+                                        />
+                                      )}
+                                    />
+                                  ) : (
+                                    <p className="text-[12px] text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
+                                      Este código no tiene clave de venta ligada. Lígala desde el catálogo antes de traspasar.
+                                    </p>
+                                  )}
+                                </div>
+                              )}
                             </div>
                           </div>
                         )}
@@ -385,7 +440,7 @@ export const TransferFormPage = () => {
                       </div>
 
                     </div>
-                    {currentProductId && <InventoryProductInfo source={stockItem} destination={destinationStock} sourceName={sourceWarehouse?.name} destinationName={destinationWarehouse?.name} productId={currentProductId} quantity={Number(watch(`items.${index}.quantity`))} unitPrice={stockItem?.average_cost} stockLoaded={!loadingStock && !stockError} />}
+                    {currentProductId && <InventoryProductInfo source={stockItem} destination={destinationStock} sourceName={sourceWarehouse?.name} destinationName={destinationWarehouse?.name} productId={currentDestinationId} quantity={Number(watch(`items.${index}.quantity`))} unitPrice={stockItem?.average_cost} stockLoaded={!loadingStock && !stockError} />}
                   </div>
                 );
               })}

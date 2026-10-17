@@ -2,9 +2,11 @@ import { useFieldArray, useFormContext } from 'react-hook-form';
 
 interface Props {
   warehouses: any[];
+  itemType: 'SALE' | 'PURCHASE';
 }
 
-export const ProductInventoryTab = ({ warehouses }: Props) => {
+// Purchase codes only live in purchase warehouses and sale keys in sales warehouses.
+export const ProductInventoryTab = ({ warehouses, itemType }: Props) => {
   const { control, register } = useFormContext();
   const { fields } = useFieldArray({
     control,
@@ -30,7 +32,9 @@ export const ProductInventoryTab = ({ warehouses }: Props) => {
           </thead>
           <tbody className="bg-white divide-y divide-gray-200/60">
             {fields.map((field: any, index) => {
-              const whName = warehouses.find(w => w.id === field.warehouse_id)?.name || 'Almacén';
+              const warehouse = warehouses.find(w => w.id === field.warehouse_id);
+              if (warehouse && (warehouse.warehouse_role === 'PURCHASE') !== (itemType === 'PURCHASE')) return null;
+              const whName = warehouse?.name || 'Almacén';
               return (
                 <tr key={field._local_id} className="hover:bg-[#F5F5F7]/50 transition-colors">
                   <td className="px-6 py-4 whitespace-nowrap text-[14px] font-medium text-[#1D1D1F]">

@@ -227,7 +227,14 @@ export const TransferDetailPage = () => {
               columns={[
                 { 
                   header: 'Código', 
-                  cell: (item: any) => <span className="font-medium text-[#0066CC]">{item.products?.code}</span> 
+                  cell: (item: any) => (
+                    <div className="leading-tight">
+                      <span className="font-medium text-[#0066CC]">{item.products?.code}</span>
+                      {item.destination && item.destination.id !== item.product_id && (
+                        <span className="block text-[12px] text-[#86868B]">Entra como {item.destination.code}</span>
+                      )}
+                    </div>
+                  ) 
                 },
                 { 
                   header: 'Producto', 
@@ -251,7 +258,7 @@ export const TransferDetailPage = () => {
                 },
                 { header: 'Cantidad', accessorKey: 'quantity', className: 'font-semibold' },
                 { header: 'Precio de traspaso', cell: (item: any) => item.unit_price == null ? 'Sin costo' : new Intl.NumberFormat('es-MX', {style: 'currency', currency: 'MXN'}).format(item.unit_price) },
-                { header: 'Inventario y precios', cell: (item: any) => <div className="min-w-80"><InventoryProductInfo productId={item.product_id} source={stock?.find(row => row.product_id===item.product_id && row.warehouse_id===transfer.source_warehouse_id && row.location_id==null)} destination={stock?.find(row => row.product_id===item.product_id && row.warehouse_id===transfer.destination_warehouse_id && row.location_id==null)} sourceName={transfer.source?.name} destinationName={transfer.destination?.name} quantity={transfer.status==='DRAFT' ? Number(item.quantity) : undefined} unitPrice={item.unit_price} stockLoaded={!loadingStock && !stockError} /></div> }
+                { header: 'Inventario y precios', cell: (item: any) => <div className="min-w-80"><InventoryProductInfo productId={item.destination_product_id || item.product_id} source={stock?.find(row => row.product_id===item.product_id && row.warehouse_id===transfer.source_warehouse_id && row.location_id==null)} destination={stock?.find(row => row.product_id===(item.destination_product_id || item.product_id) && row.warehouse_id===transfer.destination_warehouse_id && row.location_id==null)} sourceName={transfer.source?.name} destinationName={transfer.destination?.name} quantity={transfer.status==='DRAFT' ? Number(item.quantity) : undefined} unitPrice={item.unit_price} stockLoaded={!loadingStock && !stockError} /></div> }
               ]}
             />
           ) : (
@@ -282,6 +289,7 @@ export const TransferDetailPage = () => {
                       <div className="flex flex-wrap items-start justify-between gap-2 mb-2">
                         <span className="min-w-0 text-[12px] font-medium text-[#0066CC] break-all">
                           {item.products?.code}
+                          {item.destination && item.destination.id !== item.product_id && ` → ${item.destination.code}`}
                         </span>
                         <span className="shrink-0 text-[12px] font-medium text-emerald-600">
                           • Traspaso
@@ -291,7 +299,7 @@ export const TransferDetailPage = () => {
                       <h3 className="text-[15px] font-semibold text-[#1D1D1F] leading-snug mb-2 break-words" title={item.products?.name}>
                         {item.products?.name}
                       </h3>
-                      <InventoryProductInfo productId={item.product_id} source={stock?.find(row => row.product_id===item.product_id && row.warehouse_id===transfer.source_warehouse_id && row.location_id==null)} destination={stock?.find(row => row.product_id===item.product_id && row.warehouse_id===transfer.destination_warehouse_id && row.location_id==null)} sourceName={transfer.source?.name} destinationName={transfer.destination?.name} quantity={transfer.status==='DRAFT' ? Number(item.quantity) : undefined} unitPrice={item.unit_price} stockLoaded={!loadingStock && !stockError} />
+                      <InventoryProductInfo productId={item.destination_product_id || item.product_id} source={stock?.find(row => row.product_id===item.product_id && row.warehouse_id===transfer.source_warehouse_id && row.location_id==null)} destination={stock?.find(row => row.product_id===(item.destination_product_id || item.product_id) && row.warehouse_id===transfer.destination_warehouse_id && row.location_id==null)} sourceName={transfer.source?.name} destinationName={transfer.destination?.name} quantity={transfer.status==='DRAFT' ? Number(item.quantity) : undefined} unitPrice={item.unit_price} stockLoaded={!loadingStock && !stockError} />
                       
                       <div className="mt-auto pt-4 border-t border-gray-100 flex flex-wrap gap-x-8 gap-y-3">
                         <div><p className="text-[11px] text-[#86868B] uppercase tracking-wider">Cantidad</p><p className="text-[14px] font-semibold text-[#1D1D1F] mt-1">{item.quantity}</p></div>

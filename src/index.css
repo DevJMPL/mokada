@@ -108,6 +108,10 @@
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: none; }
 }
+@keyframes spinner-fade {
+  from { opacity: 1; }
+  to { opacity: 0.15; }
+}
 @keyframes shimmer {
   from { background-position: 200% 0; }
   to { background-position: -200% 0; }
@@ -318,6 +322,15 @@
     animation-duration: 1ms !important;
     animation-delay: 0ms !important;
     animation-iteration-count: 1 !important;
+  }
+  /* Progress indicators keep turning: they carry status, not decoration */
+  .animate-spin,
+  [role="status"] > span {
+    animation-duration: 800ms !important;
+    animation-iteration-count: infinite !important;
+  }
+  .animate-spin {
+    animation-duration: 1s !important;
   }
   button:not(:disabled):active,
   [role="button"]:active {

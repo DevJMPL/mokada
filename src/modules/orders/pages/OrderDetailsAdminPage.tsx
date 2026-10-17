@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ordersService } from '../services/orders.service';
+import { ordersService, type OrderStockStatus } from '../services/orders.service';
 import { statusConfig } from './OrdersPage';
-import { ArrowLeft, Save, Loader2, Calendar, Plus, Minus, Trash2, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, Save, Loader2, Calendar, Plus, Minus, Trash2, ShieldCheck, ArrowRightLeft } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import toast from 'react-hot-toast';
@@ -26,6 +26,7 @@ export const OrderDetailsAdminPage = () => {
   const [isSignatureModalOpen, setIsSignatureModalOpen] = useState(false);
   const [deliveryReceipt, setDeliveryReceipt] = useState<Awaited<ReturnType<typeof ordersService.getDeliveryReceipt>>>(null);
   const [currentUserProfile, setCurrentUserProfile] = useState<any>(null);
+  const [stockStatus, setStockStatus] = useState<Map<string, OrderStockStatus>>(new Map());
 
   // Form states
   const { data: warehouses } = useWarehouses();
@@ -87,6 +88,10 @@ export const OrderDetailsAdminPage = () => {
       if (showLoader) setIsLoading(true);
       const data = await ordersService.getOrderById(orderId);
       setOrder(data);
+      // Stock labels are a hint; the order still loads if they fail.
+      ordersService.getOrderStockStatus(orderId)
+        .then(rows => setStockStatus(new Map(rows.map(row => [row.product_id, row]))))
+        .catch(error => console.error('Error fetching order stock:', error));
       const receipt = await ordersService.getDeliveryReceipt(orderId);
       setDeliveryReceipt(receipt);
       setStatus(data.status);
@@ -303,6 +308,21 @@ export const OrderDetailsAdminPage = () => {
   }
 
   const isShippedOrDelivered = order.status === 'SHIPPED' || order.status === 'DELIVERED' || order.status === 'CANCELLED';
+  const isAdminUser = currentUserProfile?.user_type === 'ADMIN';
+  const showStock = !isShippedOrDelivered && !order.inventory_posted_at;
+  const keyCodes = new Map<string, string>((order.sales_order_items || []).map((item: any) => [item.product_id, item.products?.code]));
+  const transfersNeeded = showStock
+    ? [...stockStatus.values()].filter(row => row.status === 'TRANSFER' && row.purchase_product_id)
+    : [];
+  const createTransfer = () => navigate('/inventory/transfers/new', { state: { prefill: {
+    destination_warehouse_id: order.warehouse_id || null,
+    notes: `Pedido #${order.id.slice(0, 8)}`,
+    items: transfersNeeded.map(row => ({
+      product_id: row.purchase_product_id,
+      destination_product_id: row.product_id,
+      quantity: Math.min(Number(row.missing), Number(row.purchase_available ?? 0))
+    }))
+  } } });
 
   return (
     <div className="space-y-6 max-w-5xl min-w-0 mx-auto">
@@ -517,6 +537,32 @@ export const OrderDetailsAdminPage = () => {
               )}
             </div>
             
+            {isAdminUser && transfersNeeded.length > 0 && (
+              <div className="mb-4 p-4 rounded-xl bg-amber-50 border border-amber-200">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-[14px] font-semibold text-amber-900">Para surtir este pedido hay que traspasar</p>
+                    <ul className="mt-1 space-y-0.5 text-[13px] text-amber-900">
+                      {transfersNeeded.map(row => (
+                        <li key={row.product_id}>
+                          {row.purchase_code} → {keyCodes.get(row.product_id)} · {Math.min(Number(row.missing), Number(row.purchase_available ?? 0))} pzas
+                          {Number(row.purchase_available ?? 0) < Number(row.missing) && <span className="text-amber-700"> (solo hay {row.purchase_available} en el principal)</span>}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={createTransfer}
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-[13px] font-medium text-white bg-accent hover:bg-accent-hover rounded-lg transition-colors"
+                  >
+                    <ArrowRightLeft className="w-4 h-4" />
+                    Crear traspaso
+                  </button>
+                </div>
+              </div>
+            )}
+
             <div className="space-y-4 border-b border-gray-100 pb-4">
               {order.sales_order_items?.map((item: any) => (
                 <div key={item.id} className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
@@ -550,6 +596,15 @@ export const OrderDetailsAdminPage = () => {
                     <div>
                       <p className="text-[14px] font-medium text-ink">{item.products?.name}</p>
                       <p className="text-[12px] text-muted">{item.products?.code}</p>
+                      {showStock && (() => {
+                        const stock = stockStatus.get(item.product_id);
+                        if (!stock || stock.status === 'OK') return null;
+                        return (
+                          <span className={`inline-block mt-1 px-2 py-0.5 rounded-full text-[11px] font-medium ${stock.status === 'TRANSFER' ? 'bg-amber-50 text-amber-800' : 'bg-red-50 text-red-700'}`}>
+                            {stock.status === 'TRANSFER' ? 'Requiere traspaso' : 'Sin existencia'} · faltan {Number(stock.missing)}
+                          </span>
+                        );
+                      })()}
                       {!isShippedOrDelivered && ['ADMIN','AGENT'].includes(currentUserProfile?.user_type) && <OrderItemDiscount item={item} onSaved={()=>fetchOrder(id!)} />}
                     </div>
                   </div>

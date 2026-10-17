@@ -57,7 +57,7 @@ export const Header = ({ onMenuClick }: HeaderProps) => {
           onClick={onMenuClick}
           aria-controls="main-sidebar"
           aria-label="Abrir menú lateral"
-          className="flex h-8 w-8 items-center justify-center rounded-lg text-[#424245] transition-colors hover:bg-gray-100 lg:hidden"
+          className="flex h-8 w-8 items-center justify-center rounded-lg text-ink-2 transition-colors hover:bg-gray-100 lg:hidden"
           title="Abrir menu"
         >
           <Menu className="h-[18px] w-[18px]" />
@@ -67,14 +67,14 @@ export const Header = ({ onMenuClick }: HeaderProps) => {
       
       <div className="flex items-center gap-2 text-gray-500 sm:gap-3">
         {(!isAdmin && routeOptions.length === 1) ? (
-          <div className="hidden sm:flex h-8 items-center rounded-lg bg-gray-100 px-3 text-[13px] font-medium text-[#1D1D1F]">
+          <div className="hidden sm:flex h-8 items-center rounded-lg bg-gray-100 px-3 text-[13px] font-medium text-ink">
             {routeOptions[0].name}
           </div>
         ) : (
           <select
             value={globalSelectedRouteId}
             onChange={(e) => setGlobalSelectedRouteId(e.target.value)}
-            className="h-8 max-w-[120px] sm:max-w-[180px] rounded-lg border border-transparent bg-gray-100 px-2 sm:px-3 text-[12px] sm:text-[13px] font-medium text-[#1D1D1F] outline-none hover:bg-gray-200 focus:border-[#0066CC] focus:bg-white focus:ring-2 focus:ring-[#0066CC]/15"
+            className="h-8 max-w-[120px] sm:max-w-[180px] rounded-lg border border-transparent bg-gray-100 px-2 sm:px-3 text-[12px] sm:text-[13px] font-medium text-ink outline-none hover:bg-gray-200 focus:border-accent focus:bg-white focus:ring-2 focus:ring-accent/15"
           >
             {isAdmin && <option value="">Todas las rutas</option>}
             {routeOptions.map(r => (
@@ -94,8 +94,8 @@ export const Header = ({ onMenuClick }: HeaderProps) => {
             aria-haspopup="menu"
           >
             <div className="hidden min-w-0 text-right sm:block">
-              <p className="truncate text-xs font-medium text-[#1D1D1F]">{fullName}</p>
-              <p className="truncate text-[11px] text-[#86868B]">{profile?.email}</p>
+              <p className="truncate text-xs font-medium text-ink">{fullName}</p>
+              <p className="truncate text-[11px] text-muted">{profile?.email}</p>
             </div>
             <UserAvatar
               firstName={profile?.first_name}
@@ -104,7 +104,7 @@ export const Header = ({ onMenuClick }: HeaderProps) => {
               className="h-8 w-8"
               imageClassName="h-8 w-8 rounded-full object-cover"
             />
-            <ChevronDown className="hidden h-4 w-4 text-[#86868B] sm:block" />
+            <ChevronDown className="hidden h-4 w-4 text-muted sm:block" />
           </button>
 
           {isMenuOpen && (
@@ -121,8 +121,8 @@ export const Header = ({ onMenuClick }: HeaderProps) => {
                   imageClassName="h-12 w-12 rounded-full object-cover"
                 />
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold text-[#1D1D1F]">{fullName}</p>
-                  <p className="truncate text-[12px] text-[#86868B]">{profile?.email}</p>
+                  <p className="truncate text-sm font-semibold text-ink">{fullName}</p>
+                  <p className="truncate text-[12px] text-muted">{profile?.email}</p>
                 </div>
               </div>
 

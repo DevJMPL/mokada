@@ -47,15 +47,15 @@ export const AlertModal = ({
           {getIcon()}
         </div>
         
-        <h3 className="text-lg font-semibold text-[#1D1D1F] mb-2">{title}</h3>
-        <p className="text-[14px] text-[#86868B]">{message}</p>
+        <h3 className="text-lg font-semibold text-ink mb-2">{title}</h3>
+        <p className="text-[14px] text-muted">{message}</p>
       </div>
 
       <div className="mt-8 flex justify-center pt-4 border-t border-gray-100">
         <button
           type="button"
           onClick={onClose}
-          className="px-8 py-2 text-[14px] font-medium text-white bg-[#0066CC] rounded-lg hover:bg-[#0055FF] transition-colors"
+          className="px-8 py-2 text-[14px] font-medium text-white bg-accent rounded-lg hover:bg-accent-hover transition-colors"
         >
           Aceptar
         </button>

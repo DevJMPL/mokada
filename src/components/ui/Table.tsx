@@ -37,7 +37,7 @@ export function Table<T>({
   return (
     <div className="w-full overflow-x-auto border border-gray-200/60 rounded-2xl bg-white shadow-sm">
       <table className="w-full text-[13px] text-left">
-        <thead className="bg-white border-b border-gray-200/60 text-[#86868B] font-semibold">
+        <thead className="bg-white border-b border-gray-200/60 text-muted font-semibold">
           <tr>
             {columns.map((col, idx) => (
               <th key={col.id || String(col.accessorKey || idx)} className={`px-5 py-3.5 whitespace-nowrap ${col.className || ''}`}>
@@ -48,7 +48,7 @@ export function Table<T>({
         </thead>
         <tbody className="divide-y divide-gray-100">
           {data.map((row, rowIndex) => (
-            <tr key={rowIndex} className="hover:bg-[#F5F5F7]/50 transition-colors">
+            <tr key={rowIndex} className="hover:bg-canvas/50 transition-colors">
               {columns.map((col, colIndex) => (
                 <td key={col.id || String(col.accessorKey || colIndex)} className={`px-5 py-3.5 ${col.className || ''}`}>
                   {col.cell ? col.cell(row) : col.accessorKey ? (row[col.accessorKey] as React.ReactNode) : null}

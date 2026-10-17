@@ -55,8 +55,8 @@ export const DashboardPage = () => {
     if (active && payload && payload.length) {
       return (
         <div className="bg-white border border-gray-200/60 shadow-lg rounded-xl p-3 text-[13px]">
-          <p className="font-semibold text-[#1D1D1F] mb-1">{label || payload[0].name}</p>
-          <p className="text-[#0066CC] font-medium">
+          <p className="font-semibold text-ink mb-1">{label || payload[0].name}</p>
+          <p className="text-accent font-medium">
             {payload[0].value} unidades
           </p>
         </div>
@@ -72,8 +72,8 @@ export const DashboardPage = () => {
         {/* Gráfico 1: Salud del Inventario */}
         <div className="bg-white border border-gray-200/60 rounded-[24px] p-6 shadow-sm flex flex-col">
           <div className="flex items-center gap-2 mb-6">
-            <HeartPulse className="w-4 h-4 text-[#86868B]" />
-            <h3 className="text-[14px] font-semibold text-[#1D1D1F]">Salud del Inventario</h3>
+            <HeartPulse className="w-4 h-4 text-muted" />
+            <h3 className="text-[14px] font-semibold text-ink">Salud del Inventario</h3>
           </div>
           
           <div className="flex-1 min-h-[300px]">
@@ -98,7 +98,7 @@ export const DashboardPage = () => {
                   verticalAlign="bottom" 
                   height={36}
                   iconType="circle"
-                  formatter={(value) => <span className="text-[13px] text-[#1D1D1F] font-medium ml-1">{value}</span>}
+                  formatter={(value) => <span className="text-[13px] text-ink font-medium ml-1">{value}</span>}
                 />
               </PieChart>
             </ResponsiveContainer>
@@ -108,8 +108,8 @@ export const DashboardPage = () => {
         {/* Gráfico 2: Composición del Catálogo */}
         <div className="bg-white border border-gray-200/60 rounded-[24px] p-6 shadow-sm flex flex-col">
           <div className="flex items-center gap-2 mb-6">
-            <Boxes className="w-4 h-4 text-[#86868B]" />
-            <h3 className="text-[14px] font-semibold text-[#1D1D1F]">Composición del Catálogo</h3>
+            <Boxes className="w-4 h-4 text-muted" />
+            <h3 className="text-[14px] font-semibold text-ink">Composición del Catálogo</h3>
           </div>
 
           <div className="flex-1 min-h-[300px]">
@@ -156,26 +156,26 @@ export const DashboardPage = () => {
         {/* Top 5 Clientes */}
         <div className="bg-white border border-gray-200/60 rounded-[24px] p-6 shadow-sm">
           <div className="flex items-center gap-2 mb-6">
-            <Users className="w-4 h-4 text-[#86868B]" />
-            <h3 className="text-[14px] font-semibold text-[#1D1D1F]">Top Clientes (Compras)</h3>
+            <Users className="w-4 h-4 text-muted" />
+            <h3 className="text-[14px] font-semibold text-ink">Top Clientes (Compras)</h3>
           </div>
           <div className="space-y-4">
             {stats?.topCustomers?.length ? (
               stats.topCustomers.map((c: any, idx: number) => (
                 <div key={c.id} className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-[#0066CC] font-bold text-xs">
+                    <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-accent font-bold text-xs">
                       {idx + 1}
                     </div>
-                    <p className="text-[13px] font-medium text-[#1D1D1F] line-clamp-1">{c.name}</p>
+                    <p className="text-[13px] font-medium text-ink line-clamp-1">{c.name}</p>
                   </div>
-                  <span className="text-[13px] font-semibold text-[#86868B]">
+                  <span className="text-[13px] font-semibold text-muted">
                     {formatCurrency(c.total)}
                   </span>
                 </div>
               ))
             ) : (
-              <p className="text-[13px] text-[#86868B]">No hay datos suficientes.</p>
+              <p className="text-[13px] text-muted">No hay datos suficientes.</p>
             )}
           </div>
         </div>
@@ -183,8 +183,8 @@ export const DashboardPage = () => {
         {/* Top 5 Agentes (Pedidos) */}
         <div className="bg-white border border-gray-200/60 rounded-[24px] p-6 shadow-sm">
           <div className="flex items-center gap-2 mb-6">
-            <Award className="w-4 h-4 text-[#86868B]" />
-            <h3 className="text-[14px] font-semibold text-[#1D1D1F]">Top Agentes (Pedidos)</h3>
+            <Award className="w-4 h-4 text-muted" />
+            <h3 className="text-[14px] font-semibold text-ink">Top Agentes (Pedidos)</h3>
           </div>
           <div className="space-y-4">
             {stats?.topAgentsOrders?.length ? (
@@ -194,15 +194,15 @@ export const DashboardPage = () => {
                     <div className="w-8 h-8 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600 font-bold text-xs">
                       {idx + 1}
                     </div>
-                    <p className="text-[13px] font-medium text-[#1D1D1F] line-clamp-1">{a.name}</p>
+                    <p className="text-[13px] font-medium text-ink line-clamp-1">{a.name}</p>
                   </div>
-                  <span className="text-[13px] font-semibold text-[#86868B]">
+                  <span className="text-[13px] font-semibold text-muted">
                     {a.count} ped.
                   </span>
                 </div>
               ))
             ) : (
-              <p className="text-[13px] text-[#86868B]">No hay datos suficientes.</p>
+              <p className="text-[13px] text-muted">No hay datos suficientes.</p>
             )}
           </div>
         </div>
@@ -210,8 +210,8 @@ export const DashboardPage = () => {
         {/* Top 5 Agentes (Cobranza Efectivo) */}
         <div className="bg-white border border-gray-200/60 rounded-[24px] p-6 shadow-sm">
           <div className="flex items-center gap-2 mb-6">
-            <Banknote className="w-4 h-4 text-[#86868B]" />
-            <h3 className="text-[14px] font-semibold text-[#1D1D1F]">Top Agentes (Efectivo Recolectado)</h3>
+            <Banknote className="w-4 h-4 text-muted" />
+            <h3 className="text-[14px] font-semibold text-ink">Top Agentes (Efectivo Recolectado)</h3>
           </div>
           <div className="space-y-4">
             {stats?.topAgentsCollections?.length ? (
@@ -221,15 +221,15 @@ export const DashboardPage = () => {
                     <div className="w-8 h-8 rounded-full bg-purple-50 flex items-center justify-center text-purple-600 font-bold text-xs">
                       {idx + 1}
                     </div>
-                    <p className="text-[13px] font-medium text-[#1D1D1F] line-clamp-1">{a.name}</p>
+                    <p className="text-[13px] font-medium text-ink line-clamp-1">{a.name}</p>
                   </div>
-                  <span className="text-[13px] font-semibold text-[#86868B]">
+                  <span className="text-[13px] font-semibold text-muted">
                     {formatCurrency(a.total)}
                   </span>
                 </div>
               ))
             ) : (
-              <p className="text-[13px] text-[#86868B]">No hay datos suficientes.</p>
+              <p className="text-[13px] text-muted">No hay datos suficientes.</p>
             )}
           </div>
         </div>

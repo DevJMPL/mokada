@@ -18,8 +18,8 @@ export const EmptyState = ({
       <div className="w-12 h-12 mb-4 rounded-full bg-gray-50 flex items-center justify-center">
         {icon || <FolderSearch className="w-6 h-6 text-gray-400" />}
       </div>
-      <h3 className="text-lg font-semibold text-[#1D1D1F] tracking-tight">{title}</h3>
-      <p className="mt-1 text-[13px] text-[#86868B] max-w-sm">{description}</p>
+      <h3 className="text-lg font-semibold text-ink tracking-tight">{title}</h3>
+      <p className="mt-1 text-[13px] text-muted max-w-sm">{description}</p>
       {action && <div className="mt-6">{action}</div>}
     </div>
   );

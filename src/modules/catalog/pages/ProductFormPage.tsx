@@ -169,7 +169,7 @@ export const ProductFormPage = () => {
     return (
       <div className="flex flex-col lg:flex-row min-h-[calc(100vh-theme(spacing.16))] -m-4 md:-m-6 lg:-m-8">
         {/* Left Column Skeleton */}
-        <div className="w-full lg:w-[45%] bg-[#f5f5f7] flex flex-col p-6 md:p-8 lg:p-12 border-b lg:border-b-0 lg:border-r border-gray-200/60 lg:sticky lg:top-0 lg:h-[calc(100vh-theme(spacing.16))]">
+        <div className="w-full lg:w-[45%] bg-canvas flex flex-col p-6 md:p-8 lg:p-12 border-b lg:border-b-0 lg:border-r border-gray-200/60 lg:sticky lg:top-0 lg:h-[calc(100vh-theme(spacing.16))]">
           <div className="mb-8 h-4 w-32 bg-gray-200 rounded animate-pulse" />
           <div className="flex-1 flex items-center justify-center relative">
             <div className="w-full max-w-[420px] aspect-square bg-gray-200 rounded-2xl animate-pulse" />
@@ -211,12 +211,12 @@ export const ProductFormPage = () => {
       <form onSubmit={methods.handleSubmit(onSubmit)} className="flex flex-col lg:flex-row min-h-[calc(100vh-theme(spacing.16))] -m-4 md:-m-6 lg:-m-8">
         
         {/* Left Column (Image Hero) */}
-        <div className="w-full lg:w-[45%] bg-[#f5f5f7] flex flex-col p-6 md:p-8 lg:p-12 border-b lg:border-b-0 lg:border-r border-gray-200/60 lg:sticky lg:top-0 lg:h-[calc(100vh-theme(spacing.16))] overflow-hidden">
+        <div className="w-full lg:w-[45%] bg-canvas flex flex-col p-6 md:p-8 lg:p-12 border-b lg:border-b-0 lg:border-r border-gray-200/60 lg:sticky lg:top-0 lg:h-[calc(100vh-theme(spacing.16))] overflow-hidden">
           <div className="mb-8">
             <button 
               type="button" 
               onClick={() => navigate('/catalog/products')}
-              className="flex items-center gap-2 text-[14px] font-medium text-[#86868B] hover:text-[#1D1D1F] transition-colors"
+              className="flex items-center gap-2 text-[14px] font-medium text-muted hover:text-ink transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
               Volver al catálogo
@@ -237,10 +237,10 @@ export const ProductFormPage = () => {
         <div className="flex-1 flex flex-col bg-white">
           <div className="flex-1 p-6 md:p-8 lg:p-12 overflow-y-auto">
             <div className="mb-8">
-              <h2 className="text-[32px] font-bold tracking-tight text-[#1D1D1F] leading-tight mb-2">
+              <h2 className="text-[32px] font-bold tracking-tight text-ink leading-tight mb-2">
                 {isEditing ? 'Editar Producto' : 'Nuevo Producto'}
               </h2>
-              <p className="text-[15px] text-[#86868B]">
+              <p className="text-[15px] text-muted">
                 {isEditing ? 'Modifica los detalles, precios e inventario de este producto.' : 'Completa la información para registrar un nuevo elemento en el catálogo.'}
               </p>
             </div>
@@ -252,10 +252,10 @@ export const ProductFormPage = () => {
                   key={tab.id}
                   type="button"
                   onClick={() => setActiveTab(tab.id as any)}
-                  className={`flex-1 py-2 text-[13px] font-semibold rounded-lg transition-all ${
+                  className={`flex-1 py-2 text-[13px] font-semibold rounded-lg transition ${
                     activeTab === tab.id
-                      ? 'bg-white text-[#1D1D1F] shadow-sm'
-                      : 'text-[#86868B] hover:text-[#1D1D1F]'
+                      ? 'bg-white text-ink shadow-sm'
+                      : 'text-muted hover:text-ink'
                   }`}
                 >
                   {tab.label}
@@ -289,7 +289,7 @@ export const ProductFormPage = () => {
             <button 
               type="submit" 
               disabled={isSaving || isUploading}
-              className="flex items-center justify-center gap-2 bg-[#0066CC] hover:bg-[#005bb5] text-white px-8 py-3 rounded-xl text-[15px] font-semibold transition-colors shadow-sm disabled:opacity-50 min-w-[200px]"
+              className="flex items-center justify-center gap-2 bg-accent hover:bg-accent-hover text-white px-8 py-3 rounded-xl text-[15px] font-semibold transition-colors shadow-sm disabled:opacity-50 min-w-[200px]"
             >
               <Save className="w-5 h-5" />
               {(isSaving || isUploading) ? 'Guardando...' : 'Guardar Producto'}

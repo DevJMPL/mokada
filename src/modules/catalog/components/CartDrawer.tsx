@@ -28,10 +28,10 @@ export const CartDrawer = ({ isOpen, onClose }: CartDrawerProps) => {
       <div className={`fixed inset-y-0 right-0 z-50 w-full max-w-md bg-white shadow-2xl flex flex-col transform transition-transform duration-300 ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
         <div className="flex items-center justify-between p-6 border-b border-gray-100">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-[#0066CC]/10 rounded-full flex items-center justify-center">
-              <ShoppingCart className="w-5 h-5 text-[#0066CC]" />
+            <div className="w-10 h-10 bg-accent/10 rounded-full flex items-center justify-center">
+              <ShoppingCart className="w-5 h-5 text-accent" />
             </div>
-            <h2 className="text-xl font-bold text-[#1D1D1F]">Carrito</h2>
+            <h2 className="text-xl font-bold text-ink">Carrito</h2>
           </div>
           <button 
             onClick={onClose}
@@ -62,8 +62,8 @@ export const CartDrawer = ({ isOpen, onClose }: CartDrawerProps) => {
                   <div className="flex-1 flex flex-col">
                     <div className="flex justify-between items-start gap-2">
                       <div>
-                        <p className="text-[12px] text-[#0066CC] font-medium">{item.code}</p>
-                        <h4 className="text-[14px] font-semibold text-[#1D1D1F] line-clamp-2 leading-tight mt-0.5">{item.name}</h4>
+                        <p className="text-[12px] text-accent font-medium">{item.code}</p>
+                        <h4 className="text-[14px] font-semibold text-ink line-clamp-2 leading-tight mt-0.5">{item.name}</h4>
                       </div>
                       <button 
                         onClick={() => removeItem(item.product_id)}
@@ -89,7 +89,7 @@ export const CartDrawer = ({ isOpen, onClose }: CartDrawerProps) => {
                           <Plus className="w-3 h-3" />
                         </button>
                       </div>
-                      <span className="font-semibold text-[#1D1D1F]">
+                      <span className="font-semibold text-ink">
                         {new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(item.price * item.quantity)}
                       </span>
                     </div>
@@ -104,13 +104,13 @@ export const CartDrawer = ({ isOpen, onClose }: CartDrawerProps) => {
           <div className="p-6 border-t border-gray-100 bg-gray-50/50">
             <div className="flex justify-between items-center mb-6">
               <span className="text-gray-500 font-medium">Total Estimado</span>
-              <span className="text-2xl font-bold text-[#1D1D1F]">
+              <span className="text-2xl font-bold text-ink">
                 {new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(getTotal())}
               </span>
             </div>
             <button 
               onClick={handleCheckout}
-              className="w-full bg-[#0066CC] hover:bg-[#005bb5] text-white py-4 rounded-xl font-medium transition-colors flex items-center justify-center gap-2"
+              className="w-full bg-accent hover:bg-accent-hover text-white py-4 rounded-xl font-medium transition-colors flex items-center justify-center gap-2"
             >
               Proceder al Pago
               <ShoppingCart className="w-5 h-5" />

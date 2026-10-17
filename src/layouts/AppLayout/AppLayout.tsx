@@ -8,7 +8,7 @@ export const AppLayout = () => {
   const [isDesktopSidebarOpen, setIsDesktopSidebarOpen] = useState(true);
 
   return (
-    <div className="flex h-screen bg-[#F5F5F7] overflow-hidden text-[#1D1D1F] font-sans antialiased">
+    <div className="flex h-screen bg-canvas overflow-hidden text-ink font-sans antialiased">
       <Sidebar
         isOpen={isSidebarOpen}
         isDesktopOpen={isDesktopSidebarOpen}

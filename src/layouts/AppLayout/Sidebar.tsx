@@ -178,7 +178,7 @@ export const Sidebar = ({ isOpen, isDesktopOpen, onClose, onDesktopToggle }: Sid
       <aside
         id="main-sidebar"
         onMouseLeave={() => setTooltip(null)}
-        className={`fixed inset-y-0 left-0 z-40 flex h-full w-[260px] shrink-0 flex-col border-r border-gray-200/50 bg-[#F5F5F7] transition-[transform,width] duration-200 lg:static lg:translate-x-0 ${isDesktopOpen ? 'lg:w-[260px]' : 'lg:w-[68px]'} ${
+        className={`fixed inset-y-0 left-0 z-40 flex h-full w-[260px] shrink-0 flex-col border-r border-gray-200/50 bg-canvas transition-[transform,width] duration-200 lg:static lg:translate-x-0 ${isDesktopOpen ? 'lg:w-[260px]' : 'lg:w-[68px]'} ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -193,14 +193,14 @@ export const Sidebar = ({ isOpen, isDesktopOpen, onClose, onDesktopToggle }: Sid
             aria-expanded={isDesktopOpen}
             aria-label={isDesktopOpen ? 'Comprimir menú lateral' : 'Expandir menú lateral'}
             title={isDesktopOpen ? 'Comprimir menú' : 'Expandir menú'}
-            className="hidden h-8 w-8 items-center justify-center rounded-lg text-[#424245] transition-colors hover:bg-black/5 lg:flex"
+            className="hidden h-8 w-8 items-center justify-center rounded-lg text-ink-2 transition-colors hover:bg-black/5 lg:flex"
           >
             <Menu className="h-[18px] w-[18px]" />
           </button>
           <button
             type="button"
             onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-[#86868B] transition-colors hover:bg-black/5 hover:text-[#1D1D1F] lg:hidden"
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-muted transition-colors hover:bg-black/5 hover:text-ink lg:hidden"
             title="Cerrar menu"
           >
             <X className="h-4 w-4" />
@@ -213,7 +213,7 @@ export const Sidebar = ({ isOpen, isDesktopOpen, onClose, onDesktopToggle }: Sid
               <div key={`${section.label || section.path}-${idx}`} className={`px-3 ${isDesktopOpen ? '' : `lg:px-2 ${idx > 0 ? 'lg:border-t lg:border-gray-200/60 lg:pt-2' : ''}`}`}>
                 {section.items ? (
                   <>
-                    <h3 className={`px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-[#86868B] ${isDesktopOpen ? '' : 'lg:sr-only'}`}>
+                    <h3 className={`px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-muted ${isDesktopOpen ? '' : 'lg:sr-only'}`}>
                       {section.label}
                     </h3>
                     <div className="space-y-0.5">
@@ -233,7 +233,7 @@ export const Sidebar = ({ isOpen, isDesktopOpen, onClose, onDesktopToggle }: Sid
       {!isDesktopOpen && tooltip && createPortal(
         <div
           role="tooltip"
-          className="pointer-events-none fixed z-50 -translate-y-1/2 rounded-lg bg-[#1D1D1F] px-2.5 py-1.5 text-xs font-medium whitespace-nowrap text-white shadow-lg"
+          className="pointer-events-none fixed z-50 -translate-y-1/2 rounded-lg bg-ink px-2.5 py-1.5 text-xs font-medium whitespace-nowrap text-white shadow-lg"
           style={{ left: tooltip.left, top: tooltip.top }}
         >
           {tooltip.label}
@@ -276,7 +276,7 @@ const NavItem = ({ item, isDesktopOpen, onNavigate, onTooltip, onTooltipHide }: 
       onBlur={onTooltipHide}
       className={({ isActive }) =>
         `flex items-center gap-2.5 rounded-lg px-3 py-1.5 text-[13px] transition-colors ${isDesktopOpen ? '' : 'lg:h-10 lg:justify-center lg:px-0'} ${
-          isActive ? 'bg-[#0066CC] font-medium text-white shadow-sm' : 'text-[#1D1D1F] hover:bg-black/5'
+          isActive ? 'bg-accent font-medium text-white shadow-sm' : 'text-ink hover:bg-black/5'
         }`
       }
     >

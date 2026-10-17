@@ -59,9 +59,9 @@ export const LoginPage = () => {
   };
 
   return (
-    <main className="min-h-screen bg-[#F5F5F7] text-[#1D1D1F]">
+    <main className="min-h-screen bg-canvas text-ink">
       <div className="grid min-h-screen lg:grid-cols-[minmax(0,0.9fr)_minmax(420px,1fr)]">
-        <section className="hidden overflow-hidden border-r border-gray-200 bg-[#F5F5F7] lg:block">
+        <section className="hidden overflow-hidden border-r border-gray-200 bg-canvas lg:block">
           <LoginParallaxShowcase />
         </section>
 
@@ -70,14 +70,14 @@ export const LoginPage = () => {
             <div className="mb-7">
               <img src={logoMokada} alt="Mokada" className="mb-6 h-auto w-40 lg:hidden" />
               <h2 className="text-2xl font-semibold tracking-tight">Iniciar sesión</h2>
-              <p className="mt-1 text-sm text-[#86868B]">Entra con tu correo y contrasena.</p>
+              <p className="mt-1 text-sm text-muted">Entra con tu correo y contrasena.</p>
             </div>
 
             <form className="space-y-4" onSubmit={handleSubmit}>
               <label className="block">
-                <span className="mb-1.5 block text-[13px] font-medium text-[#1D1D1F]">Correo</span>
-                <div className="flex items-center rounded-lg border border-gray-300 bg-white px-3 focus-within:border-[#0066CC] focus-within:ring-2 focus-within:ring-[#0066CC]/15">
-                  <Mail className="h-4 w-4 text-[#86868B]" />
+                <span className="mb-1.5 block text-[13px] font-medium text-ink">Correo</span>
+                <div className="flex items-center rounded-lg border border-gray-300 bg-white px-3 focus-within:border-accent focus-within:ring-2 focus-within:ring-accent/15">
+                  <Mail className="h-4 w-4 text-muted" />
                   <input
                     type="email"
                     value={email}
@@ -90,9 +90,9 @@ export const LoginPage = () => {
               </label>
 
               <label className="block">
-                <span className="mb-1.5 block text-[13px] font-medium text-[#1D1D1F]">Contrasena</span>
-                <div className="flex items-center rounded-lg border border-gray-300 bg-white px-3 focus-within:border-[#0066CC] focus-within:ring-2 focus-within:ring-[#0066CC]/15">
-                  <Lock className="h-4 w-4 text-[#86868B]" />
+                <span className="mb-1.5 block text-[13px] font-medium text-ink">Contrasena</span>
+                <div className="flex items-center rounded-lg border border-gray-300 bg-white px-3 focus-within:border-accent focus-within:ring-2 focus-within:ring-accent/15">
+                  <Lock className="h-4 w-4 text-muted" />
                   <input
                     type="password"
                     value={password}
@@ -113,11 +113,11 @@ export const LoginPage = () => {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="flex h-11 w-full items-center justify-center rounded-lg bg-[#0066CC] px-4 text-sm font-semibold text-white transition-colors hover:bg-[#0057AD] disabled:cursor-not-allowed disabled:bg-gray-300"
+                className="flex h-11 w-full items-center justify-center rounded-lg bg-accent px-4 text-sm font-semibold text-white transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:bg-gray-300"
               >
                 {isSubmitting ? 'Entrando...' : 'Entrar'}
               </button>
-              <p className="pt-1 text-center text-[12px] font-medium text-[#A1A1A6] lg:hidden">
+              <p className="pt-1 text-center text-[12px] font-medium text-gray-400 lg:hidden">
                 Developed by Nizana Studio
               </p>
             </form>
@@ -234,9 +234,9 @@ const LoginParallaxShowcase = () => {
         </div>
       </div>
       <div className="absolute bottom-10 left-8 z-20 max-w-sm">
-        <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-[#86868B]">Autopartes</p>
-        <h1 className="mt-3 text-4xl font-semibold tracking-tight text-[#1D1D1F]">Acceso operativo</h1>
-        <p className="mt-4 text-[15px] leading-6 text-[#6E6E73]">
+        <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-muted">Autopartes</p>
+        <h1 className="mt-3 text-4xl font-semibold tracking-tight text-ink">Acceso operativo</h1>
+        <p className="mt-4 text-[15px] leading-6 text-muted">
           Gestiona catalogo, inventario y usuarios con cuentas verificadas por correo.
         </p>
       </div>

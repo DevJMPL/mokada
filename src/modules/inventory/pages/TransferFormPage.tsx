@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { useSaveTransfer, useUpdateTransfer, useTransferFull, useWarehouses, useStock, useSaleLinks } from '../hooks/useInventory';
 import { Plus, Trash2, Package } from 'lucide-react';
@@ -12,6 +12,8 @@ import { createClientUuid } from '../../../utils/createClientUuid';
 
 export const TransferFormPage = () => {
   const navigate = useNavigate();
+  // Prefilled from an order that needs stock: purchase code -> sale key and missing quantity.
+  const prefill = (useLocation().state as { prefill?: { destination_warehouse_id: string | null; notes: string; items: { product_id: string; destination_product_id: string; quantity: number }[] } } | null)?.prefill;
   const { id } = useParams<{ id: string }>();
   
   const { data: transferData, isLoading: isLoadingTransfer } = useTransferFull(id || null);
@@ -63,6 +65,22 @@ export const TransferFormPage = () => {
   const availableStock = stockData?.filter((item: any) => 
     item.warehouse_id === sourceWarehouseId && item.location_id == null && item.available_quantity > 0
   ) || [];
+
+  useEffect(() => {
+    if (id || !prefill || !warehouses || isDirty) return;
+    const source = warehouses.find((w: any) => w.is_active && w.warehouse_role === 'PURCHASE');
+    const destination = warehouses.find((w: any) => w.is_active && w.warehouse_role === 'SALES' && (!prefill.destination_warehouse_id || w.id === prefill.destination_warehouse_id))
+      || warehouses.find((w: any) => w.is_active && w.warehouse_role === 'SALES');
+    reset({
+      transfer_number: `TR-${createClientUuid().slice(0, 8).toUpperCase()}`,
+      source_warehouse_id: source?.id || '',
+      destination_warehouse_id: destination?.id || '',
+      notes: prefill.notes,
+      items: prefill.items.length > 0
+        ? prefill.items.map(item => ({ product_id: item.product_id, destination_product_id: item.destination_product_id, quantity: item.quantity, unit_price: null }))
+        : [{ product_id: '', destination_product_id: '', quantity: 1, unit_price: null }]
+    });
+  }, [id, prefill, warehouses, isDirty, reset]);
 
   // Populate form if editing
   useEffect(() => {

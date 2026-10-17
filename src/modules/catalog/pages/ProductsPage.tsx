@@ -56,13 +56,11 @@ export const ProductsPage = () => {
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
+        <div className="shrink-0">
           <h2 className="text-[28px] font-bold tracking-tight text-ink">Productos</h2>
-          <p className="text-[15px] text-muted mt-1">
-            {isPurchaseView ? 'Códigos del almacén principal con su costo' : 'Catálogo de venta de refacciones'}
-          </p>
+          <p className="text-[15px] text-muted mt-1">Catálogo de refacciones</p>
           {isAdmin && (
-            <div className="mt-3 inline-flex p-1 bg-gray-100/80 rounded-xl" role="tablist" aria-label="Tipo de catálogo">
+            <div className="mt-3 grid grid-cols-2 w-[19rem] max-w-full p-1 bg-gray-100/80 rounded-xl" role="tablist" aria-label="Tipo de catálogo">
               {([['SALE', 'Claves de venta'], ['PURCHASE', 'Códigos de compra']] as const).map(([value, label]) => (
                 <button
                   key={value}
@@ -70,7 +68,7 @@ export const ProductsPage = () => {
                   role="tab"
                   aria-selected={itemType === value}
                   onClick={() => setItemType(value)}
-                  className={`px-3 py-1.5 text-[13px] font-semibold rounded-lg transition-all ${
+                  className={`h-8 px-3 whitespace-nowrap text-center text-[13px] font-semibold rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent/40 ${
                     itemType === value ? 'bg-white text-ink shadow-sm' : 'text-muted hover:text-ink'
                   }`}
                 >

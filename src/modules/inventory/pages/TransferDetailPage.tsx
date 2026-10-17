@@ -2,14 +2,13 @@ import { useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useTransferFull, useCompleteTransfer, useCancelTransfer, useStock } from '../hooks/useInventory';
 import { StatusBadge } from '../../../components/ui/StatusBadge';
-import { formatDate } from '../../../utils/formatters';
+import { formatCurrency, formatDate } from '../../../utils/formatters';
 import { ConfirmModal } from '../../../components/ui/ConfirmModal';
 import { AlertModal } from '../../../components/ui/AlertModal';
 import { Modal } from '../../../components/ui/Modal';
-import { Table } from '../../../components/ui/Table';
-import { ArrowLeft, CheckCircle2, Pencil, XCircle, Package, List, LayoutGrid } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Pencil, XCircle } from 'lucide-react';
 import { catalogService } from '../../catalog/services/catalog.service';
-import { InventoryProductInfo } from '../components/InventoryProductInfo';
+import { TransferLine } from '../components/TransferLine';
 
 export const TransferDetailPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -30,7 +29,6 @@ export const TransferDetailPage = () => {
   const [confirmModal, setConfirmModal] = useState(false);
   const [cancelModal, setCancelModal] = useState(false);
   const [previewImage, setPreviewImage] = useState<{ url: string; title: string } | null>(null);
-  const [viewMode, setViewMode] = useState<'table' | 'grid'>('grid');
   
   const [alertModal, setAlertModal] = useState<{ isOpen: boolean; title: string; message: string; type: 'error' | 'success' | 'info' }>({
     isOpen: false,
@@ -193,124 +191,33 @@ export const TransferDetailPage = () => {
         )}
 
         <div>
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-[17px] font-semibold text-ink">Productos Involucrados</h3>
-            <div className="flex items-center bg-gray-100/80 p-1 rounded-xl border border-gray-200/50">
-              <button
-                onClick={() => setViewMode('table')}
-                className={`p-1.5 rounded-lg transition ${
-                  viewMode === 'table' 
-                    ? 'bg-white shadow-sm text-ink' 
-                    : 'text-gray-500 hover:text-ink'
-                }`}
-                title="Vista de Tabla"
-              >
-                <List className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => setViewMode('grid')}
-                className={`p-1.5 rounded-lg transition ${
-                  viewMode === 'grid' 
-                    ? 'bg-white shadow-sm text-ink' 
-                    : 'text-gray-500 hover:text-ink'
-                }`}
-                title="Vista de Cuadrícula"
-              >
-                <LayoutGrid className="w-4 h-4" />
-              </button>
-            </div>
+          <div className="flex items-baseline justify-between mb-3">
+            <h3 className="text-[17px] font-semibold text-ink">Productos</h3>
+            {transfer.items?.length > 0 && <p className="text-[13px] text-muted">
+              {transfer.items.length} {transfer.items.length === 1 ? 'partida' : 'partidas'} · Total {formatCurrency(transfer.items.reduce((sum: number, item: any) => sum + Number(item.unit_price ?? 0) * Number(item.quantity), 0))}
+            </p>}
           </div>
-          
-          {viewMode === 'table' ? (
-            <Table
-              data={transfer.items || []}
-              columns={[
-                { 
-                  header: 'Código', 
-                  cell: (item: any) => (
-                    <div className="leading-tight">
-                      <span className="font-medium text-accent">{item.products?.code}</span>
-                      {item.destination && item.destination.id !== item.product_id && (
-                        <span className="block text-[12px] text-muted">Entra como {item.destination.code}</span>
-                      )}
-                    </div>
-                  ) 
-                },
-                { 
-                  header: 'Producto', 
-                  cell: (item: any) => (
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 flex items-center justify-center shrink-0 bg-gray-50 border border-gray-100 rounded-lg overflow-hidden">
-                        {item.products?.image_url ? (
-                          <img 
-                            src={catalogService.getProductImageUrl(item.products.image_url) ?? undefined}
-                            alt={item.products?.name} 
-                            className="w-full h-full object-cover cursor-pointer hover:opacity-80 transition-opacity"
-                            onClick={() => setPreviewImage({ url: catalogService.getProductImageUrl(item.products.image_url) || '', title: item.products?.name })}
-                          />
-                        ) : (
-                          <Package className="w-5 h-5 text-gray-300 stroke-[1.5]" />
-                        )}
-                      </div>
-                      <span className="font-medium text-ink">{item.products?.name}</span>
-                    </div>
-                  )
-                },
-                { header: 'Cantidad', accessorKey: 'quantity', className: 'font-semibold' },
-                { header: 'Precio de traspaso', cell: (item: any) => item.unit_price == null ? 'Sin costo' : new Intl.NumberFormat('es-MX', {style: 'currency', currency: 'MXN'}).format(item.unit_price) },
-                { header: 'Inventario y precios', cell: (item: any) => <div className="min-w-80"><InventoryProductInfo productId={item.destination_product_id || item.product_id} source={stock?.find(row => row.product_id===item.product_id && row.warehouse_id===transfer.source_warehouse_id && row.location_id==null)} destination={stock?.find(row => row.product_id===(item.destination_product_id || item.product_id) && row.warehouse_id===transfer.destination_warehouse_id && row.location_id==null)} sourceName={transfer.source?.name} destinationName={transfer.destination?.name} quantity={transfer.status==='DRAFT' ? Number(item.quantity) : undefined} unitPrice={item.unit_price} stockLoaded={!loadingStock && !stockError} /></div> }
-              ]}
-            />
-          ) : (
-            <div className="grid grid-cols-1 gap-5">
-              {transfer.items?.map((item: any, index: number) => {
-                const imageUrl = item.products?.image_url ? catalogService.getProductImageUrl(item.products.image_url) : null;
-                return (
-                  <div 
-                    key={item.id || index}
-                    className="group min-w-0 bg-white border border-gray-200/60 rounded-[24px] overflow-hidden shadow-sm hover:shadow-lg transition duration-300 grid grid-cols-1 md:grid-cols-[14rem_minmax(0,1fr)]"
-                  >
-                    {/* Image Section */}
-                    <div className="relative aspect-[4/3] md:aspect-auto md:min-h-72 bg-white border-b md:border-b-0 md:border-r border-gray-100 p-6 flex items-center justify-center overflow-hidden">
-                      {imageUrl ? (
-                        <img 
-                          src={imageUrl} 
-                          alt={item.products?.name} 
-                          className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500 cursor-pointer"
-                          onClick={() => setPreviewImage({ url: imageUrl, title: item.products?.name })}
-                        />
-                      ) : (
-                        <Package className="w-20 h-20 text-gray-200 stroke-[1] group-hover:scale-105 transition-transform duration-500" />
-                      )}
-                    </div>
-
-                    {/* Info Section */}
-                    <div className="p-4 sm:p-5 min-w-0 flex flex-col">
-                      <div className="flex flex-wrap items-start justify-between gap-2 mb-2">
-                        <span className="min-w-0 text-[12px] font-medium text-accent break-all">
-                          {item.products?.code}
-                          {item.destination && item.destination.id !== item.product_id && ` → ${item.destination.code}`}
-                        </span>
-                        <span className="shrink-0 text-[12px] font-medium text-emerald-600">
-                          • Traspaso
-                        </span>
-                      </div>
-                      
-                      <h3 className="text-[15px] font-semibold text-ink leading-snug mb-2 break-words" title={item.products?.name}>
-                        {item.products?.name}
-                      </h3>
-                      <InventoryProductInfo productId={item.destination_product_id || item.product_id} source={stock?.find(row => row.product_id===item.product_id && row.warehouse_id===transfer.source_warehouse_id && row.location_id==null)} destination={stock?.find(row => row.product_id===(item.destination_product_id || item.product_id) && row.warehouse_id===transfer.destination_warehouse_id && row.location_id==null)} sourceName={transfer.source?.name} destinationName={transfer.destination?.name} quantity={transfer.status==='DRAFT' ? Number(item.quantity) : undefined} unitPrice={item.unit_price} stockLoaded={!loadingStock && !stockError} />
-                      
-                      <div className="mt-auto pt-4 border-t border-gray-100 flex flex-wrap gap-x-8 gap-y-3">
-                        <div><p className="text-[11px] text-muted uppercase tracking-wider">Cantidad</p><p className="text-[14px] font-semibold text-ink mt-1">{item.quantity}</p></div>
-                        <div><p className="text-[11px] text-muted uppercase tracking-wider">Precio de traspaso</p><p className="text-[14px] font-semibold text-ink mt-1">{item.unit_price == null ? 'Sin costo' : new Intl.NumberFormat('es-MX', {style: 'currency', currency: 'MXN'}).format(item.unit_price)}</p></div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
+          <div className="space-y-3">
+            {transfer.items?.map((item: any, index: number) => {
+              const imageUrl = item.products?.image_url ? catalogService.getProductImageUrl(item.products.image_url) : null;
+              const source = stock?.find(row => row.product_id === item.product_id && row.warehouse_id === transfer.source_warehouse_id && row.location_id == null);
+              return (
+                <TransferLine
+                  key={item.id || index}
+                  code={item.products?.code}
+                  destinationCode={item.destination?.code}
+                  name={item.products?.name}
+                  imageUrl={imageUrl}
+                  quantity={Number(item.quantity)}
+                  unitPrice={item.unit_price}
+                  isDraft={transfer.status === 'DRAFT' && !loadingStock && !stockError}
+                  available={source?.available_quantity ?? 0}
+                  missingCost={source?.average_cost == null || source?.original_average_cost == null}
+                  onImageClick={imageUrl ? () => setPreviewImage({ url: imageUrl, title: item.products?.name }) : undefined}
+                />
+              );
+            })}
+          </div>
         </div>
       </div>
 

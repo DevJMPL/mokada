@@ -266,7 +266,7 @@ export const ProductFormPage = () => {
             </div>
 
             {/* Item type: fixed once created */}
-            <div className="flex p-1 space-x-1 bg-gray-100/80 rounded-xl max-w-sm mb-6" role="radiogroup" aria-label="Tipo de producto">
+            <div className="grid grid-cols-2 w-full max-w-[19rem] p-1 bg-gray-100/80 rounded-xl mb-6" role="radiogroup" aria-label="Tipo de producto">
               {([['SALE', 'Clave de venta'], ['PURCHASE', 'Código de compra']] as const).map(([value, label]) => (
                 <button
                   key={value}
@@ -278,7 +278,7 @@ export const ProductFormPage = () => {
                     methods.setValue('item_type', value, { shouldDirty: true });
                     if (activeTab === 'prices') setActiveTab('general');
                   }}
-                  className={`flex-1 py-2 text-[13px] font-semibold rounded-lg transition-all disabled:cursor-default ${
+                  className={`h-8 px-3 whitespace-nowrap text-center text-[13px] font-semibold rounded-lg transition-colors disabled:cursor-default focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent/40 ${
                     itemType === value ? 'bg-white text-ink shadow-sm' : 'text-muted hover:text-ink disabled:hover:text-muted'
                   }`}
                 >

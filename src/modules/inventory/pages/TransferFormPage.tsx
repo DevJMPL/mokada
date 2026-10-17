@@ -2,12 +2,12 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { useSaveTransfer, useUpdateTransfer, useTransferFull, useWarehouses, useStock, useSaleLinks } from '../hooks/useInventory';
-import { Plus, Trash2, Package, Tag } from 'lucide-react';
+import { Plus, Trash2, Package } from 'lucide-react';
 import { AlertModal } from '../../../components/ui/AlertModal';
 import { SearchSelect } from '../../../components/ui/SearchSelect';
 import { Modal } from '../../../components/ui/Modal';
 import { catalogService } from '../../catalog/services/catalog.service';
-import { InventoryProductInfo } from '../components/InventoryProductInfo';
+import { TransferFlowSummary } from '../components/TransferLine';
 import { createClientUuid } from '../../../utils/createClientUuid';
 
 export const TransferFormPage = () => {
@@ -230,11 +230,6 @@ export const TransferFormPage = () => {
             />
           </div>
 
-          <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-xl text-[13px] text-amber-800">
-            <Tag className="w-5 h-5 shrink-0" />
-            El precio de traspaso se toma automáticamente del costo promedio del almacén de compras. El almacén principal queda sin margen y el almacén de ventas recibe un costo válido para calcular la ganancia de los pedidos.
-          </div>
-
           <div>
             <label className="block text-[13px] font-medium text-ink mb-1.5">Notas / Referencia</label>
             <input
@@ -285,7 +280,7 @@ export const TransferFormPage = () => {
 
                 return (
                   <div key={field.id} className="p-4 sm:p-5 bg-white border border-gray-200/60 shadow-sm rounded-[16px] relative group min-w-0 overflow-visible">
-                    <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_20rem] gap-5 xl:gap-6 min-w-0">
+                    <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_12rem] gap-5 xl:gap-6 min-w-0">
                       
                       {/* Product Selector / Visual Info */}
                       <div className="min-w-0">
@@ -341,10 +336,6 @@ export const TransferFormPage = () => {
                                 </h4>
                               </div>
                               <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2">
-                                <div className="inline-flex max-w-full flex-wrap items-center gap-1.5 text-[12px] text-gray-600 bg-gray-50 px-2 py-1 rounded-md border border-gray-100">
-                                  <span>Disponible en origen:</span>
-                                  <span className="font-semibold text-ink">{productStockInfo?.available_quantity || 0}</span>
-                                </div>
                                 <button
                                   type="button"
                                   onClick={() => {setValue(`items.${index}.product_id`, ''); setValue(`items.${index}.destination_product_id`, ''); setValue(`items.${index}.unit_price`, null); setValue(`items.${index}.quantity`, 1);}}
@@ -388,7 +379,7 @@ export const TransferFormPage = () => {
 
                       {/* Quantity + Price Inputs */}
                       <div className="min-w-0 flex flex-col justify-center border-t xl:border-t-0 xl:border-l border-gray-100 pt-5 xl:pt-0 xl:pl-6 gap-3">
-                        <div className="grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] items-end gap-3 min-w-0">
+                        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3 min-w-0">
                           <div className="min-w-0">
                             <label className="block text-[12px] font-medium text-muted mb-1">Cantidad *</label>
                             <input
@@ -408,30 +399,12 @@ export const TransferFormPage = () => {
                             {errors.items?.[index]?.quantity && <p className="text-red-600 text-[11px] mt-1">Cantidad inválida o superior al disponible.</p>}
                           </div>
 
-                          <div className="min-w-0">
-                            <label className="block text-[12px] font-medium text-muted mb-1 truncate flex items-center gap-1" title="Precio de traspaso (MXN)">
-                              <Tag className="w-3 h-3 text-amber-500" />
-                              Precio de traspaso
-                            </label>
-                            <div className="relative" title="Se calcula con el costo promedio del almacén de origen">
-                              <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[13px] text-gray-400 font-medium">$</span>
-                              <input
-                                type="number"
-                                value={stockItem?.average_cost ?? ''}
-                                readOnly
-                                disabled={!currentProductId || stockItem?.average_cost == null}
-                                placeholder="0.00"
-                                className="w-full pl-6 pr-2 py-2 bg-gray-50 border border-gray-200/60 rounded-lg text-[14px] text-ink disabled:opacity-50"
-                              />
-                              {currentProductId && stockItem?.average_cost == null && <p className="text-red-600 text-[11px] mt-1">Configura el costo del origen.</p>}
-                            </div>
-                          </div>
 
                           <button
                             type="button"
                             onClick={() => remove(index)}
                             disabled={fields.length === 1}
-                            className="flex h-10 w-full sm:w-10 items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                            className="flex h-10 w-10 items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
                             title="Eliminar producto"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -440,7 +413,7 @@ export const TransferFormPage = () => {
                       </div>
 
                     </div>
-                    {currentProductId && <InventoryProductInfo source={stockItem} destination={destinationStock} sourceName={sourceWarehouse?.name} destinationName={destinationWarehouse?.name} productId={currentDestinationId} quantity={Number(watch(`items.${index}.quantity`))} unitPrice={stockItem?.average_cost} stockLoaded={!loadingStock && !stockError} />}
+                    {currentProductId && <TransferFlowSummary source={stockItem} destination={destinationStock} sourceName={sourceWarehouse?.name} destinationName={destinationWarehouse?.name} destinationCode={productLinks.find(link => link.sale_product_id === currentDestinationId)?.sale?.code} quantity={Number(watch(`items.${index}.quantity`))} stockLoaded={!loadingStock && !stockError} />}
                   </div>
                 );
               })}

@@ -15,7 +15,7 @@ import {
 import { supabase } from '../../../lib/supabase/client';
 import { returnsService } from '../services/returns.service';
 import { statusConfig } from './OrdersPage';
-import { useRouteStore } from '../../../store/routeStore';
+import { useRouteScope } from '../../route-operations/hooks/useRouteScope';
 
 type WarrantyStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
 
@@ -34,7 +34,7 @@ export const WarrantyOrdersPage = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<'ALL' | WarrantyStatus>('ALL');
-  const { globalSelectedRouteId } = useRouteStore();
+  const { matchesRoute } = useRouteScope();
 
   const fetchWarranties = useCallback(async (showLoader = false) => {
     try {
@@ -79,9 +79,8 @@ export const WarrantyOrdersPage = () => {
     const term = search.trim().toLowerCase();
     const matchesSearch = !term || [warranty.id, order?.id, product?.code, product?.name, customer?.name, customer?.email]
       .some(value => String(value || '').toLowerCase().includes(term));
-    const matchesRoute = !globalSelectedRouteId || branch?.route_id === globalSelectedRouteId;
-    return matchesSearch && matchesRoute && (statusFilter === 'ALL' || warranty.status === statusFilter);
-  }), [search, statusFilter, warranties, globalSelectedRouteId]);
+    return matchesSearch && matchesRoute(branch?.route_id) && (statusFilter === 'ALL' || warranty.status === statusFilter);
+  }), [search, statusFilter, warranties, matchesRoute]);
 
   return (
     <div className="space-y-6">

@@ -4,8 +4,7 @@ import { ChevronDown, LogOut, Menu } from 'lucide-react';
 import { NotificationBell } from '../../modules/notifications/NotificationBell';
 import { UserAvatar } from '../../components/ui/UserAvatar';
 import { useAuth } from '../../modules/auth/context/useAuth';
-import { useCustomerRoutes } from '../../modules/customers/hooks/useCustomers';
-import { useRouteStore } from '../../store/routeStore';
+import { useRouteScope } from '../../modules/route-operations/hooks/useRouteScope';
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -14,8 +13,7 @@ interface HeaderProps {
 export const Header = ({ onMenuClick }: HeaderProps) => {
   const { profile, isAdmin, signOut } = useAuth();
   const navigate = useNavigate();
-  const { data: routeOptions = [] } = useCustomerRoutes();
-  const { globalSelectedRouteId, setGlobalSelectedRouteId } = useRouteStore();
+  const { routeOptions, selectedRouteId, setSelectedRouteId, isLoading: isLoadingRoutes } = useRouteScope();
   const menuRef = useRef<HTMLDivElement>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const fullName = profile ? `${profile.first_name} ${profile.last_name}` : 'Usuario';
@@ -30,19 +28,6 @@ export const Header = ({ onMenuClick }: HeaderProps) => {
     document.addEventListener('pointerdown', handlePointerDown);
     return () => document.removeEventListener('pointerdown', handlePointerDown);
   }, []);
-
-  useEffect(() => {
-    // If we have options but no selection
-    if (routeOptions.length > 0 && !globalSelectedRouteId && !isAdmin) {
-      setGlobalSelectedRouteId(routeOptions[0].id);
-    }
-    // Also, if the current selected route is not valid anymore (e.g. user changed)
-    if (!isAdmin && globalSelectedRouteId && !routeOptions.find(r => r.id === globalSelectedRouteId)) {
-      if (routeOptions.length > 0) {
-        setGlobalSelectedRouteId(routeOptions[0].id);
-      }
-    }
-  }, [isAdmin, routeOptions, globalSelectedRouteId, setGlobalSelectedRouteId]);
 
   const handleSignOut = async () => {
     await signOut();
@@ -66,17 +51,20 @@ export const Header = ({ onMenuClick }: HeaderProps) => {
       </div>
       
       <div className="flex items-center gap-2 text-gray-500 sm:gap-3">
-        {(!isAdmin && routeOptions.length === 1) ? (
-          <div className="hidden sm:flex h-8 items-center rounded-lg bg-gray-100 px-3 text-[13px] font-medium text-[#1D1D1F]">
-            {routeOptions[0].name}
-          </div>
+        {!isAdmin && routeOptions.length <= 1 ? (
+          !isLoadingRoutes && (
+            <div className="hidden sm:flex h-8 items-center rounded-lg bg-gray-100 px-3 text-[13px] font-medium text-[#1D1D1F]">
+              {routeOptions[0]?.name ?? 'Sin rutas asignadas'}
+            </div>
+          )
         ) : (
           <select
-            value={globalSelectedRouteId}
-            onChange={(e) => setGlobalSelectedRouteId(e.target.value)}
+            value={selectedRouteId}
+            onChange={(e) => setSelectedRouteId(e.target.value)}
+            aria-label="Filtrar por ruta"
             className="h-8 max-w-[120px] sm:max-w-[180px] rounded-lg border border-transparent bg-gray-100 px-2 sm:px-3 text-[12px] sm:text-[13px] font-medium text-[#1D1D1F] outline-none hover:bg-gray-200 focus:border-[#0066CC] focus:bg-white focus:ring-2 focus:ring-[#0066CC]/15"
           >
-            {isAdmin && <option value="">Todas las rutas</option>}
+            <option value="">{isAdmin ? 'Todas las rutas' : 'Todas mis rutas'}</option>
             {routeOptions.map(r => (
               <option key={r.id} value={r.id}>{r.name}</option>
             ))}

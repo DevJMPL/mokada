@@ -159,7 +159,7 @@ export const TransferFormPage = () => {
   if (id && isLoadingTransfer) {
     return (
       <div className="py-12 flex justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0066CC]"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent"></div>
       </div>
     );
   }
@@ -167,10 +167,10 @@ export const TransferFormPage = () => {
   return (
     <div className="max-w-6xl mx-auto space-y-6 min-w-0">
       <div>
-        <h2 className="text-[28px] font-bold tracking-tight text-[#1D1D1F]">
+        <h2 className="text-[28px] font-bold tracking-tight text-ink">
           {id ? 'Editar Traspaso' : 'Nuevo Traspaso'}
         </h2>
-        <p className="text-[15px] text-[#86868B]">
+        <p className="text-[15px] text-muted">
           {id ? `Editando borrador ${transferData?.transfer_number}` : 'Mover inventario entre almacenes'}
         </p>
       </div>
@@ -236,11 +236,11 @@ export const TransferFormPage = () => {
           </div>
 
           <div>
-            <label className="block text-[13px] font-medium text-[#1D1D1F] mb-1.5">Notas / Referencia</label>
+            <label className="block text-[13px] font-medium text-ink mb-1.5">Notas / Referencia</label>
             <input
               type="text"
               {...register('notes')}
-              className="w-full px-3 py-2 bg-gray-50 border border-transparent rounded-lg focus:bg-white focus:border-[#0066CC] focus:ring-1 focus:ring-[#0066CC] text-[14px] transition-all"
+              className="w-full px-3 py-2 bg-gray-50 border border-transparent rounded-lg focus:bg-white focus:border-accent focus:ring-4 focus:ring-accent/15 text-[14px] transition"
               placeholder="Ej: Traspaso urgente para sucursal norte"
             />
           </div>
@@ -248,8 +248,8 @@ export const TransferFormPage = () => {
           <div className="border-t border-gray-100 pt-6">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-6">
               <div className="min-w-0">
-                <h3 className="text-[17px] font-semibold text-[#1D1D1F]">Productos a Transferir</h3>
-                <p className="text-[13px] text-[#86868B]">
+                <h3 className="text-[17px] font-semibold text-ink">Productos a Transferir</h3>
+                <p className="text-[13px] text-muted">
                   {sourceWarehouseId 
                     ? `Mostrando ${availableStock.length} productos disponibles en el origen.`
                     : 'Selecciona un almacén de origen para ver el inventario disponible.'}
@@ -259,7 +259,7 @@ export const TransferFormPage = () => {
                 type="button"
                 onClick={() => append({ product_id: '', destination_product_id: '', quantity: 1, unit_price: null })}
                 disabled={!sourceWarehouseId}
-                className="flex w-full sm:w-auto items-center justify-center gap-2 px-3 py-2 text-[13px] font-medium text-[#0066CC] bg-[#0066CC]/10 rounded-lg hover:bg-[#0066CC]/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex w-full sm:w-auto items-center justify-center gap-2 px-3 py-2 text-[13px] font-medium text-accent bg-accent/10 rounded-lg hover:bg-accent/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Plus className="w-4 h-4" />
                 Añadir Producto
@@ -333,22 +333,22 @@ export const TransferFormPage = () => {
                             </button>
                             <div className="flex-1 min-w-0 mt-1">
                               <div>
-                                <span className="text-[12px] font-medium text-[#0066CC] block mb-0.5">
+                                <span className="text-[12px] font-medium text-accent block mb-0.5">
                                   {productStockInfo?.product_code || '---'}
                                 </span>
-                                <h4 className="text-[14px] font-semibold text-[#1D1D1F] line-clamp-1 pr-4">
+                                <h4 className="text-[14px] font-semibold text-ink line-clamp-1 pr-4">
                                   {productStockInfo?.product_name || 'Cargando producto...'}
                                 </h4>
                               </div>
                               <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2">
                                 <div className="inline-flex max-w-full flex-wrap items-center gap-1.5 text-[12px] text-gray-600 bg-gray-50 px-2 py-1 rounded-md border border-gray-100">
                                   <span>Disponible en origen:</span>
-                                  <span className="font-semibold text-[#1D1D1F]">{productStockInfo?.available_quantity || 0}</span>
+                                  <span className="font-semibold text-ink">{productStockInfo?.available_quantity || 0}</span>
                                 </div>
                                 <button
                                   type="button"
                                   onClick={() => {setValue(`items.${index}.product_id`, ''); setValue(`items.${index}.destination_product_id`, ''); setValue(`items.${index}.unit_price`, null); setValue(`items.${index}.quantity`, 1);}}
-                                  className="text-[12px] text-[#0066CC] hover:underline font-medium"
+                                  className="text-[12px] text-accent hover:underline font-medium"
                                 >
                                   Cambiar producto
                                 </button>
@@ -390,7 +390,7 @@ export const TransferFormPage = () => {
                       <div className="min-w-0 flex flex-col justify-center border-t xl:border-t-0 xl:border-l border-gray-100 pt-5 xl:pt-0 xl:pl-6 gap-3">
                         <div className="grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] items-end gap-3 min-w-0">
                           <div className="min-w-0">
-                            <label className="block text-[12px] font-medium text-[#86868B] mb-1">Cantidad *</label>
+                            <label className="block text-[12px] font-medium text-muted mb-1">Cantidad *</label>
                             <input
                               type="number"
                               min="0.01"
@@ -403,13 +403,13 @@ export const TransferFormPage = () => {
                                 valueAsNumber: true 
                               })}
                               disabled={!currentProductId}
-                              className="w-full px-3 py-2 bg-gray-50 border border-transparent rounded-lg focus:bg-white focus:border-[#0066CC] focus:ring-1 focus:ring-[#0066CC] text-[14px] transition-all disabled:opacity-50"
+                              className="w-full px-3 py-2 bg-gray-50 border border-transparent rounded-lg focus:bg-white focus:border-accent focus:ring-4 focus:ring-accent/15 text-[14px] transition disabled:opacity-50"
                             />
                             {errors.items?.[index]?.quantity && <p className="text-red-600 text-[11px] mt-1">Cantidad inválida o superior al disponible.</p>}
                           </div>
 
                           <div className="min-w-0">
-                            <label className="block text-[12px] font-medium text-[#86868B] mb-1 truncate flex items-center gap-1" title="Precio de traspaso (MXN)">
+                            <label className="block text-[12px] font-medium text-muted mb-1 truncate flex items-center gap-1" title="Precio de traspaso (MXN)">
                               <Tag className="w-3 h-3 text-amber-500" />
                               Precio de traspaso
                             </label>
@@ -421,7 +421,7 @@ export const TransferFormPage = () => {
                                 readOnly
                                 disabled={!currentProductId || stockItem?.average_cost == null}
                                 placeholder="0.00"
-                                className="w-full pl-6 pr-2 py-2 bg-gray-50 border border-gray-200/60 rounded-lg text-[14px] text-[#1D1D1F] disabled:opacity-50"
+                                className="w-full pl-6 pr-2 py-2 bg-gray-50 border border-gray-200/60 rounded-lg text-[14px] text-ink disabled:opacity-50"
                               />
                               {currentProductId && stockItem?.average_cost == null && <p className="text-red-600 text-[11px] mt-1">Configura el costo del origen.</p>}
                             </div>
@@ -458,7 +458,7 @@ export const TransferFormPage = () => {
             <button
               type="submit"
               disabled={isPending || loadingStock || !!stockError || (!!id && transferData?.status !== 'DRAFT')}
-              className="w-full sm:w-auto px-5 py-2.5 text-[14px] font-medium text-white bg-[#0066CC] rounded-xl hover:bg-[#0055FF] transition-colors shadow-sm disabled:opacity-50"
+              className="w-full sm:w-auto px-5 py-2.5 text-[14px] font-medium text-white bg-accent rounded-xl hover:bg-accent-hover transition-colors shadow-sm disabled:opacity-50"
             >
               {isPending ? 'Guardando...' : id ? 'Actualizar Borrador' : 'Crear Borrador'}
             </button>

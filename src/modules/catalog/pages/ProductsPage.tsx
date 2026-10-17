@@ -57,8 +57,8 @@ export const ProductsPage = () => {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-[28px] font-bold tracking-tight text-[#1D1D1F]">Productos</h2>
-          <p className="text-[15px] text-[#86868B] mt-1">
+          <h2 className="text-[28px] font-bold tracking-tight text-ink">Productos</h2>
+          <p className="text-[15px] text-muted mt-1">
             {isPurchaseView ? 'Códigos del almacén principal con su costo' : 'Catálogo de venta de refacciones'}
           </p>
           {isAdmin && (
@@ -71,7 +71,7 @@ export const ProductsPage = () => {
                   aria-selected={itemType === value}
                   onClick={() => setItemType(value)}
                   className={`px-3 py-1.5 text-[13px] font-semibold rounded-lg transition-all ${
-                    itemType === value ? 'bg-white text-[#1D1D1F] shadow-sm' : 'text-[#86868B] hover:text-[#1D1D1F]'
+                    itemType === value ? 'bg-white text-ink shadow-sm' : 'text-muted hover:text-ink'
                   }`}
                 >
                   {label}
@@ -87,7 +87,7 @@ export const ProductsPage = () => {
             <input 
               type="text" 
               placeholder={isAdmin ? 'Buscar por clave, código o nombre...' : 'Buscar por clave o nombre...'}
-              className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200/60 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0066CC]/20 focus:border-[#0066CC] text-[14px] transition-all shadow-sm"
+              className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200/60 rounded-xl focus:outline-none focus:ring-4 focus:ring-accent/15 focus:border-accent text-[14px] transition shadow-sm"
               value={search}
               onChange={(e) => {
                 setSearch(e.target.value);
@@ -136,7 +136,7 @@ export const ProductsPage = () => {
           {isAdmin && (
             <button 
               onClick={() => navigate(isPurchaseView ? '/catalog/products/new?type=PURCHASE' : '/catalog/products/new')}
-              className="flex flex-1 sm:flex-none items-center justify-center gap-2 bg-[#0066CC] hover:bg-[#005bb5] text-white px-4 py-2 rounded-xl text-[14px] font-medium transition-colors whitespace-nowrap shadow-sm"
+              className="flex flex-1 sm:flex-none items-center justify-center gap-2 bg-accent hover:bg-accent-hover text-white px-4 py-2 rounded-xl text-[14px] font-medium transition-colors whitespace-nowrap shadow-sm"
             >
               <Plus className="w-4 h-4" />
               Nuevo producto
@@ -150,7 +150,7 @@ export const ProductsPage = () => {
             >
               <ShoppingCart className="w-6 h-6" />
               {getItemCount() > 0 && (
-                <span className="absolute top-0 right-0 -mt-1 -mr-1 bg-red-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-[#F5F5F7]">
+                <span className="absolute top-0 right-0 -mt-1 -mr-1 bg-red-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-canvas">
                   {getItemCount()}
                 </span>
               )}
@@ -162,21 +162,21 @@ export const ProductsPage = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {[...Array(8)].map((_, i) => (
             <div key={i} className="bg-white border border-gray-200/60 rounded-[24px] overflow-hidden shadow-sm flex flex-col">
-              <div className="relative aspect-[4/3] bg-gray-100 border-b border-gray-50 animate-pulse" />
+              <div className="relative aspect-[4/3] bg-gray-100 border-b border-gray-50 skeleton" />
               <div className="p-4 flex-1 flex flex-col gap-3">
                 <div className="flex items-center justify-between">
-                  <div className="h-4 w-20 bg-gray-200 rounded animate-pulse" />
-                  <div className="h-5 w-16 bg-gray-200 rounded-full animate-pulse" />
+                  <div className="h-4 w-20 bg-gray-200 rounded skeleton" />
+                  <div className="h-5 w-16 bg-gray-200 rounded-full skeleton" />
                 </div>
-                <div className="h-4 w-full bg-gray-200 rounded animate-pulse" />
-                <div className="h-4 w-2/3 bg-gray-200 rounded animate-pulse mb-auto" />
+                <div className="h-4 w-full bg-gray-200 rounded skeleton" />
+                <div className="h-4 w-2/3 bg-gray-200 rounded skeleton mb-auto" />
                 <div className="flex gap-2 pt-2">
-                  <div className="h-5 w-16 bg-gray-200 rounded-md animate-pulse" />
-                  <div className="h-5 w-20 bg-gray-200 rounded-md animate-pulse" />
+                  <div className="h-5 w-16 bg-gray-200 rounded-md skeleton" />
+                  <div className="h-5 w-20 bg-gray-200 rounded-md skeleton" />
                 </div>
                 <div className="flex items-center justify-between border-t border-gray-100 pt-3 mt-1">
-                  <div className="h-3 w-20 bg-gray-200 rounded animate-pulse" />
-                  <div className="h-5 w-24 bg-gray-200 rounded animate-pulse" />
+                  <div className="h-3 w-20 bg-gray-200 rounded skeleton" />
+                  <div className="h-5 w-24 bg-gray-200 rounded skeleton" />
                 </div>
               </div>
             </div>
@@ -189,8 +189,8 @@ export const ProductsPage = () => {
       ) : products.length === 0 ? (
         <div className="bg-white border border-gray-200/60 rounded-2xl p-12 text-center flex flex-col items-center shadow-sm">
           <PackageSearch className="w-12 h-12 text-gray-300 mb-4 stroke-[1.5]" />
-          <h3 className="text-[16px] font-semibold text-[#1D1D1F] mb-1">No hay productos</h3>
-          <p className="text-[14px] text-[#86868B]">No se encontraron productos con los filtros actuales.</p>
+          <h3 className="text-[16px] font-semibold text-ink mb-1">No hay productos</h3>
+          <p className="text-[14px] text-muted">No se encontraron productos con los filtros actuales.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -201,13 +201,13 @@ export const ProductsPage = () => {
               <div 
                 key={item.id}
                 onClick={() => isAdmin ? navigate(`/catalog/products/${item.id}`) : undefined}
-                className={`group bg-white border border-gray-200/60 rounded-[24px] overflow-hidden shadow-sm flex flex-col ${isAdmin ? 'hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer' : ''}`}
+                className={`group bg-white border border-gray-200/60 rounded-[24px] overflow-hidden shadow-sm flex flex-col ${isAdmin ? 'hover-lift cursor-pointer' : ''}`}
               >
                 {/* Image Section */}
                 <div className="relative aspect-[4/3] bg-white border-b border-gray-100 flex items-center justify-center overflow-hidden p-3">
                   {item.is_new && (
                     <div className="absolute top-3 left-3 z-10">
-                      <span className="text-[10px] bg-[#0066CC]/10 text-[#0066CC] font-semibold px-2 py-0.5 rounded-full uppercase backdrop-blur-md">
+                      <span className="text-[10px] bg-accent/10 text-accent font-semibold px-2 py-0.5 rounded-full uppercase backdrop-blur-md">
                         Nuevo
                       </span>
                     </div>
@@ -228,23 +228,23 @@ export const ProductsPage = () => {
                 {/* Info Section */}
                 <div className="p-4 flex-1 flex flex-col">
                   <div className="flex items-start justify-between gap-2 mb-1.5">
-                    <span className="text-[11px] font-medium text-[#0066CC] truncate">
+                    <span className="text-[11px] font-medium text-accent truncate">
                       {isAdmin && (item.item_type === 'PURCHASE' ? 'Código ' : 'Clave ')}{item.code}
                     </span>
                     <StatusBadge status={item.status} />
                   </div>
                   {isAdmin && item.linked_codes?.length > 0 && (
-                    <p className="text-[11px] text-[#86868B] truncate -mt-1 mb-1.5" title={item.linked_codes.join(', ')}>
+                    <p className="text-[11px] text-muted truncate -mt-1 mb-1.5" title={item.linked_codes.join(', ')}>
                       {item.item_type === 'PURCHASE' ? 'Claves: ' : 'Código: '}{item.linked_codes.join(', ')}
                     </p>
                   )}
                   
-                  <h3 className="text-[14px] font-semibold text-[#1D1D1F] leading-snug mb-2 line-clamp-2">
+                  <h3 className="text-[14px] font-semibold text-ink leading-snug mb-2 line-clamp-2">
                     {item.name}
                   </h3>
                   
                   <div className="mt-auto pt-2">
-                    <div className="flex flex-wrap gap-1.5 text-[11px] text-[#86868B] mb-3">
+                    <div className="flex flex-wrap gap-1.5 text-[11px] text-muted mb-3">
                       {item.brand && (
                         <span className="truncate bg-gray-100 px-2 py-0.5 rounded-md">{item.brand}</span>
                       )}
@@ -255,16 +255,16 @@ export const ProductsPage = () => {
                     
                     {item.public_price != null && (
                       <div className="flex items-center justify-between border-t border-gray-100 pt-3">
-                        <span className="text-[12px] font-medium text-[#86868B]">Precio Público</span>
-                        <span className="text-[16px] font-bold text-[#1D1D1F]">
+                        <span className="text-[12px] font-medium text-muted">Precio Público</span>
+                        <span className="text-[16px] font-bold text-ink">
                           {currency.format(item.public_price)}
                         </span>
                       </div>
                     )}
                     {isAdmin && (
                       <div className={`flex items-center justify-between ${item.public_price != null ? 'pt-1' : 'border-t border-gray-100 pt-3'}`}>
-                        <span className="text-[12px] font-medium text-[#86868B]">Costo</span>
-                        <span className="text-[13px] font-semibold text-[#86868B]">
+                        <span className="text-[12px] font-medium text-muted">Costo</span>
+                        <span className="text-[13px] font-semibold text-muted">
                           {item.cost != null ? currency.format(item.cost) : 'Sin costo'}
                         </span>
                       </div>
@@ -287,7 +287,7 @@ export const ProductsPage = () => {
                         });
                         setIsCartOpen(true);
                       }}
-                      className="mt-4 w-full flex items-center justify-center gap-2 bg-[#0066CC]/10 text-[#0066CC] hover:bg-[#0066CC] hover:text-white px-4 py-2 rounded-xl text-[13px] font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="mt-4 w-full flex items-center justify-center gap-2 bg-accent/10 text-accent hover:bg-accent hover:text-white px-4 py-2 rounded-xl text-[13px] font-medium transition disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <ShoppingCart className="w-4 h-4" />
                       {Number(item.public_price) > 0 ? 'Agregar al carrito' : 'Sin precio público'}
@@ -304,17 +304,17 @@ export const ProductsPage = () => {
       {!isLoading && products.length > 0 && (
         <div ref={bottomRef} className="py-6 flex justify-center">
           {isFetchingNextPage ? (
-            <Loader2 className="w-6 h-6 text-[#0066CC] animate-spin" />
+            <Loader2 className="w-6 h-6 text-accent animate-spin" />
           ) : hasNextPage ? (
             <button
               type="button"
               onClick={() => fetchNextPage()}
-              className="rounded-xl border border-gray-200 bg-white px-5 py-2 text-sm font-medium text-[#0066CC] shadow-sm hover:bg-gray-50"
+              className="rounded-xl border border-gray-200 bg-white px-5 py-2 text-sm font-medium text-accent shadow-sm hover:bg-gray-50"
             >
               {isFetchNextPageError ? 'Reintentar carga' : 'Cargar más productos'}
             </button>
           ) : (
-            <span className="text-[13px] text-[#86868B]">No hay más productos</span>
+            <span className="text-[13px] text-muted">No hay más productos</span>
           )}
         </div>
       )}

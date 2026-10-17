@@ -38,10 +38,10 @@ export const ProductSaleLinksTab = ({ itemType, purchaseCodes, costs }: Props) =
   return (
     <div className="space-y-8">
       <div>
-        <h3 className="text-[16px] font-semibold text-[#1D1D1F] mb-1">
+        <h3 className="text-[16px] font-semibold text-ink mb-1">
           {itemType === 'PURCHASE' ? 'Claves de venta' : 'Códigos de compra'}
         </h3>
-        <p className="text-[14px] text-[#86868B] mb-6">
+        <p className="text-[14px] text-muted mb-6">
           {itemType === 'PURCHASE'
             ? 'Un código del almacén principal puede venderse con una o varias claves. Al traspasar se propone la clave predeterminada.'
             : 'Códigos del almacén principal que surten esta clave. Las ligas se editan desde el código de compra.'}
@@ -51,19 +51,19 @@ export const ProductSaleLinksTab = ({ itemType, purchaseCodes, costs }: Props) =
           <div className="space-y-4">
             <div className="overflow-x-auto rounded-xl border border-gray-200/60 shadow-sm">
               <table className="min-w-full divide-y divide-gray-200/60">
-                <thead className="bg-[#F5F5F7]">
+                <thead className="bg-canvas">
                   <tr>
-                    <th className="px-4 py-3 text-left text-[12px] font-semibold text-[#86868B] uppercase tracking-wider">Clave</th>
-                    <th className="px-4 py-3 text-left text-[12px] font-semibold text-[#86868B] uppercase tracking-wider">Descripción</th>
-                    <th className="px-4 py-3 text-center text-[12px] font-semibold text-[#86868B] uppercase tracking-wider w-32">Predeterminada</th>
+                    <th className="px-4 py-3 text-left text-[12px] font-semibold text-muted uppercase tracking-wider">Clave</th>
+                    <th className="px-4 py-3 text-left text-[12px] font-semibold text-muted uppercase tracking-wider">Descripción</th>
+                    <th className="px-4 py-3 text-center text-[12px] font-semibold text-muted uppercase tracking-wider w-32">Predeterminada</th>
                     <th className="w-12" />
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200/60">
                   {fields.map((field: any, index) => (
                     <tr key={field._local_id}>
-                      <td className="px-4 py-3 text-[14px] font-medium text-[#0066CC] whitespace-nowrap">{field.code}</td>
-                      <td className="px-4 py-3 text-[13px] text-[#1D1D1F]">{field.name}</td>
+                      <td className="px-4 py-3 text-[14px] font-medium text-accent whitespace-nowrap">{field.code}</td>
+                      <td className="px-4 py-3 text-[13px] text-ink">{field.name}</td>
                       <td className="px-4 py-3 text-center">
                         <input
                           type="radio"
@@ -87,7 +87,7 @@ export const ProductSaleLinksTab = ({ itemType, purchaseCodes, costs }: Props) =
                   ))}
                   {fields.length === 0 && (
                     <tr>
-                      <td colSpan={4} className="px-4 py-8 text-center text-[#86868B] text-[14px]">
+                      <td colSpan={4} className="px-4 py-8 text-center text-muted text-[14px]">
                         Sin claves de venta. Este código no se podrá traspasar hasta ligar una.
                       </td>
                     </tr>
@@ -116,22 +116,22 @@ export const ProductSaleLinksTab = ({ itemType, purchaseCodes, costs }: Props) =
         ) : (
           <div className="overflow-x-auto rounded-xl border border-gray-200/60 shadow-sm">
             <table className="min-w-full divide-y divide-gray-200/60">
-              <thead className="bg-[#F5F5F7]">
+              <thead className="bg-canvas">
                 <tr>
-                  <th className="px-4 py-3 text-left text-[12px] font-semibold text-[#86868B] uppercase tracking-wider">Código</th>
-                  <th className="px-4 py-3 text-left text-[12px] font-semibold text-[#86868B] uppercase tracking-wider">Descripción</th>
+                  <th className="px-4 py-3 text-left text-[12px] font-semibold text-muted uppercase tracking-wider">Código</th>
+                  <th className="px-4 py-3 text-left text-[12px] font-semibold text-muted uppercase tracking-wider">Descripción</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200/60">
                 {purchaseCodes.map((p) => (
                   <tr key={p.id}>
-                    <td className="px-4 py-3 text-[14px] font-medium text-[#0066CC] whitespace-nowrap">{p.code}</td>
-                    <td className="px-4 py-3 text-[13px] text-[#1D1D1F]">{p.name}</td>
+                    <td className="px-4 py-3 text-[14px] font-medium text-accent whitespace-nowrap">{p.code}</td>
+                    <td className="px-4 py-3 text-[13px] text-ink">{p.name}</td>
                   </tr>
                 ))}
                 {purchaseCodes.length === 0 && (
                   <tr>
-                    <td colSpan={2} className="px-4 py-8 text-center text-[#86868B] text-[14px]">Sin código de compra ligado.</td>
+                    <td colSpan={2} className="px-4 py-8 text-center text-muted text-[14px]">Sin código de compra ligado.</td>
                   </tr>
                 )}
               </tbody>
@@ -141,14 +141,14 @@ export const ProductSaleLinksTab = ({ itemType, purchaseCodes, costs }: Props) =
       </div>
 
       <div>
-        <h3 className="text-[16px] font-semibold text-[#1D1D1F] mb-1">Costo</h3>
-        <p className="text-[14px] text-[#86868B] mb-4">Costo promedio por almacén. Se ajusta desde Inventario.</p>
+        <h3 className="text-[16px] font-semibold text-ink mb-1">Costo</h3>
+        <p className="text-[14px] text-muted mb-4">Costo promedio por almacén. Se ajusta desde Inventario.</p>
         <div className="flex flex-wrap gap-3">
-          {costs.length === 0 && <span className="text-[14px] text-[#86868B]">Sin existencias registradas.</span>}
+          {costs.length === 0 && <span className="text-[14px] text-muted">Sin existencias registradas.</span>}
           {costs.map((c) => (
             <div key={c.warehouse_id} className="rounded-xl border border-gray-200/60 px-4 py-3 shadow-sm">
-              <div className="text-[12px] text-[#86868B]">{c.warehouse_name}</div>
-              <div className="text-[16px] font-semibold text-[#1D1D1F]">{money(c.average_cost)}</div>
+              <div className="text-[12px] text-muted">{c.warehouse_name}</div>
+              <div className="text-[16px] font-semibold text-ink">{money(c.average_cost)}</div>
             </div>
           ))}
         </div>

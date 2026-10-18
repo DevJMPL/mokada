@@ -88,11 +88,12 @@ export const MovementFormModal = ({ isOpen, onClose }: Props) => {
                       label="Producto *"
                       options={products
                         // Entries only go to the purchase warehouse, which only holds purchase codes.
+                        // Exits list whatever has stock there, so leftover sale keys in the
+                        // purchase warehouse can still be moved out.
                         .filter((p: any) => {
-                          const role = warehouses?.find(w => w.id === warehouseId)?.warehouse_role;
-                          if (incoming || role === 'PURCHASE') return p.item_type === 'PURCHASE';
-                          if (role === 'SALES') return p.item_type === 'SALE';
-                          return true;
+                          if (incoming) return p.item_type === 'PURCHASE';
+                          if (!warehouseId) return true;
+                          return stock?.some(row => row.product_id === p.id && row.warehouse_id === warehouseId && Number(row.quantity) > 0) ?? false;
                         })
                         .map((p: any) => ({
                         value: p.id,
